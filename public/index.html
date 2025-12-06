@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang = "ja">
+    <head>
+        <meta charset="UTF-8" />
+        <title>GPX経路分析</title>
+        <style>
+            #map {
+                height: 400px;
+                width: 100%;
+            }
+            #log {
+                height: 150px;
+                overflow-y: scroll;
+                border: 1px solid #ccc;
+                padding: 5px;
+                margin-bottom: 10px; 
+            }
+
+            #gpxFileInput{
+                display: none;
+            }
+
+            #fileNameDisplay {
+                display: none;
+            }
+        </style>
+
+        <!-- Google Maps-->
+    </head>
+    <body>
+        <h1>GPXデータ解析と経路判定</h1>
+
+        <label for="gpxFile" class="custom-file-upload"></label>
+        <input type="file" id="gpxFileInput" multiple>
+        <span id="fileNameDisplay">ファイルが選択されていません</span>
+
+        <button onclick="processFiles()" id="processButton">GPXファイルを読み込み・処理</button>
+
+        <hr>
+
+        <input type="text" id="destinationInput" placeholder="目的地を入力（例：東京タワー）">
+        <button onclick="requestRouteDrawing()" id="drawingButton">
+            ルート検索開始
+        </button>
+
+        <hr>
+
+        <button onclick="startNavigation()" id="startButton">
+            ナビゲーション開始
+        </button>
+        <button onclick="stopNavigation()" id="stopButton" style="display: none;">
+            ナビゲーション停止
+        </button>
+
+
+
+
+        <div id="log">ログ</div>
+        <div id="map"></div>
+
+        <script src="utils.js"></script>
+        <script src="gpx-parser.js"></script>
+        <script src="gpx-analyzer.js"></script>
+        <script src="route.check.js"></script>
+        <script src="map.renderer.js"></script>
+        <script src = "navigation.js"></script>
+        <script src="location-tracker.js"></script>
+        <script src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyCkwS_qxBA71fy-FkO4NnD768wPdADx1qw&callback=initMap&v=beta&libraries=marker" async defer></script>
+
+        <script>
+            async function processFiles() {
+                allPoints = [];
+
+                // --- サーバー上の GPX ファイルを取得 ---
+                try {
+                    const res = await fetch("/api/gpx");
+                    const serverFiles = await res.json();
+
+                    for (const file of serverFiles) {
+                     try {
+                        const gpxRes = await fetch(`/api/gpx/${file}`);
+                        const gpxText = await gpxRes.text();
+                        const points = parseGpx(gpxText);
+                        allPoints.push(...points);
+                        logMessage(`${file} 読み込み成功 (${points.length}点)`);
+                    } catch (err) {
+                        logMessage(`サーバーGPX読み込み失敗: ${file}`);
+                        console.error(err);
+                        }
+                    }
+                } catch (err) {
+                    logMessage("サーバーのGPXファイル取得失敗");
+                    console.error(err);
+                }
+
+                // --- ユーザーアップロードファイルの処理 ---
+                const fileInput = document.getElementById('gpxFileInput');
+                const userFiles = fileInput.files;
+
+                for (let i = 0; i < userFiles.length; i++) {
+                const file = userFiles[i];
+                try {
+                    const gpxText = await file.text();
+                    const points = parseGpx(gpxText);
+                    allPoints.push(...points);
+                    logMessage(`${file.name} 読み込み成功 (${points.length}点)`);
+                } catch (err) {
+                    logMessage(`アップロードGPX読み込み失敗: ${file.name}`);
+                    console.error(err);
+                }
+            }
+
+            // --- 全ポイント処理 ---
+            if (allPoints.length > 0) {
+                gpxProcessed = true;
+                calculateFrequentPoints();
+                drawMap();
+                logMessage("GPX処理完了");
+            } else {
+                logMessage("有効なGPXポイントが見つかりませんでした");
+                gpxProcessed = false;
+            }
+        }
+        </script>
+        <script>
+            window.addEventListener("load", async() => {
+                try {
+                    const res = await fetch("/api/gpx");
+                    const files = await res.json();
+
+                    if (files.length === 0) {
+                        document.getElementById("log").innerHTML += "<p>GPX file not found</p>";
+                        return;
+                    }
+
+                    for (const file of files) {
+                        const gpxRes = await fetch(`/api/gpx/${file}`);
+                        const gpxText = await gpxRes.text();
+
+                        const points = parseGpx(gpxText);
+                        allPoints.push(...points);
+
+                        logMessage(`${file}読み込み成功(${points.length}点)`);
+                    }
+                } catch (err) {
+                    console.error(err);
+                    document.getElementById("log").innerHTML += "<P>Cannot file import</p>";
+                }
+            });
+        </script>
+
+
+    </body>
+</html>
