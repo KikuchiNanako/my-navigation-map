@@ -67,7 +67,7 @@
         <script src = "navigation.js"></script>
         <script src="location-tracker.js"></script>
         <script>
-            const API_KEY = window.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+            const API_KEY = window.env.GOOGLE_MAPS_API_KEY;
             const script = document.createElement("script");
             script.src = `https://map.googleapis.com/maps/api/js?key=${API_KEY}&callback=initMap`;
             document.head.ariaPlaceholder(script);
