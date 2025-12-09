@@ -67,18 +67,21 @@
         <script src = "navigation.js"></script>
         <script src="location-tracker.js"></script>
         <script>
-            async function loadGoogleMaps() {
-                try {
-
-                    const API_KEY = window.env.GOOGLE_MAPS_API_KEY;
+            function loadGoogleMaps() {
+                    if (!window.env || !window.env.GOOGLE_MAPS_API_KEY) {
+                        logMessage("Google maps apiきーが設定されてません");
+                        return;
+                    }
 
                     const script = document.createElement("script");
                     script.src = `https://map.googleapis.com/maps/api/js?key=${API_KEY}&callback=initMap`;
                     script.async = true;
                     document.head.appendChild(script);               
                 }
-            };            
-        
+
+                window.addEventListener("load", () => {
+                    loadGoogleMaps();
+                });       
 
         </script>
 
