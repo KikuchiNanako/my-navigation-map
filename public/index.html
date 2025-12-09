@@ -58,6 +58,7 @@
         <div id="log">ログ</div>
         <div id="map"></div>
 
+        <script src="env.js"></script>
         <script src="utils.js"></script>
         <script src="gpx-parser.js"></script>
         <script src="gpx-analyzer.js"></script>
@@ -69,24 +70,15 @@
             async function loadGoogleMaps() {
                 try {
 
-                    const res = await fetch("/api/get-api-key");
-                    const data = await res.json();
-                    const API_KEY = data.key;
+                    const API_KEY = window.env.GOOGLE_MAPS_API_KEY;
 
                     const script = document.createElement("script");
                     script.src = `https://map.googleapis.com/maps/api/js?key=${API_KEY}&callback=initMap`;
                     script.async = true;
                     document.head.appendChild(script);               
-                } catch (err) {
-                    console.error("APIキー取得失敗, err");
-                    logMessage("Google Maps APIの読み込みに失敗しました");
                 }
-              }
-
-              window.addEventListener("load", () => {
-                loadGoogleMaps();
-              });            
-         
+            };            
+        
 
         </script>
 
@@ -100,7 +92,7 @@
                     const serverFiles = await res.json();
 
                     for (const file of serverFiles) {
-                     try {
+                    try {
                         const gpxRes = await fetch(`/api/gpx/${file}`);
                         const gpxText = await gpxRes.text();
                         const points = parseGpx(gpxText);
