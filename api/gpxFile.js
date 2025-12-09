@@ -1,15 +1,18 @@
-const fs = require("fs");
-const path = require("path");
+import path from "path";
+import fs from "fs";
 
-module.exports = (req, res) => {
+export default function handler(req, res) {
     const { filename } = req.query;
 
     const filePath = path.join(process.cwd(), "gpx_files",filename);
 
     if (!fs.existsSync(filePath)) {
-        return res.status(404).send("Not found");
+        res.status(404).json({ error: "File not found" });
+        return;
     }
 
-    res.sendFile(filePath);
+    const fileContent = fs.readFileSync(filePath);
 
-};
+    res.setHeader("Content-Type", "application/xml");
+    res.status(200).send(fileContent)
+}
