@@ -58,6 +58,7 @@
         <div id="log">ログ</div>
         <div id="map"></div>
 
+        <script src = "/env.js"></script>
         <script src="utils.js"></script>
         <script src="gpx-parser.js"></script>
         <script src="gpx-analyzer.js"></script>
@@ -65,7 +66,12 @@
         <script src="map.renderer.js"></script>
         <script src = "navigation.js"></script>
         <script src="location-tracker.js"></script>
-        <script src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyCkwS_qxBA71fy-FkO4NnD768wPdADx1qw&callback=initMap&v=beta&libraries=marker" async defer></script>
+        <script>
+            const API_KEY = window.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+            const script = document.createElement("script");
+            script.src = `https://map.googleapis.com/maps/api/js?key=${API_KEY}&callback=initMap`;
+            document.head.ariaPlaceholder(script);
+        </script>
 
         <script>
             async function processFiles() {
