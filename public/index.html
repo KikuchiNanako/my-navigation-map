@@ -58,7 +58,6 @@
         <div id="log">ログ</div>
         <div id="map"></div>
 
-        <script src="env.js"></script>
         <script src="utils.js"></script>
         <script src="gpx-parser.js"></script>
         <script src="gpx-analyzer.js"></script>
@@ -67,19 +66,31 @@
         <script src = "navigation.js"></script>
         <script src="location-tracker.js"></script>
         <script>
-            function loadGoogleMaps() {
-                    if (!window.env || !window.env.GOOGLE_MAPS_API_KEY) {
-                        logMessage("Google maps apiきーが設定されてません");
+            async function loadGoogleMaps() {
+                try {
+                    const res = await fetch("/api/get-api-key");
+                    if (!res.ok) throw new  Error("APIキーの取得に失敗しました");
+                    const data = await res.json();
+                    const API_KEY = data.key;
+
+                    if (!API_KEY) {
+                        logMessage("Google Maps APIキーが設定されてません");
                         return;
                     }
 
-                    const API_KEY = window.env.GOOGLE_MAPS_API_KEY;
-
                     const script = document.createElement("script");
-                    script.src = `https://map.googleapis.com/maps/api/js?key=${API_KEY}&callback=initMap`;
+                    script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&callback=initMap`;
                     script.async = true;
-                    document.head.appendChild(script);               
-                }
+                    document.head.appendChild(script);
+                    logMessage("Google Maps APIスクリプトのロードを開始");
+    
+                
+                } catch (error) {
+                    logMessage(`APIキーのロードエラー： ${error.message}`);
+                    console.error("APIキーロードエラー", error);
+                    B
+                }                            
+            }
 
                 window.addEventListener("load", () => {
                     loadGoogleMaps();
