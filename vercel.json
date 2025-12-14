@@ -2,7 +2,7 @@
     "rewrites": [
         {
             "source": "/api/gpx/:filename",
-            "destination": "/api/gpxFile.js?filename=:filename"
+            "destination": "/api/gpxFile?filename=:filename"
         }
     ]
 }
