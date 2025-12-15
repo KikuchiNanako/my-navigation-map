@@ -57,6 +57,13 @@
   */
 async function getGoogleGeolocation() {
 
+    const apiKey = window.MAPS_API_KEY;
+
+    if (!apiKey) {
+        logMessage("エラー：APIキーが利用できません");
+        return null;
+    }
+
     try {
         const response = await fetch(
             `https://www.googleapis.com/geolocation/v1/geolocate?key=${apiKey}`,
