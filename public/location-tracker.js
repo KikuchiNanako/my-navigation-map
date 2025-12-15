@@ -56,7 +56,6 @@
   * @returns {promise<{lat: number, lng: number} | null>}
   */
 async function getGoogleGeolocation() {
-    const apiKey = "AIzaSyCkwS_qxBA71fy-FkO4NnD768wPdADx1qw&callback=initMap&v=beta&libraries=marker";
 
     try {
         const response = await fetch(
@@ -69,6 +68,11 @@ async function getGoogleGeolocation() {
         );
 
         const data = await response.json();
+
+        if (response.status !== 200) {
+            logMessage(`Google GeolocationAPI request failed: Status=${response.status}, Error=${data.error ? data.error.message : 'Unknown'}`);
+            return null;
+        }
 
         if (data && data.location) {
             logMessage(`Google GeolocationAPI success: 緯度=${data.location.lat}, 経度=${data.location.lng}`);
