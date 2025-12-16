@@ -1,4 +1,9 @@
+ window.googleMapsReady = false;
+ 
  function initMap() {
+    window.googleMapsReady = true;
+    logMessage("GoogleMaps初期化完了");
+
     const initialLocation = { lat: 35.681236, lng: 139.767125 };
 
     map = new google.maps.Map(document.getElementById("map"), {
