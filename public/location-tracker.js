@@ -122,10 +122,17 @@ async function getHybridLocation() {
  async function requestRouteDrawing() {
     logMessage("ルート描画を開始します");
 
-    const destinationPlace = document.getElementById('destinationInput').value.trim();
-    if (!destinationPlace) {
+    const destinationInput = document.getElementById('destinationInput').value.trim();
+    
+    if (!destinationInput) {
         logMessage("エラー:目的地を入力してください");
         return;
+    }
+
+    const destinationPlace = destinationInput.value.trim();
+    if (!destinationPlace) {
+        logMessage("エラー：目的地を入力してください");
+        return;        
     }
 
     const originLatLon = await getHybridLocation();
