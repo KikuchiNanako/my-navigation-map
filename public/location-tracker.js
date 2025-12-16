@@ -101,10 +101,18 @@ async function getGoogleGeolocation() {
 async function getHybridLocation() {
     logMessage("位置情報取得")
 
-    const googleLocation = await getGoogleGeolocation();
-    if (googleLocation) return googleLocation;
+    const browserLocation = await getApproximateLocation();
+    if (browserLocation) {
+        logMessage("ブラウザのGeolocationで位置情報を取得しました");
+        return browserLocation;
+    }
 
-    logMessage("位置情報取得に失敗しました");
+    const googleLocation = await getGoogleGeolocation();
+    if (googleLocation) {
+        return googleLocation;
+    }
+
+    logMessage("すべての方法で位置情報取得に失敗しました");
     return null;
 }
 
@@ -114,21 +122,38 @@ async function getHybridLocation() {
  async function requestRouteDrawing() {
     logMessage("ルート描画を開始します");
 
-    const browserLocation = await getApproximateLocation();
-    if (browserLocation) {
-        logMessage("ブラウザのGeolocationで位置情報を取得しました");
-        return browserLocation;
+    const destinationPlace = document.getElementById('destinationInput').value.trim();
+    if (!destinationPlace) {
+        logMessage("エラー:目的地を入力してください");
+        return;
     }
 
-    logMessage("ブラウザのGeolocationに失敗");
-    const googleLocation = await getGoogleGeolocation();
-    if (googleLocation) {
-        logMessage("Google GeolocationAPIで位置情報を取得しました");
-        return googleLocation;
+    const originLatLon = await getHybridLocation();
+    if (!originLatLon) {
+        logMessage("エラー：現在地を取得できません");
+        return;
     }
 
-    logMessage("すべての方法で位置情報取得に失敗しました");
-    return null;
+    logMessage(`デバッグ：現在地取得成功 - 緯度： ${originLatLon.lat.toFixed(5)}, 経度： ${originLatLon.lng.toFixed(5)}`);
+
+    const destinationLatLon = await getCoordinatesFromPlace(destinationPlace);
+    if (!destinationLatLon) {
+        logMessage("エラー：目的地の座標を取得できませんでした");
+        logMessage(`デバッグ：Geocoding失敗 - 目的地名： '${destinationPlace}'`);
+        return;
+    }
+    
+    logMessage(`デバッグ：目的地座標取得成功 - 緯度： ${destinationLatLon.lat.toFixed(5)}, 経度： ${destinationLatLon.lng.toFixed(5)}`);
+
+    displayRoute(originLatLon, destinationLatLon);
+
+    logMessage("ルート描画が完了しました");
+
+    updateCurrentLocationMarker(originLatLon);
+
+    document.getElementById(`startButton`).style.display = 'block';
+    document.getElementById('stopButton').style.display = 'none';
+
  }
 
  //現在地マーカーの位置を更新する
