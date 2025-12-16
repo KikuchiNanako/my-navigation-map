@@ -122,45 +122,51 @@ async function getHybridLocation() {
  async function requestRouteDrawing() {
     logMessage("ルート描画を開始します");
 
-    const destinationInput = document.getElementById('destinationInput').value.trim();
+    try {
+        const destinationInput = document.getElementById('destinationInput').value.trim();
     
-    if (!destinationInput) {
-        logMessage("エラー:目的地を入力してください");
-        return;
-    }
+        if (!destinationInput) {
+            logMessage("エラー:目的地を入力してください");
+            return;
+        }
 
-    const destinationPlace = destinationInput.value.trim();
-    if (!destinationPlace) {
-        logMessage("エラー：目的地を入力してください");
-        return;        
-    }
+        const destinationPlace = destinationInput.value.trim();
+        if (!destinationPlace) {
+            logMessage("エラー：目的地を入力してください");
+            return;        
+        }
 
-    const originLatLon = await getHybridLocation();
-    if (!originLatLon) {
-        logMessage("エラー：現在地を取得できません");
-        return;
-    }
+        const originLatLon = await getHybridLocation();
+        if (!originLatLon) {
+            logMessage("エラー：現在地を取得できません");
+            return;
+        }
 
-    logMessage(`デバッグ：現在地取得成功 - 緯度： ${originLatLon.lat.toFixed(5)}, 経度： ${originLatLon.lng.toFixed(5)}`);
+        logMessage(`デバッグ：現在地取得成功 - 緯度： ${originLatLon.lat.toFixed(5)}, 経度： ${originLatLon.lng.toFixed(5)}`);
 
-    const destinationLatLon = await getCoordinatesFromPlace(destinationPlace);
-    if (!destinationLatLon) {
-        logMessage("エラー：目的地の座標を取得できませんでした");
-        logMessage(`デバッグ：Geocoding失敗 - 目的地名： '${destinationPlace}'`);
-        return;
+        const destinationLatLon = await getCoordinatesFromPlace(destinationPlace);
+        if (!destinationLatLon) {
+            logMessage("エラー：目的地の座標を取得できませんでした");
+            logMessage(`デバッグ：Geocoding失敗 - 目的地名： '${destinationPlace}'`);
+            return;
+        }
+    
+        logMessage(`デバッグ：目的地座標取得成功 - 緯度： ${destinationLatLon.lat.toFixed(5)}, 経度： ${destinationLatLon.lng.toFixed(5)}`);
+
+        displayRoute(originLatLon, destinationLatLon);
+
+        logMessage("ルート描画が完了しました");
+
+        updateCurrentLocationMarker(originLatLon);
+
+        document.getElementById(`startButton`).style.display = 'block';
+        document.getElementById('stopButton').style.display = 'none';
+
+    } catch (e) {
+        logMessage(`**致命的エラー発生(rquestRouteDrawing) :** ${e.name}: ${e.message}`);
+        console.error("ルート描画中のキャッチされたエラー", e);
     }
     
-    logMessage(`デバッグ：目的地座標取得成功 - 緯度： ${destinationLatLon.lat.toFixed(5)}, 経度： ${destinationLatLon.lng.toFixed(5)}`);
-
-    displayRoute(originLatLon, destinationLatLon);
-
-    logMessage("ルート描画が完了しました");
-
-    updateCurrentLocationMarker(originLatLon);
-
-    document.getElementById(`startButton`).style.display = 'block';
-    document.getElementById('stopButton').style.display = 'none';
-
  }
 
  //現在地マーカーの位置を更新する
