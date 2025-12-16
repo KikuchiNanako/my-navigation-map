@@ -1,5 +1,3 @@
-const { raw } = require("express");
-
 /**
   * プレース名から座標を取得する
   * @param {string} PlaceName
