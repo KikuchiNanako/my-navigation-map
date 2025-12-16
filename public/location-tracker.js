@@ -1,3 +1,5 @@
+const { raw } = require("express");
+
 /**
   * プレース名から座標を取得する
   * @param {string} PlaceName
@@ -123,14 +125,21 @@ async function getHybridLocation() {
     logMessage("ルート描画を開始します");
 
     try {
-        const destinationInput = document.getElementById('destinationInput').value.trim();
+        const destinationInput = document.getElementById('destinationInput');
     
         if (!destinationInput) {
-            logMessage("エラー:目的地を入力してください");
+            logMessage("致命的エラー:目的地を入力してください");
             return;
         }
 
-        const destinationPlace = destinationInput.value.trim();
+        const rawValue = destinationInput.value;
+
+        if (rawValue === undefined || rawValue === null) {
+            logMessage("致命的エラー２");
+            return;
+        }
+
+        const destinationPlace = String(rawValue).trim();
         if (!destinationPlace) {
             logMessage("エラー：目的地を入力してください");
             return;        
