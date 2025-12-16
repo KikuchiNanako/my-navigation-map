@@ -24,7 +24,7 @@
   * ブラウザのGoolocationAPIで現在地を取得
   * @returns {Promise<{lat: number, lng: number} | null>}
   */
- /**function getApproximateLocation() {
+ function getApproximateLocation() {
     return new Promise((resolve) => {
         if (!navigator.geolocation) {
             logMessage("ブラウザがGeolocationをサポートしてません");
@@ -114,33 +114,21 @@ async function getHybridLocation() {
  async function requestRouteDrawing() {
     logMessage("ルート描画を開始します");
 
-    const destinationPlace = document.getElementById('destinationInput').value.trim();
-    if (!destinationPlace) {
-        logMessage("エラー：目的地を入力してください");
-        return;
+    const browserLocation = await getApproximateLocation();
+    if (browserLocation) {
+        logMessage("ブラウザのGeolocationで位置情報を取得しました");
+        return browserLocation;
     }
 
-
-    const originLatLon = await getHybridLocation();
-    if (!originLatLon) {
-        logMessage("エラー：現在地を取得できませんでした");
-        return;
+    logMessage("ブラウザのGeolocationに失敗");
+    const googleLocation = await getGoogleGeolocation();
+    if (googleLocation) {
+        logMessage("Google GeolocationAPIで位置情報を取得しました");
+        return googleLocation;
     }
 
-    const destinationLatLon = await getCoordinatesFromPlace(destinationPlace);
-    if (!destinationLatLon) {
-        logMessage("エラー：目的地の座標を取得できませんでした");
-        return;
-    }
-
-    displayRoute(originLatLon, destinationLatLon);
-
-    logMessage("ルート描画が完了しました");
-
-    updateCurrentLocationMarker(originLatLon);
-
-    document.getElementById('startButton').style.display = 'block';
-    document.getElementById('stopButton').style.display = 'none';
+    logMessage("すべての方法で位置情報取得に失敗しました");
+    return null;
  }
 
  //現在地マーカーの位置を更新する
@@ -162,6 +150,7 @@ async function getHybridLocation() {
     }
  }
 
+ /*
  function startNavigationTracking() {
     if (navigationTimer !== null) {
         clearInterval(navigationTimer);
@@ -183,6 +172,7 @@ async function getHybridLocation() {
         });
     }, 3000);
  }
+*/
 
  /**
  * 現在地監視を開始し、ナビゲーションのコアロジックを駆動する
@@ -210,8 +200,6 @@ function startNavigation() {
 
     startStepNavigation(route.legs[0]);
 
-    startNavigationTracking();
-
     /*既存のナビゲーションがあれば停止
     if (watchId !== null) {
         logMessage("ナビゲーションはすでに開始されています");
@@ -228,6 +216,21 @@ function startNavigation() {
         }    
     );
     */
+
+    if (watchId === null) {
+        watchId = navigator.geolocation.watchPosition(
+            onPositionUpdate,
+            (error) => logMessage(`Geolocation監視エラー: ${error.message}`),
+            {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0
+            }
+        );
+        logMessage("ブラウザによるナビゲーション監視を開始します");
+    } else {
+        logMessage("ナビゲーション監視はすでに開始されています");
+    }
         
     document.getElementById('startButton').style.display = 'none';
     document.getElementById('stopButton').style.display = 'block';
