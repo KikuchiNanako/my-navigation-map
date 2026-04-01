@@ -164,7 +164,8 @@ async function getHybridLocation() {
 
         logMessage("ルート描画が完了しました");
 
-        updateCurrentLocationMarker(originLatLon);
+        const isOutsideInitial = isOutsideRoute(originLatLon.lat, originLatLon.lng);
+        updateCurrentLocationMarker(originLatLon, 0, isOutsideInitial);
 
         document.getElementById(`startButton`).style.display = 'block';
         document.getElementById('stopButton').style.display = 'none';
@@ -352,7 +353,7 @@ async function onPositionUpdate(position) {
             icon: {
                 path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
                 scale: 6,
-                fillColor: "#4285F4",
+                fillColor: fillColor,
                 fillOpacity: 1,
                 strokeWeight: 2,
                 strokeColor: "white",
