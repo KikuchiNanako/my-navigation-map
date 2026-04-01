@@ -176,24 +176,6 @@ async function getHybridLocation() {
     
  }
 
- //現在地マーカーの位置を更新する
- function updateCurrentLocationMarker(currentLatLon) {
-    map.panTo(currentLatLon);
-
-    if (!currentLocationMarker) {
-        currentLocationMarker = new google.maps.Marker({
-            position: currentLatLon,
-            map: map,
-            title: '現在地',
-            icon: {
-                url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
-            }
-        });
-        logMessage("現在地マーカーを作成しました");
-    } else {
-        currentLocationMarker.setPosition(currentLatLon);
-    }
- }
 
  /*
  function startNavigationTracking() {
@@ -333,18 +315,11 @@ async function onPositionUpdate(position) {
     }
 
     //判定結果に応じて色を決める
-    const markerColor = isOutside ? "red" : "blue";
-    const iconUrl = `http://maps.google.com/mapfiles/ms/icons${markerColor}-dot.png`;
-
-    //マーカーを更新
-    updateCurrentLocationMarker(currentLatLon, iconUrl);
+    updateCurrentLocationMarker(currentLatLon, 0, isOutside);
 
     //ナビゲーションがアクティブな場合のみ案内ロジックを実行
     if (navigationActive) {
-
-        const isOutsideSpecialRoute = isOutsideRoute(currentLatLon.lat, currentLatLon.lng);
-
-        if (isOutsideSpecialRoute) {
+        if (isOutside) {
             logMessage("ナビゲーション案内実行中:ルート外です");
 
             if (typeof checkStepProgression === 'function') {
@@ -353,8 +328,61 @@ async function onPositionUpdate(position) {
         } else {
             logMessage("ナビ案内抑制中：経路内にいます");
         }
-
     } else {
         logMessage("現在地を追跡中ですがナビゲーションは停止中");
     }
 }
+
+ /**
+  * 現在地マーカーを更新し、向きを反映させる
+  * @param {object} currentLatLon -{lat, lng}
+  * @param {number} heading -向き （０～３６０度）
+  * @param {boolean} isOutside - 経路外かどうか
+  */
+ function updateCurrentLocationMarker(currentLatLon, heading = 0, isOutside = false) {
+    map.panTo(currentLatLon);
+
+    const fillColor = isOutside ? '#FF0000' : "#4285F4";
+
+    if (!currentLocationMarker) {
+        currentLocationMarker = new google.maps.Marker({
+            position: currentLatLon,
+            map: map,
+            title: '現在地',
+            icon: {
+                path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                scale: 6,
+                fillColor: "#4285F4",
+                fillOpacity: 1,
+                strokeWeight: 2,
+                strokeColor: "white",
+                rotation: heading
+            }
+        });
+        logMessage("現在地マーカーを作成しました");
+    } else {
+        currentLocationMarker.setPosition(currentLatLon);
+
+        const icon = currentLocationMarker.getIcon();
+        icon.fillColor = fillColor;
+        icon.rotation = heading;
+        currentLocationMarker.setIcon(icon);
+    }
+ }
+
+window.addEventListener('deviceorientationabsolute', (event) => {
+    let heading = 0;
+    if (event.webkitCompassHeading) {
+        heading = event.webkitCompassHeading;
+    } else if (event.absolute) {
+        heading = 360 - event.alpha;
+    }
+    
+    if (currentLocationMarker) {
+        const icon = currentLocationMarker.getIcon();
+        if (icon) {
+            icon.rotation = heading;
+            currentLocationMarker.setIcon(icon);
+        }
+    }
+}, true);
