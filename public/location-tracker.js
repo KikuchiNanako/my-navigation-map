@@ -318,8 +318,26 @@ async function onPositionUpdate(position) {
         lng: position.coords.longitude
     };
 
-    //現在地マーカーの更新・作成
-    updateCurrentLocationMarker(currentLatLon);
+    //経路外かどうかを判定
+    const isOutside = isOutsideRoute(currentLatLon.lat, currentLatLon.lng);
+
+    const statusLabel = document.getElementById(`statusLabel`);
+    if (statusLabel) {
+        if (isOutside) {
+            statusLabel.innerText = "状態：【経路外】ルート検索を実行します";
+            statusLabel.style.color = "red";
+        } else {
+            statusLabel.innerText = "状態；【経路内】";
+            statusLabel.style.color = "green";
+        }
+    }
+
+    //判定結果に応じて色を決める
+    const markerColor = isOutside ? "red" : "blue";
+    const iconUrl = `http://maps.google.com/mapfiles/ms/icons${markerColor}-dot.png`;
+
+    //マーカーを更新
+    updateCurrentLocationMarker(currentLatLon, iconUrl);
 
     //ナビゲーションがアクティブな場合のみ案内ロジックを実行
     if (navigationActive) {
