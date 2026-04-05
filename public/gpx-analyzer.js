@@ -83,7 +83,7 @@
 
     const recentHighPoints = [];
     for (const [key, count] of recentPointsMap.entries()) {
-        if (count >= 5) {
+        if (count >= 2) {
             const [lat_r, lon_r] = key.split(',').map(Number);
             recentHighPoints.push({ lat_r, lon_r });
         }
