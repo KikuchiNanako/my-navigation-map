@@ -42,32 +42,21 @@ async function startRouteCheck() {
         }
 
         const { lat: currentLat, lng: currentLon } = currentLatLon;
-        logMessage(`現在地: ${currentLat.toFixed(5)}, ${currentLon.toFixed(5)}`);
-
         const destinationLatLon = await getCoordinatesFromPlace(destinationPlace);
 
         if (!destinationLatLon) {
             logMessage("\nエラー:目的地の座標を獲得できませんでした");
             return;
         }
-        const { lat: destinationLat, lng: destinationLon } = destinationLatLon;
-        logMessage(`目的地: ${destinationLat.toFixed(5)}, ${destinationLon.toFixed(5)}`);
 
         if (isOutsideRoute(currentLat, currentLon)) {
             logMessage("経路外です");
-
             displayRoute(currentLatLon, destinationLatLon);
-            map.setCenter(currentLatLon);
-            map.setZoom(16);
 
             drawMap();
             
         } else {
             logMessage("経路内です");
-
-            if(directionsRenderer){
-                directionsRenderer.setDirections({ routes: [] });
-            }
             drawMap();
         }
  }
