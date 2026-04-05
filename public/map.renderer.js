@@ -19,7 +19,7 @@
  }
 
   function drawMap() {
-    if (!map || !frequentPoints || frequentPoints.length === 0) {
+    if (!map || !window.Points || window.allPoints.length === 0) {
         logMessage("可視化エラー：描画するデータがありません");
         return;
     }

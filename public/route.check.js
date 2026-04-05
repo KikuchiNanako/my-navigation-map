@@ -1,13 +1,13 @@
-let frequentPoints = [];
-let allPoints = [];
-let map;
-let gpxProcessed = false;
-let directionsService;
-let directionsRenderer;
-let frequentCircles = [];
-let currentLocationMarker;
-let watchId = null;
-let navigationTimer = null;
+//let frequentPoints = [];
+//let allPoints = [];
+//let map;
+//let gpxProcessed = false;
+//let directionsService;
+//let directionsRenderer;
+//let frequentCircles = [];
+//let currentLocationMarker;
+//let watchId = null;
+//let navigationTimer = null;
 
 
 
