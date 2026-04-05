@@ -85,6 +85,8 @@
             var directionsRenderer;
             var frequentCircles = [];
             var currentLocationMarker = null;
+            var watchId = null;
+            var navigationTimer = null;
             
             async function loadGoogleMaps() {
                 try {
