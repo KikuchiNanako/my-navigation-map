@@ -19,21 +19,27 @@
  }
 
   function drawMap() {
-    if (!map || !window.Points || window.allPoints.length === 0) {
+    const pts = window.allPoints || allPoints;
+    const fpts = window.frequentPoints || frequentPoints;
+
+    if (!map || !pts || pts.length === 0) {
         logMessage("可視化エラー：描画するデータがありません");
         return;
     }
 
-    const avgLat = window.allPoints.reduce((sum, p) => sum + p.lat, 0) / allPoints.length;
-    const avgLon = window.allPoints.reduce((sum, p) => sum + p.lon, 0) / allPoints.length;
+    const avgLat = pts.reduce((sum, p) => sum + p.lat, 0) / pts.length;
+    const avgLon = pts.reduce((sum, p) => sum + p.lon, 0) / pts.length;
     map.setCenter({ lat: avgLat, lng: avgLon });
     map.setZoom(14);
 
-    frequentCircles.forEach(circle => circle.setMap(null));
-    frequentCircles = [];
+    if (window.frequentCircles) {
+        window.frequentCircles.forEach(circle => circle.setMap(null));
+    }
+    window.frequentCircles = [];
 
-    frequentPoints.forEach(p => {
-        const circle = new google.maps.Circle({
+    if (fpts && fpts.length > 0) {
+        fpts.forEach(p => {
+            const circle = new google.maps.Circle({
             strokeColor: "red",
             strokeOpacity: 0.9,
             strokeWeight: 2,
@@ -43,11 +49,11 @@
             center: { lat: p.lat_r, lng: p.lon_r},
             radius: THRESHOLD_M,
         });
-        frequentCircles.push(circle);
+        window.frequentCircles.push(circle);
     });
 
     logMessage("地図に描画しました");
- }
+ }}
 
  /**
  * マップ上の頻度ポイントの円をすべてクリアする
