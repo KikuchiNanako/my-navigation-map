@@ -126,11 +126,13 @@
     }
 
     let minDist = Infinity;
+    let nearestPoint = null;
 
     for (const point of frequentPoints) {
         const dist = getDistanceMeters(currentLat, currentLon, point.lat_r, point.lon_r);
         if (dist < minDist) {
             minDist = dist;
+            nearestPoint = point;
         }
     }
 

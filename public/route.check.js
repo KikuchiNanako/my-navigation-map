@@ -15,7 +15,7 @@ let navigationTimer = null;
 
 
 
-/**async function startRouteCheck() {
+async function startRouteCheck() {
     if (!gpxProcessed) {
         logMessage("エラー");
         return;
@@ -32,8 +32,6 @@ let navigationTimer = null;
     if(directionsRenderer) {
         directionsRenderer.setDirections({ routes: [] });
     }
-
-    clearFrequentCircle();
 
     if (!currentLatLon && allPoints.length > 0) {
         logMessage("現在地の取得に失敗しました");
@@ -57,36 +55,19 @@ let navigationTimer = null;
 
         if (isOutsideRoute(currentLat, currentLon)) {
             logMessage("経路外です");
-            
-            map.setCenter(currentLatLon);
-
-            new google.maps.Marker({
-                position:currentLatLon,
-                map: map,
-                title: '現在地（経路外）',
-                icon: {
-                    url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
-                }
-            });
-
-            new google.maps.Marker({
-                position: destinationLatLon,
-                map: map,
-                title: '目的地',
-                icon: {
-                    url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-                }
-            });
 
             displayRoute(currentLatLon, destinationLatLon);
             map.setCenter(currentLatLon);
             map.setZoom(16);
+
+            drawMap();
+            
         } else {
             logMessage("経路内です");
 
             if(directionsRenderer){
                 directionsRenderer.setDirections({ routes: [] });
             }
+            drawMap();
         }
  }
-*/

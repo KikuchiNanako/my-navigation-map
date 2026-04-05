@@ -19,7 +19,10 @@
  }
 
   function drawMap() {
-    if (!map || !window.allPoints || window.allPoints.length === 0) return;
+    if (!map || !frequentPoints || frequentPoints.length === 0) {
+        logMessage("可視化エラー：描画するデータがありません");
+        return;
+    }
 
     const avgLat = window.allPoints.reduce((sum, p) => sum + p.lat, 0) / allPoints.length;
     const avgLon = window.allPoints.reduce((sum, p) => sum + p.lon, 0) / allPoints.length;
@@ -36,10 +39,9 @@
             strokeWeight: 2,
             fillColor: "red",
             fillOpacity: 0.9,
-            map,
+            map: map,
             center: { lat: p.lat_r, lng: p.lon_r},
-            radius: 5,
-            title: `頻度:`
+            radius: THRESHOLD_M,
         });
         frequentCircles.push(circle);
     });
