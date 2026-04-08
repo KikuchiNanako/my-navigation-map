@@ -16,6 +16,8 @@
 
 
 async function startRouteCheck() {
+    await requestDeviceOrientation();
+    
     if (!gpxProcessed) {
         logMessage("エラー");
         return;

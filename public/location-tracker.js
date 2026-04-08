@@ -392,8 +392,9 @@ async function requestDeviceOrientation () {
     if ( typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
         try {
             const permission = await DeviceOrientationEvent.requestPermissiont();
-            if (permission === 'ganted') {
-                window.addEventListener('deviceorientation', updateHeading);
+            if (permission === 'granted') {
+                window.addEventListener('deviceorientation', updateHeadingHandler, true);
+                logMessage("向きセンサーの権限を取得しました");
             } else {
                 logMessage("方向情報の取得が拒否されました");
             }
@@ -401,15 +402,20 @@ async function requestDeviceOrientation () {
             logMessage("方向情報の権限リクエスト中にエラーが発生しました");
         }
     } else {
-        window.addEventListener('deviceorientationabsolute', updateHeading, true);
-        window.addEventListener('deviceorientation', updateHeading, true);
+        if ('ondeviceorientationabsolute' in window) {
+            window.addEventListener('deviceorientationabsolute', updateHeadingHandler, true);
+        } else {
+            window.addEventListener('deviceorientation', updateHeadingHandler, true);
+        }
+        logMessage("向きセンサーを開始しました");
     }
 }
 
 /**
  * 実際にマーカーを回転させる処理
  */
-function updateHeading(event) {
+function updateHeadingHandler
+(event) {
     let heading = null;
 
     if (event.webkitCompassHeading) {
