@@ -167,7 +167,7 @@ async function getHybridLocation() {
         const isOutsideInitial = isOutsideRoute(originLatLon.lat, originLatLon.lng);
         updateCurrentLocationMarker(originLatLon, 0, isOutsideInitial);
 
-        document.getElementById(`startButton`).style.display = 'block';
+        document.getElementById(`startButton`).style.display = 'none';
         document.getElementById('stopButton').style.display = 'none';
 
     } catch (e) {
@@ -260,6 +260,7 @@ function startNavigation() {
         logMessage("ナビゲーション監視はすでに開始されています");
     }
         
+    document.getElementById('routestartButton').style.display = 'none';
     document.getElementById('startButton').style.display = 'none';
     document.getElementById('stopButton').style.display = 'block';
 
