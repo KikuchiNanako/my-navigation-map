@@ -167,7 +167,8 @@ async function getHybridLocation() {
         const isOutsideInitial = isOutsideRoute(originLatLon.lat, originLatLon.lng);
         updateCurrentLocationMarker(originLatLon, 0, isOutsideInitial);
 
-        document.getElementById(`startButton`).style.display = 'none';
+        
+        document.getElementById(`startButton`).style.display = 'block';
         document.getElementById('stopButton').style.display = 'none';
 
     } catch (e) {
