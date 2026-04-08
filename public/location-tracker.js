@@ -391,7 +391,7 @@ window.addEventListener('deviceorientationabsolute', (event) => {
 async function requestDeviceOrientation () {
     if ( typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
         try {
-            const permission = await DeviceOrientationEvent.requestPermissiont();
+            const permission = await DeviceOrientationEvent.requestPermission();
             if (permission === 'granted') {
                 window.addEventListener('deviceorientation', updateHeadingHandler, true);
                 logMessage("向きセンサーの権限を取得しました");
@@ -414,8 +414,7 @@ async function requestDeviceOrientation () {
 /**
  * 実際にマーカーを回転させる処理
  */
-function updateHeadingHandler
-(event) {
+function updateHeadingHandler(event) {
     let heading = null;
 
     if (event.webkitCompassHeading) {
