@@ -287,6 +287,7 @@ function stopNavigation() {
     logMessage("ナビゲーション案内を停止しました");
 
     //ボタンの表示を切り替える
+    document.getElementById('routestartButton').style.display = 'none';
     document.getElementById('startButton').style.display = 'block';
     document.getElementById('stopButton').style.display = 'none';
 }
