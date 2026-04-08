@@ -402,12 +402,9 @@ async function requestDeviceOrientation () {
             logMessage("方向情報の権限リクエスト中にエラーが発生しました");
         }
     } else {
-        if ('ondeviceorientationabsolute' in window) {
-            window.addEventListener('deviceorientationabsolute', updateHeadingHandler, true);
-        } else {
-            window.addEventListener('deviceorientation', updateHeadingHandler, true);
-        }
-        logMessage("向きセンサーを開始しました");
+            const eventname = ('ondeviceorientationabsolute' in window) ? 'deviceorientationabsolute' : 'deviceorientation';
+            window.addEventListener(eventname, updateHeadingHandler, true);
+            logMessage("向きセンサーを開始しました");
     }
 }
 
