@@ -387,3 +387,44 @@ window.addEventListener('deviceorientationabsolute', (event) => {
         }
     }
 }, true);
+
+async function requestDeviceOrientation () {
+    if ( typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        try {
+            const permission = await DeviceOrientationEvent.requestPermissiont();
+            if (permission === 'ganted') {
+                window.addEventListener('deviceorientation', updateHeading);
+            } else {
+                logMessage("方向情報の取得が拒否されました");
+            }
+        } catch (e) {
+            logMessage("方向情報の権限リクエスト中にエラーが発生しました");
+        }
+    } else {
+        window.addEventListener('deviceorientationabsolute', updateHeading, true);
+        window.addEventListener('deviceorientation', updateHeading, true);
+    }
+}
+
+/**
+ * 実際にマーカーを回転させる処理
+ */
+function updateHeading(event) {
+    let heading = null;
+
+    if (event.webkitCompassHeading) {
+        heading = event.webkitCompassHeading;
+    } else if (event.absolute && event.alpha !== null) {
+        heading = 360 - event.alpha;
+    } else if (event.alpha !== null) {
+        heading = 360 - event.alpha;
+    }
+
+    if (heading !== null && currentLocationMarker) {
+        const icon = currentLocationMarker.getIcon();
+        if (icon) {
+            icon.rotation = heading;
+            currentLocationMarker.setIcon(icon);
+        }
+    }
+}

@@ -188,3 +188,7 @@ function handleRouteForNavigation(route) {
     startStepNavigation(leg);
 }
 
+async function handleStartNavigation() {
+    await requestDeviceOrientation();
+    startStepNavigation();
+}
