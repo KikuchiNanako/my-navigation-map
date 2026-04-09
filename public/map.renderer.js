@@ -11,7 +11,7 @@
         zoom: 17,
         gestureHandling: "greedy",
         disableDefaultUI: false,
-        mapId: "DEMO_MAP_ID",
+        mapId: "3d7b65239e3531fb68add898",
         heading: 0,
         tilt: 0
     });

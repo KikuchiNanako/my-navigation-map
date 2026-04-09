@@ -91,8 +91,8 @@ function showCurrentStep() {
         });
     }
 
-    if (startLoc) map.panTo(startLoc);
-    map.setZoom(17);
+    //if (startLoc) map.panTo(startLoc);
+    //map.setZoom(17);
 }
 
 /**
