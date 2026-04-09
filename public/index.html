@@ -54,11 +54,11 @@
         <hr>
 
         <div id = "navControls">
-            <button onclick="startRouteCheck()" id="routestartButton">
+            <button onclick="startNavigation()" id="routestartButton" style="display: block";>
             ルートを確認してナビ開始
             </button>
 
-             <button onclick="stopNavigation()" style="display: none;">
+             <button onclick="stopNavigation()" id="stopButton" style="display: none;">
             ナビ停止
             </button>
 
@@ -68,17 +68,6 @@
 
         </div>     
         
-             <button id = "startButton" onclick="startNavigation()" style="display: none;">
-            ナビ開始
-            </button>
-            <button onclick="stopNavigation()" id="stopButton" style="display: none;">
-            ナビゲーション停止
-            </button>
-        </div>
-       
-
-
-
 
         <div id="log">ログ</div>
         <div id="map"></div>
