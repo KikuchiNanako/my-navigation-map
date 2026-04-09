@@ -243,10 +243,13 @@ async function startNavigation() {
         return;
     }
 
+    const isResuming = true;
+    logMessage(isResuming ? "ナビゲーションを再開します" : "ナビゲーションを開始します");
+
     navigationActive = true;
     logMessage("ナビゲーションを開始します")
 
-    startStepNavigation(route.legs[0]);
+    startStepNavigation(route.legs[0], isResuming);
 
     /*既存のナビゲーションがあれば停止
     if (watchId !== null) {

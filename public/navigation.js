@@ -4,17 +4,25 @@ let stepPolyline = null;
 let navigationActive = false;
 
 /**
- * 経路ナビを開始する
- * @param {object} leg - route.legs[0]を想定
+ * 経路ナビを開始・再開する
+ * @param {object} leg - route.legs[0]
+ * @param {boolean} resume -再開かどうか
  */
-function startStepNavigation(leg) {
+function startStepNavigation(leg, resume = false) {
     if (!leg || !leg.steps) {
         logMessage("ナビ開始エラー：leg情報が不足しています");
         return;
     }
     
     steps = leg.steps;
-    currentStepIndex = 0;
+
+    if (!resume) {
+        currentStepIndex = 0;
+        logMessage("ナビを最初から開始します");
+    } else {
+        logMessage(`ナビをステップ ${currentStepIndex + 1} から再開します`);
+    }
+    
     navigationActive = true;
 
     if (window.lastDirectionsResponse && window.lastDirectionsResponse.routes && window.lastDirectionsResponse.routes.length > 0) {
@@ -24,7 +32,7 @@ function startStepNavigation(leg) {
         console.warn("DirectionsAPIレスポンスからboundsが取れませんでした");
 
     }
-    logMessage(`ナビ開始: ${steps.length} ステップ`);
+    logMessage(`全 ${steps.length} ステップ中、現在 ${currentStepIndex + 1} ステップ目`);
     showCurrentStep();
 }
 
