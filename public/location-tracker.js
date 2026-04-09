@@ -243,11 +243,11 @@ async function startNavigation() {
         return;
     }
 
-    const isResuming = true;
+    const isResuming = (typeof currentStepIndex !== 'undefined' && currentStepIndex > 0);
     logMessage(isResuming ? "ナビゲーションを再開します" : "ナビゲーションを開始します");
 
     navigationActive = true;
-    logMessage("ナビゲーションを開始します")
+    //logMessage("ナビゲーションを開始します")
 
     startStepNavigation(route.legs[0], isResuming);
 
@@ -419,6 +419,7 @@ async function onPositionUpdate(position) {
 }, true);
 
 */
+
 
 /*
 async function requestDeviceOrientation () {
