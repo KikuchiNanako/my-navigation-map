@@ -400,7 +400,8 @@ async function onPositionUpdate(position) {
     }
  }
 
-window.addEventListener('deviceorientationabsolute', (event) => {
+/*
+ window.addEventListener('deviceorientationabsolute', (event) => {
     let heading = 0;
     if (event.webkitCompassHeading) {
         heading = event.webkitCompassHeading;
@@ -416,6 +417,8 @@ window.addEventListener('deviceorientationabsolute', (event) => {
         }
     }
 }, true);
+
+*/
 
 /*
 async function requestDeviceOrientation () {
@@ -455,10 +458,10 @@ function updateHeadingHandler(event) {
 
 
     if (heading !== null ) {
-        if (typeof currentLocationMarker !== 'undefined' && currentLocationMarker) {
+        if (currentLocationMarker) {
             const icon = currentLocationMarker.getIcon();
             if (icon) {
-                icon.rocation = heading;
+                icon.rotation = heading;
                 currentLocationMarker.setIcon(icon);
             }
         }

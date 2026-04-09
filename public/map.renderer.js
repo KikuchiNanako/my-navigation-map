@@ -10,7 +10,10 @@
         center: initialLocation,
         zoom: 17,
         gestureHandling: "greedy",
-        disableDefaultUI: false
+        disableDefaultUI: false,
+        mapId: "DEMO_MAP_ID",
+        heading: 0,
+        tilt: 0
     });
 
     directionsService = new google.maps.DirectionsService();
