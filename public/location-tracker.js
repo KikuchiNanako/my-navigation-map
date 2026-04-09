@@ -206,7 +206,26 @@ async function getHybridLocation() {
  /**
  * 現在地監視を開始し、ナビゲーションのコアロジックを駆動する
  */
-function startNavigation() {
+async function startNavigation() {
+    if ( typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        try {
+            const permission = await DeviceOrientationEvent.requestPermission();
+            if (permission === 'granted') {
+                window.addEventListener('deviceorientation', updateHeadingHandler, true);
+                logMessage("向きセンサーの権限を取得しました");
+            } else {
+                logMessage("方向情報の取得が拒否されました");
+            }
+        } catch (e) {
+            logMessage("方向情報の権限リクエスト中にエラーが発生しました");
+        }
+    } else {
+            const eventname = ('ondeviceorientationabsolute' in window) ? 'deviceorientationabsolute' : 'deviceorientation';
+            window.addEventListener(eventname, updateHeadingHandler, true);
+            logMessage("向きセンサーを開始しました");
+    }
+
+
     if (!window.lastDirectionsResponse) {
         logMessage("エラー：事前にルートを描画してください");
         return;
@@ -391,6 +410,7 @@ window.addEventListener('deviceorientationabsolute', (event) => {
     }
 }, true);
 
+/*
 async function requestDeviceOrientation () {
     if ( typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
         try {
@@ -410,6 +430,7 @@ async function requestDeviceOrientation () {
             logMessage("向きセンサーを開始しました");
     }
 }
+*/
 
 /**
  * 実際にマーカーを回転させる処理
