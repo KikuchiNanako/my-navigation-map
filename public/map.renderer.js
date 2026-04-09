@@ -9,15 +9,14 @@
     map = new google.maps.Map(document.getElementById("map"), {
         center: initialLocation,
         zoom: 17,
-        heading: 0,
-        tilt: 0,
-        //mapId: "DEMO_MAP_ID",
         gestureHandling: "greedy",
+        disableDefaultUI: false
     });
 
     directionsService = new google.maps.DirectionsService();
     directionsRenderer = new google.maps.DirectionsRenderer({
         map: map,
+        preserveViewport: true
     });
  }
 
