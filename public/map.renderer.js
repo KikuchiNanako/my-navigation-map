@@ -10,9 +10,9 @@
         center: initialLocation,
         zoom: 17,
         heading: 0,
-        tilt: 45,
-        mapId: "DEMO_MAP_ID",
-        headingControl: false
+        tilt: 0,
+        //mapId: "DEMO_MAP_ID",
+        gestureHandling: "greedy",
     });
 
     directionsService = new google.maps.DirectionsService();

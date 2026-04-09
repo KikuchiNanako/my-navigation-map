@@ -455,7 +455,7 @@ function updateHeadingHandler(event) {
 
 
     if (heading !== null ) {
-        if (currentLocationMarker) {
+        if (typeof currentLocationMarker !== 'undefined' && currentLocationMarker) {
             const icon = currentLocationMarker.getIcon();
             if (icon) {
                 icon.rocation = heading;
@@ -463,8 +463,8 @@ function updateHeadingHandler(event) {
             }
         }
 
-        if (typeof map !== 'undefined' && navigationActive) {
-            map.setHeading(heading);
+        if (window.map && typeof window.map.setHeading === 'function' && navigationActive) {
+            window.map.setHeading(heading);
         }
 
     }
