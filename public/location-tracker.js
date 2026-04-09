@@ -394,6 +394,10 @@ async function onPositionUpdate(position) {
         icon.rotation = heading;
         currentLocationMarker.setIcon(icon);
     }
+
+    if (navigationActive) {
+        map.setHeading(heading);
+    }
  }
 
 window.addEventListener('deviceorientationabsolute', (event) => {
@@ -449,11 +453,19 @@ function updateHeadingHandler(event) {
         heading = 360 - event.alpha;
     }
 
-    if (heading !== null && currentLocationMarker) {
-        const icon = currentLocationMarker.getIcon();
-        if (icon) {
-            icon.rotation = heading;
-            currentLocationMarker.setIcon(icon);
+
+    if (heading !== null ) {
+        if (currentLocationMarker) {
+            const icon = currentLocationMarker.getIcon();
+            if (icon) {
+                icon.rocation = heading;
+                currentLocationMarker.setIcon(icon);
+            }
         }
+
+        if (typeof map !== 'undefined' && navigationActive) {
+            map.setHeading(heading);
+        }
+
     }
 }

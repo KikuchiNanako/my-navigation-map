@@ -8,13 +8,18 @@
 
     map = new google.maps.Map(document.getElementById("map"), {
         center: initialLocation,
-        zoom: 14
+        zoom: 17,
+        heading: 0,
+        tilt: 45,
+        mapId: "DEMO_MAP_ID",
+        headingControl: false
     });
 
     directionsService = new google.maps.DirectionsService();
     directionsRenderer = new google.maps.DirectionsRenderer({
         map: map,
-        suppressMarkers: false
+        suppressMarkers: false,
+        preserveViewport: true
     });
  }
 
