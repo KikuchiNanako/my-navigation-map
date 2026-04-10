@@ -467,7 +467,7 @@ function updateHeadingHandler(event) {
             }
         }
 
-        if (window.map && typeof window.map.setHeading === 'function' && navigationActive) {
+        if (window.map && !isUserInteracting && navigationActive) {
             window.map.setHeading(heading);
         }
 

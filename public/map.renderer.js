@@ -21,6 +21,19 @@
         map: map,
         preserveViewport: true
     });
+
+    map.addListener('dragstart', () => {
+        isUserInteracting = true;
+        logMessage("手動操作検知：回転を一時停止");
+    });
+
+    map.addListener('dragend', () => {
+        if (interactionTimeout) clearTimeout(interactionTimeout);
+        interactionTimeout = setTimeout(() => {
+            isUserInteracting = false;
+            logMessage("回転を再開します");
+        }, 3000);
+    });
  }
 
   function drawMap() {
