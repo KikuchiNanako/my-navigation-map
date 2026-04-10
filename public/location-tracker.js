@@ -162,7 +162,7 @@ async function getHybridLocation() {
         logMessage(`デバッグ：目的地座標取得成功 - 緯度： ${destinationLatLon.lat.toFixed(5)}, 経度： ${destinationLatLon.lng.toFixed(5)}`);
         */
 
-        displayRoute(originLatLon, destinationplace);
+        displayRoute(originLatLon, destinationPlace);
 
         logMessage("ルート描画が完了しました");
 
