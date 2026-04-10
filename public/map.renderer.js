@@ -1,10 +1,20 @@
  window.googleMapsReady = false;
  
- function initMap() {
+ async function initMap() {
     window.googleMapsReady = true;
     logMessage("GoogleMaps初期化完了");
 
-    const initialLocation = { lat: 35.681236, lng: 139.767125 };
+    let  initialLocation = { lat: 35.681236, lng: 139.767125 };
+
+    try {
+        const pos = await getHybridLocation();
+        if (pos) {
+            initialLocation = pos;
+            logMessage("初期位置を現在地に設定");
+        }
+    } catch (e) {
+        logMessage("現在地を取得できなかったのでデフォルト位置を表示");
+    }
 
     map = new google.maps.Map(document.getElementById("map"), {
         center: initialLocation,
@@ -36,7 +46,7 @@
     });
  }
 
-  function drawMap() {
+async function drawMap() {
     const pts = window.allPoints || allPoints;
     const fpts = window.frequentPoints || frequentPoints;
 
@@ -45,10 +55,16 @@
         return;
     }
 
-    const avgLat = pts.reduce((sum, p) => sum + p.lat, 0) / pts.length;
-    const avgLon = pts.reduce((sum, p) => sum + p.lon, 0) / pts.length;
-    map.setCenter({ lat: avgLat, lng: avgLon });
-    map.setZoom(14);
+    const currentpos = await getHybritLocation();
+    if (currentpos) {
+        map.setCenter(pos);
+        map.setZoom(17);
+    } else {
+        const avgLat = pts.reduce((sum, p) => sum + p.lat, 0) / pts.length;
+        const avgLon = pts.reduce((sum, p) => sum + p.lon, 0) / pts.length;
+        map.setCenter({ lat: avgLat, lng: angLon });
+    }
+  
 
     if (window.frequentCircles) {
         window.frequentCircles.forEach(circle => circle.setMap(null));
