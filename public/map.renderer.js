@@ -44,6 +44,21 @@
             logMessage("回転を再開します");
         }, 3000);
     });
+
+    const input = document.getElementById("destinationInput");
+    const autocomplete = new google.maps.places.Autocomplete(input, {
+        fields: ["geometry", "name", "formatted_address"],
+        types: ["geocode", "establishment"]
+    });
+
+    autocomplete.addListener("place_changed", () => {
+        const place = autocomplete.getPlace();
+        if (!place.geometry || !place.geometry.location) {
+            logMessage("候補から目的地をえらんでください");
+            return;
+        }
+        logMessage(`目的地を選択： ${place.name}`);
+     });
  }
 
 async function drawMap() {
@@ -55,7 +70,7 @@ async function drawMap() {
         return;
     }
 
-    const currentpos = await getHybritLocation();
+    const currentpos = await getHybridLocation();
     if (currentpos) {
         map.setCenter(pos);
         map.setZoom(17);

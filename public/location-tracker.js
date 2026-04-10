@@ -162,12 +162,12 @@ async function getHybridLocation() {
         logMessage(`デバッグ：目的地座標取得成功 - 緯度： ${destinationLatLon.lat.toFixed(5)}, 経度： ${destinationLatLon.lng.toFixed(5)}`);
         */
 
-        displayRoute(originLatLon, destinationLatLon);
+        displayRoute(originLatLon, destinationplace);
 
         logMessage("ルート描画が完了しました");
 
         const isOutsideInitial = isOutsideRoute(originLatLon.lat, originLatLon.lng);
-        updateCurrentLocationMarker(originLatLon, 0, isOutsideInitial);
+        updateCurrentLocationMarker(originLatLon, 0, false);
 
         document.getElementById('routestartButton').style.display = 'block';
         document.getElementById(`startButton`).style.display = 'none';
