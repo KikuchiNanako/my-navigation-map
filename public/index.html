@@ -93,6 +93,8 @@
             var currentLocationMarker = null;
             var watchId = null;
             var navigationTimer = null;
+            var isUserInteracting = false;
+            var interactionTimeout = null;
             
             async function loadGoogleMaps() {
                 try {

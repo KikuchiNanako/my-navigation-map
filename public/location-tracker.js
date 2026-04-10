@@ -459,7 +459,7 @@ function updateHeadingHandler(event) {
 
 
     if (heading !== null ) {
-        if (currentLocationMarker) {
+        if (typeof currentLocationMarker !== 'undefined' && currentLocationMarker) {
             const icon = currentLocationMarker.getIcon();
             if (icon) {
                 icon.rotation = heading;
