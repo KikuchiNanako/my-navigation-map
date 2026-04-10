@@ -151,6 +151,7 @@ async function getHybridLocation() {
 
         logMessage(`デバッグ：現在地取得成功 - 緯度： ${originLatLon.lat.toFixed(5)}, 経度： ${originLatLon.lng.toFixed(5)}`);
 
+        /*
         const destinationLatLon = await getCoordinatesFromPlace(destinationPlace);
         if (!destinationLatLon) {
             logMessage("エラー：目的地の座標を取得できませんでした");
@@ -159,6 +160,7 @@ async function getHybridLocation() {
         }
     
         logMessage(`デバッグ：目的地座標取得成功 - 緯度： ${destinationLatLon.lat.toFixed(5)}, 経度： ${destinationLatLon.lng.toFixed(5)}`);
+        */
 
         displayRoute(originLatLon, destinationLatLon);
 

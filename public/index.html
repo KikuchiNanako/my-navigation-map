@@ -131,7 +131,8 @@
                     });
 
                     await google.maps.importLibrary("maps");
-                    await google.maps.importLibrary("routes")
+                    await google.maps.importLibrary("routes");
+                    await google.maps.importLibrary("places");
 
                     if (typeof initMap === "function"){
                         initMap();
