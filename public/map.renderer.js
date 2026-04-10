@@ -75,7 +75,7 @@ async function drawMap() {
     } else {
         const avgLat = pts.reduce((sum, p) => sum + p.lat, 0) / pts.length;
         const avgLon = pts.reduce((sum, p) => sum + p.lon, 0) / pts.length;
-        map.setCenter({ lat: avgLat, lng: angLon });
+        map.setCenter({ lat: avgLat, lng: avgLon });
     }
   
 
