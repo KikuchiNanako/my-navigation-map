@@ -33,7 +33,10 @@
     });
 
     map.addListener("click", async (e) => {
-        const geocorder = new google.maps.Geocoder();
+        const geocoder = new google.maps.Geocoder();
+
+        //const lat = e.latLng.lat();
+        //const lng = e.latLng.lng();
 
         geocoder.geocode({ location: e.latLng }, (results, status) => {
             if (status === "OK" && result[0]) {
