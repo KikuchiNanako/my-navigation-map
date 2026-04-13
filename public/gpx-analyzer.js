@@ -25,6 +25,7 @@
         logMessage(`合計 ${allPoints.length}地点のログを読み込みました`);
     }
 
+    /*
     if (files.length === 0) {
         logMessage("ファイルが選択されていません");
         return;
@@ -54,6 +55,7 @@
     calculateFrequentPoints();
     if (typeof drawMap === 'function') drawMap();
     gpxProcessed = true;
+    */
  }
 
  function processFilesWrapper() {
