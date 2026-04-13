@@ -317,6 +317,28 @@ function stopNavigation() {
     document.getElementById('stopButton').style.display = 'none';
 }
 
+function startAutoTracking() {
+    if (!navigator.geolocation) return;
+
+    const options = {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 27000
+    };
+
+    watchId = navigator.geolocation.watchPosition(
+        (position) => {
+            const { latitude, longitude } = position.coords;
+
+            pathLog.push({ lat: latitude, lon: longitude, time: new Date() });
+
+            checkCurrentLocation(latitude, longitude);
+        },
+        (error) => console.error(error),
+        options
+    );
+}
+
 
 /**
  * 位置情報が更新されるたびに実行されるナビゲーションのコアロジック

@@ -62,3 +62,14 @@ async function startRouteCheck() {
             drawMap();
         }
  }
+
+ function checkCurrentLocation(lat, lon) {
+    const outside = isOutsideRoute(lat, lon);
+
+    if (outside && !NavigationActivation) {
+        logMessage("知らない道に出ました。ナビを開始します");
+        startRouteCheck();
+    } else if (!outside) {
+        logMessage("経路内を走行中");
+    }
+ }
