@@ -350,6 +350,8 @@ async function onPositionUpdate(position) {
         lng: position.coords.longitude
     };
 
+    await savePointToDB(currentLatLon.lat, currentLatLon.lng);
+
     //経路外かどうかを判定
     const isOutside = isOutsideRoute(currentLatLon.lat, currentLatLon.lng);
 

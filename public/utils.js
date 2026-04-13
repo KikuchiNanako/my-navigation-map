@@ -50,3 +50,46 @@ const ROUND_DECIMALS = 4;
     const factor = Math.pow(10, decimals);
     return Math.round(num * factor) / factor;
  }
+
+ const DB_NAME = "CatNaviLogDB";
+ const STORE_NAME = "locationLogs";
+
+ function openDB() {
+   return new Promise((resolve, reject) => {
+      const request = indexedDB.open(DB_NAME, 1);
+      request.onupgradeneeded = (e) => {
+         const db = e.target.result;
+         if (!db.objectStoreNames.contains(STORE_NAME)) {
+            db.createObjectStore(STORE_NAME, { autoIncrement: true });
+         }
+      };
+      request.onsuccess = (e) => resolve(e.target.result);
+      request.onerror = (e) => reject(e.target.error);
+   });
+ }
+
+async function savePointToDB(lat, lon) {
+   const db = await openDB();
+   const tx = db.transaction(STORE_NAME, "readwrite");
+   const store = tx.objectStore(STORE_NAME);
+   store.add({ lat, lon, time: new Date() });
+}
+
+async function bulkSavePoints(points) {
+   const db = await openDB();
+   const tx = db.transaction(STORE_NAME, "readwrite");
+   const store = tx.objectStore(STORE_NAME);
+   point.forEach(p => store.add(p));
+   return new Promise(resolve => tx.oncomplete = resolve);
+}
+
+async function getAllPointsFromDB() {
+   const db = await openDB();
+   return new Promise((resolve) => {
+      const tx = db.transaction(STORE_NAME, "readonly");
+      const store = tx.objectStore(STORE_NAME);
+      const request = store.getAll();
+      request.onsuccess = () => resolve(request.result);
+   });
+}
+ 

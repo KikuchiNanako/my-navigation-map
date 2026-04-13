@@ -4,7 +4,26 @@
  async function processFiles() {
     const fileInput = document.getElementById(`gpxFileInput`);
     const files = fileInput.files;
-    allPoints = [];
+
+    if (files.length > 0) {
+        logMessage(`${files.length}このファイルをインポートします`);
+        for (let file of files) {
+            const gpxText = await file.text();
+            const points = parseGpx(gpxText);
+            await bulkSavePoints(points);
+            logMessage(`${file.name}を保存しました`);
+        }
+    }
+
+    const dbPoints = await getAllPointsFromDB();
+    allPoints = dbPoints;
+
+    if (allPoints.length > 0) {
+        calculateFrequentPoints();
+        if (typeof drawMap === 'function') drawMap();
+        gpxProcessed = true;
+        logMessage(`合計 ${allPoints.length}地点のログを読み込みました`);
+    }
 
     if (files.length === 0) {
         logMessage("ファイルが選択されていません");
