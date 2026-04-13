@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="RouteHistory - https://www.ateow.com" xmlns="http://www.topografix.com/GPX/1/1" xmlns:rh="http://www.ateow.com/routehistory">
+<trk>
+<trkseg>
+<trkpt lat="35.69732527784733" lon="139.6430875985602">
+<time>2026-04-12T12:34:48Z</time>
+<ele>49.19330255259504</ele>
+</trkpt>
+<trkpt lat="35.69684700554773" lon="139.64305690883342">
+<time>2026-04-12T12:35:03Z</time>
+<ele>47.28781197298902</ele>
+</trkpt>
+<trkpt lat="35.696778129723015" lon="139.64363980683018">
+<time>2026-04-12T12:35:18Z</time>
+<ele>48.39436705317348</ele>
+</trkpt>
+<trkpt lat="35.69684417649026" lon="139.6442020119312">
+<time>2026-04-12T12:35:39Z</time>
+<ele>52.77260310109705</ele>
+</trkpt>
+</trkseg>
+</trk>
+</gpx>
