@@ -1,3 +1,5 @@
+const { type } = require("express/lib/response");
+
  window.googleMapsReady = false;
  
  async function initMap() {
@@ -39,18 +41,40 @@
         //const lng = e.latLng.lng();
 
         geocoder.geocode({ location: e.latLng }, (results, status) => {
-            if (status === "OK" && result[0]) {
+            if (status === "OK" && results[0]) {
                 const address = results[0].formatted_address;
-                document.getElementById("destinationInput").value = address;
 
-                if (destinationMarker) destinationMarker.setMap(null);
+                const input = document.getElementById("destinationInput");
+                if (input) {
+                    input.value = address;
+                    logMessage(`目的地をセットしました： ${address}`);
+                } else {
+                    console.error("destinationInputというIDの要素が見つかりません");
+                }
+
+                if(typeof destinationMarker !== 'undefined' && destinationMarker) {
+                    destinationMarker.setMap(null);
+                }
+
                 destinationMarker = new google.maps.Marker({
                     position: e.latLng,
                     map: map,
                     icon: "http://maps.google.co.jp/mapfiles/ms/icons/blue-dot.png"
                 });
+            } else {
+                logMessage("住所を取得できませんでした");
 
-                logMessage(`目的地をセットしました： ${address}`);
+                if (typeof destinationMarker !== 'undefined' && destinationMarker) {
+                    destinationMarker.setMap(null);
+                }
+                destinationMarker = new google.maps.Marker({
+                    position: e.latLng,
+                    map: map,
+                    icon: "http://maps.google.co.jo/mapfiles/ms/icons/blue-dot.png"
+                });
+
+                const coords = `${e.latLng.lat().toFixed(6)}, ${e.latLng.lng().toFixed(6)}`;
+                document.getElementById("destinationInput").value = coords;
             }
         });
     });
