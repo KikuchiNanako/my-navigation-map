@@ -32,6 +32,26 @@
         preserveViewport: true
     });
 
+    map.addListener("click", async (e) => {
+        const geocorder = new google.maps.Geocoder();
+
+        geocoder.geocode({ location: e.latLng }, (results, status) => {
+            if (status === "OK" && result[0]) {
+                const address = results[0].formatted_address;
+                document.getElementById("destinationInput").value = address;
+
+                if (destinationMarker) destinationMarker.setMap(null);
+                destinationMarker = new google.maps.Marker({
+                    position: e.latLng,
+                    map: map,
+                    icon: "http://maps.google.co.jp/mapfiles/ms/icons/blue-dot.png"
+                });
+
+                logMessage(`目的地をセットしました： ${address}`);
+            }
+        });
+    });
+
     map.addListener('dragstart', () => {
         isUserInteracting = true;
         logMessage("手動操作検知：回転を一時停止");
@@ -57,6 +77,7 @@
             logMessage("目的地が選択されました");
         });
     }
+
  }
 
 async function drawMap() {
