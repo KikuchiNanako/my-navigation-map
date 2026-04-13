@@ -6,24 +6,45 @@
     const files = fileInput.files;
 
     if (files.length > 0) {
-        logMessage(`${files.length}このファイルをインポートします`);
-        for (let file of files) {
-            const gpxText = await file.text();
-            const points = parseGpx(gpxText);
-            await bulkSavePoints(points);
-            logMessage(`${file.name}を保存しました`);
+        logMessage(`${files.length}このファイルをインポート中`);
+
+        for (let i = 0; i < files.length; i++) {
+            try {
+                const file = files[i];
+                const gpxText = await files.text();
+                const points = parseGpx(gpxText);
+
+                if (points && points.length > 0) {
+                    await bulkSavePoints(points);
+                    logMessage(`${file.name} (${points.length}地点)を保存しました`);
+                }
+            } catch (e) {
+                logMessage(`保存エラー： ${e.message}`);
+            }
         }
+    } else {
+        logMessage("ファイル未選択"); 
     }
 
-    const dbPoints = await getAllPointsFromDB();
-    allPoints = dbPoints;
+    const allSaveData = await getAllPointsFromDB();
 
-    if (allPoints.length > 0) {
-        calculateFrequentPoints();
-        if (typeof drawMap === 'function') drawMap();
-        gpxProcessed = true;
-        logMessage(`合計 ${allPoints.length}地点のログを読み込みました`);
+    allPoints = allSaveData.map(d => ({ lat: d.lat, lon: d.lon, time: d.time }));
+
+    if (allPoints.length === 0) {
+        logMessage("有効なポイントがデータベースに見つかりませんでした");
+        gpxProcessed = false;
+        return;
     }
+
+    logMessage(`合計 ${allPoints.length} 地点のログを読み込みました`);
+    calculateFrequentPoints();
+    if (typeof drawMap === 'function') {
+        drawMap();
+    } 
+
+    gpxProcessed = true;
+}
+
 
     /*
     if (files.length === 0) {
@@ -56,7 +77,7 @@
     if (typeof drawMap === 'function') drawMap();
     gpxProcessed = true;
     */
- }
+ 
 
  function processFilesWrapper() {
     const fileInput = document.getElementById('gpxFile');
