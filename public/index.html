@@ -148,6 +148,29 @@
 
             window.addEventListener("DOMContentLoaded", loadGoogleMaps);
 
+            window.addEventListener("load", async () => {
+                setTimeout(async () => {
+                    try {
+                        logMessage("保存済みのログを確認しています");
+                        const allSaveData = await getAllPointsFromDB();
+
+                        if (allSaveData && allSaveData.length > 0) {
+                            allPoints = allSaveData.map(d => ({ lat: d.lat, lon: d.lon, time: d.time }));
+                            logMessage(`合計 ${allPoints.length} 地点の過去ログを読み込みました`);
+
+                            calculateFrequentPoints();
+                            gpxProcessed = true;
+
+                            if (typeof drawMap === 'function') drawMap();
+                        } else {
+                            logMessage("保存されたログがありません。新しいGPXファイルを読み込んでください");
+                        }
+                    } catch (e) {
+                        console.error("初期読み込みエラー:", e);
+                    }
+                }, 1500);
+            });
+
             /*
             async function processFiles() {
                 allPoints = [];
