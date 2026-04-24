@@ -11,7 +11,7 @@
         for (let i = 0; i < files.length; i++) {
             try {
                 const file = files[i];
-                const gpxText = await files.text();
+                const gpxText = await file.text();
                 const points = parseGpx(gpxText);
 
                 if (points && points.length > 0) {
