@@ -479,11 +479,23 @@ function updateHeadingHandler(event) {
         heading = event.webkitCompassHeading;
     } else if (event.absolute && event.alpha !== null) {
         heading = 360 - event.alpha;
-    } else if (event.alpha !== null) {
-        heading = 360 - event.alpha;
+    } 
+
+    if (heading !== null) {
+        const aplha = 0.2;
+        let filteredHeading = lastHeading * (1 - alpha) + heading + alpha;
+        lastHeading = filteredHeading;
+
+        if (currentLocationMarker) {
+            const icon = currentLocationMarker.getIcon();
+            if (icon) {
+                icon.rotation = filteredHeading;
+                currentLocationMarker.setIcon(icon);
+            }
+        }
     }
 
-
+    /*
     if (heading !== null ) {
         if (typeof currentLocationMarker !== 'undefined' && currentLocationMarker) {
             const icon = currentLocationMarker.getIcon();
@@ -498,4 +510,5 @@ function updateHeadingHandler(event) {
         }
 
     }
+    */
 }
