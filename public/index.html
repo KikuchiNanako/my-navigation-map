@@ -39,10 +39,9 @@
         <h1>GPXデータ解析と経路判定</h1>
 
         <label for="gpxFile" class="custom-file-upload"></label>
-        <input type="file" id="gpxFileInput" multiple>
+        <input type="file" id="gpxFileInput" multiple> <button onclick = "processFiles()" id="processButton">GPXファイルを読み込み・処理</button>
         <span id="fileNameDisplay">ファイルが選択されていません</span>
 
-        <button onclick="processFiles()" id="processButton">GPXファイルを読み込み・処理</button>
 
         <hr>
 
@@ -149,6 +148,7 @@
 
             window.addEventListener("DOMContentLoaded", loadGoogleMaps);
 
+            /*
             async function processFiles() {
                 allPoints = [];
 
@@ -191,6 +191,7 @@
                     logMessage("有効なGPXポイントが見つかりませんでした");
                     }
             }
+            */
 
             async function updateLogCounter() {
                 const points =await getAllPointsFromDB();

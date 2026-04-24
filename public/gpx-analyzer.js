@@ -3,7 +3,13 @@
   */
  async function processFiles() {
     const fileInput = document.getElementById(`gpxFileInput`);
+    if (!fileInput) {
+        logMessage("error: HTML要素 'gpxFileInput'が見つかりません");
+        return;
+    }
+
     const files = fileInput.files;
+    allPoints = [];
 
     if (files.length > 0) {
         logMessage(`${files.length}このファイルをインポート中`);
@@ -27,7 +33,6 @@
     }
 
     const allSaveData = await getAllPointsFromDB();
-
     allPoints = allSaveData.map(d => ({ lat: d.lat, lon: d.lon, time: d.time }));
 
     if (allPoints.length === 0) {
@@ -38,6 +43,7 @@
 
     logMessage(`合計 ${allPoints.length} 地点のログを読み込みました`);
     calculateFrequentPoints();
+    
     if (typeof drawMap === 'function') {
         drawMap();
     } 

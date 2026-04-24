@@ -79,7 +79,7 @@ async function bulkSavePoints(points) {
    const db = await openDB();
    const tx = db.transaction(STORE_NAME, "readwrite");
    const store = tx.objectStore(STORE_NAME);
-   point.forEach(p => store.add(p));
+   points.forEach(p => store.add(p));
    return new Promise(resolve => tx.oncomplete = resolve);
 }
 
