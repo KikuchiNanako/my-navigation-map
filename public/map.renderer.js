@@ -108,13 +108,17 @@
  }
 
 async function drawMap() {
+    if (typeof map === 'undefined' || !map) {
+        if (window.map) {
+            map = window.map;
+        } else {
+            logMessage("可視化エラー：地図の初期化を待機中です");
+            return;
+        }
+    }
+
     const pts = window.allPoints || [];
     const fpts = window.frequentPoints || [];
-
-    if (!map) {
-        logMessage("可視化エラー：地図が初期化されていません");
-        return;
-    }
 
     if (pts.length === 0 && fpts.length === 0) {
         logMessage("可視化エラー：描画するデータがありません");
@@ -125,7 +129,7 @@ async function drawMap() {
     if (currentpos) {
         map.setCenter(currentpos);
         map.setZoom(17);
-    } else {
+    } else if (pts.length > 0) {
         const avgLat = pts.reduce((sum, p) => sum + p.lat, 0) / pts.length;
         const avgLon = pts.reduce((sum, p) => sum + p.lon, 0) / pts.length;
         map.setCenter({ lat: avgLat, lng: avgLon });
