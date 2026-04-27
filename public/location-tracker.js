@@ -482,7 +482,7 @@ function updateHeadingHandler(event) {
     } 
 
     if (heading !== null) {
-        const aplha = 0.2;
+        const alpha = 0.2;
         let filteredHeading = lastHeading * (1 - alpha) + heading + alpha;
         lastHeading = filteredHeading;
 

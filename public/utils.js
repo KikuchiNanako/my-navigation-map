@@ -68,18 +68,28 @@ const ROUND_DECIMALS = 4;
    });
  }
 
+let lastSavePos = null;
 async function savePointToDB(lat, lon) {
+   if (lastSavePos) {
+      const dist = getDistanceMeters(lat, lon, lastSavePos.lat, lastSavePos.lon);
+      if (dist < 5) return;
+   }
+
    const db = await openDB();
    const tx = db.transaction(STORE_NAME, "readwrite");
    const store = tx.objectStore(STORE_NAME);
-   store.add({ lat, lon, time: new Date() });
+   store.put({ lat, lon, time: new Date() });
+   lastSavePos = { lat, lon };
 }
 
 async function bulkSavePoints(points) {
    const db = await openDB();
    const tx = db.transaction(STORE_NAME, "readwrite");
    const store = tx.objectStore(STORE_NAME);
-   points.forEach(p => store.add(p));
+
+   points.forEach(p => {
+      store.put(p);
+   });
    return new Promise(resolve => tx.oncomplete = resolve);
 }
 
