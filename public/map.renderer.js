@@ -152,14 +152,15 @@ async function drawMap() {
     if (fpts && fpts.length > 0) {
         fpts.forEach(p => {
             const circle = new google.maps.Circle({
-            strokeColor: "red",
-            strokeOpacity: 0.9,
-            strokeWeight: 2,
-            fillColor: "red",
-            fillOpacity: 0.9,
+            strokeColor: "#ff0000",
+            strokeOpacity: 0.3,
+            strokeWeight: 1,
+            fillColor: "#ff0000",
+            fillOpacity: 0.15,
             map: map,
             center: { lat: p.lat_r, lng: p.lon_r},
             radius: THRESHOLD_M,
+            clickable: false,
         });
         window.frequentCircles.push(circle);
     });
