@@ -23,7 +23,8 @@
             }
 
             #gpxFileInput{
-                display: none;
+                display: inline-block;
+                margin-bottom: 10px;
             }
 
             #fileNameDisplay {
@@ -38,10 +39,20 @@
     <body>
         <h1>GPXデータ解析と経路判定</h1>
 
-        <label for="gpxFile" class="custom-file-upload"></label>
-        <input type="file" id="gpxFileInput" multiple> <button onclick = "processFiles()" id="processButton">GPXファイルを読み込み・処理</button>
-        <span id="fileNameDisplay">ファイルが選択されていません</span>
+        <div style="background: #f9f9f9; padding: 15px; border: 1px solid #ddd; border-radius: 15px; margin-bottom: 20px;">
+            <p style="margin-top: 0;"><strong>過去のログを読み込む：</strong></p>
 
+            <input type="file" id="gpxFileInput" multiple accept=".gpx" style="margin-bottom: 10px;">
+
+            <br>
+
+            <button onclick="processFiles()" id="processButton" style="padding: 5px 10px; cursor: pointer;">
+                GPXファイルをデータベースに存
+            </button>
+            <div id="fileNameDisplay" style="font-size: 0.8em; color: #666; margin-top: 5px;">
+                複数選択して一括読み読みが可能です
+            </div>
+        </div>
 
         <hr>
 
