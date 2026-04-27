@@ -28,6 +28,13 @@
         tilt: 0
     });
 
+    window.map = map;
+    window.googleMapsReady = true;
+
+    if (window.frequentPoints && window.frequentPoints.length > 0) {
+        drawMap();
+    }
+
     directionsService = new google.maps.DirectionsService();
     directionsRenderer = new google.maps.DirectionsRenderer({
         map: map,
@@ -113,6 +120,7 @@ async function drawMap() {
             map = window.map;
         } else {
             logMessage("可視化エラー：地図の初期化を待機中です");
+            setTimeout(drawMap, 1000);
             return;
         }
     }
