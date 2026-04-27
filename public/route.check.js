@@ -60,6 +60,19 @@ async function startRouteCheck() {
         } else {
             logMessage("経路内です");
             drawMap();
+
+            if (watchId === null) {
+                watchId = navigation.geolocation.watchPosition(
+                    onPositionUpdate,
+                    (error) => logMessage(`位置監視エラー: ${error.message}`),
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 5000,
+                        maximumAge: 0
+                    }
+                );
+                logMessage("現在地の保存を開始しました");
+            }
         }
  }
 
