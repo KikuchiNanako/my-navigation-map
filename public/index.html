@@ -47,7 +47,7 @@
             <br>
 
             <button onclick="processFiles()" id="processButton" style="padding: 5px 10px; cursor: pointer;">
-                GPXファイルをデータベースに存
+                GPXファイルをデータベースに保存
             </button>
             <div id="fileNameDisplay" style="font-size: 0.8em; color: #666; margin-top: 5px;">
                 複数選択して一括読み読みが可能です
@@ -57,7 +57,7 @@
         <hr>
 
         <input type="text" id="destinationInput" placeholder="目的地を入力（例：東京タワー）">
-        <button onclick="requestRouteDrawing()" id="drawingButton">
+        <button onclick="startRouteCheck()" id="drawingButton">
             ルート検索開始
         </button>
 
