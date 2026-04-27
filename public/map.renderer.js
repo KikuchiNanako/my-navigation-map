@@ -108,8 +108,8 @@
  }
 
 async function drawMap() {
-    const pts = window.allPoints || allPoints || [];
-    const fpts = window.frequentPoints || frequentPoints || [];
+    const pts = window.allPoints || [];
+    const fpts = window.frequentPoints || [];
 
     if (!map) {
         logMessage("可視化エラー：地図が初期化されていません");
