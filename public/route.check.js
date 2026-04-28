@@ -64,7 +64,7 @@ async function startRouteCheck() {
             updateNavDisplay("よく通る道です", "案内を休止しています")
 
             if (watchId === null) {
-                watchId = navigation.geolocation.watchPosition(
+                watchId = navigator.geolocation.watchPosition(
                     onPositionUpdate,
                     (error) => logMessage(`位置監視エラー: ${error.message}`),
                     {

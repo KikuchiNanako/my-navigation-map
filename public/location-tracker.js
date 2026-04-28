@@ -361,13 +361,25 @@ async function onPositionUpdate(position) {
             statusLabel.innerText = "状態：【経路外】ルート検索を実行します";
             statusLabel.style.color = "red";
         } else {
-            statusLabel.innerText = "状態；【経路内】";
+            statusLabel.innerText = "状態:【経路内】";
             statusLabel.style.color = "green";
         }
     }
 
     //判定結果に応じて色を決める
     updateCurrentLocationMarker(currentLatLon, 0, isOutside);
+
+    if (isOutside) {
+        if (!navigationActive) {
+            updateNavDisplay("経路外です", "ナビ開始を押すと案内します", "#333");
+        }
+    } else {
+        updateNavDisplay(
+            "<span style='color: #81c784;'>既知のルート（案内停止中）</span>",
+            "知っている道です。ルートを外れると案内を再開します",
+            "#1a261a"
+        );
+    }
 
     //ナビゲーションがアクティブな場合のみ案内ロジックを実行
     if (navigationActive) {

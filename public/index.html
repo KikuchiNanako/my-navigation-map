@@ -61,18 +61,7 @@
             ルート検索開始
         </button>
 
-        <hr>
-
-        <div id="nav-panel" style="background: #333; color: white; padding: 20px; font-size: 1.4em; min-height: 80px; border-radius: 12px; margin-bottom: 15px; display: none; text-align: center; box-shadow: 0 4px15px rgba(0,0,0,0.3); border: 2px solid #555;">
-            <div id="nav-instruction" style="font-weight: bold; line-height: 1.4;">目的地を入力してルートを検索してください</div>
-            <div id="nav-distance" style="font-size: 0.8em; color: #ffeb3b; margin-top: 8px;"></div>
-        </div>
-
-        <div id="map"></div>
-
-        <hr>
-
-        <div id = "navControls">
+        <div id = "navControls" style="margin-top: 10px;">
             <button onclick="startNavigation()" id="routestartButton" style="display: block";>
             ルートを確認してナビ開始
             </button>
@@ -84,15 +73,22 @@
             <button onclick="startNavigation()" id="startButton" style="display: none;">
             ナビ再開
             </button>
-
         </div>     
         
-
-        <div id="log">ログ</div>
-        <div id="map"></div>
-        <div id="statusLabel" style="font-weight:bold; padding:10px; background:#f0f0f0;">
+        <div id="statusLabel" style="font-weight:bold; padding:10px; background:#f0f0f0; margin-top: 10px; border-radius: 5px;">
             状態：待機中
         </div>
+
+        <div id="nav-panel" style="background: #333; color: white; padding: 20px; font-size: 1.4em; min-height: 80px; border-radius: 12px; margin-bottom: 15px; display: none; text-align: center; box-shadow: 0 4px15px rgba(0,0,0,0.3); border: 2px solid #555;">
+            <div id="nav-instruction" style="font-weight: bold; line-height: 1.4;">目的地を入力してルートを検索してください</div>
+            <div id="nav-distance" style="font-size: 0.8em; color: #ffeb3b; margin-top: 8px;"></div>
+        </div>
+
+        <div id="map" style="margin-top: 10px;"></div>
+
+        <hr>
+        <p style="font-size: 0.8em; color: #666; margin-bottom: 2px;">動作ログ</p>
+        <div id="log"></div>
 
         <script src="utils.js"></script>
         <script src="gpx-parser.js"></script>
