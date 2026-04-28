@@ -54,12 +54,14 @@ async function startRouteCheck() {
         if (isOutsideRoute(currentLat, currentLon)) {
             logMessage("経路外です");
             displayRoute(currentLatLon, destinationLatLon);
-
             drawMap();
-            
+
+            updateNavDisplay("ルートを確認してください", "開始ボタンを押すと案内を始めます", "#2c3e50");
         } else {
             logMessage("経路内です");
             drawMap();
+
+            updateNavDisplay("よく通る道です", "案内を休止しています")
 
             if (watchId === null) {
                 watchId = navigation.geolocation.watchPosition(

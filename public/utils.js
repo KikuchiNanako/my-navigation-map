@@ -103,3 +103,25 @@ async function getAllPointsFromDB() {
    });
 }
  
+/**
+ * ナビ専用パネルの表示を更新する
+ * @param {string} instruction 案内文（「右折です」など）
+ * @param {string} distance 距離
+ * @param {string} bgColor パネルの背景色
+ */
+function updateNavDisplay(instruction, distance = "", bgColor = "#333") {
+   const panel = document.getElementById('nav-panel');
+   const insText = document.getElementById('nav-instruction');
+   const distText = document.getElementById('nav-distance');
+
+   if (panel) {
+      panel.style.display = 'block';
+      panel.style.background = bgColor;
+   }
+   if (insText) {
+      insText.innerHTML = instruction;
+   }
+   if (distText) {
+      distText.innerText = distance;
+   }
+}

@@ -51,7 +51,8 @@ function showCurrentStep() {
     const distance = step.distance.text;
     const duration = step.duration.text;
 
-    logMessage(`次の案内: ${instruction} (${distance}, ${duration})`);
+    logMessage(`案内: ${instruction.replace(/<[^>]*>/g, "")}`);
+    updateNavDisplay(instruction, `あと ${distance}`, "#333");
 
     if (stepPolyline) {
         stepPolyline.setMap(null);
