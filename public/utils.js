@@ -124,28 +124,4 @@ function updateNavDisplay(instruction, distance = "", bgColor = "#333") {
    if (distText) {
       distText.innerText = distance;
    }
-
-   /**
-    * 指定したテキストで音声を読み上げる
-    * @param {string} text 読み上げるテキスト
-    */
-   function speak(text) {
-      if (!text) return;
-
-      if(!('speechSynthesis' in window)) {
-         logMessage("このブラウザは音声合成に対応してません");
-         return;
-      }
-
-      window.speechSynthesis.cancel();
-
-      const uttr = new SpeechSynthesisUtterance();
-      uttr.text = text.replace(/<[^>]*./g, "");
-      uttr.lang = "ja-JP";
-      uttr.rate = 1.0;
-      uttr.pitch = 1.0;
-
-      window.speechSynthesis.speak(uttr);
-      logMessage(`音声案内： $[uttr.text]`);
-   }
 }
