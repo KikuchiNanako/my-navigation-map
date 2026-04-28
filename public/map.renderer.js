@@ -28,6 +28,12 @@
         tilt: 0
     });
 
+    new google.maps.Marker({
+        position: initialLocation,
+        mao: map,
+        title: "あなたの現在地",
+    });
+
     window.map = map;
     window.googleMapsReady = true;
 
