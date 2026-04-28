@@ -47,12 +47,13 @@ function showCurrentStep() {
     }
     
     const step = steps[currentStepIndex];
-    const instruction = step.instructions.replace(/<[^>]*>/g, "");
+    const instruction = step.instructions
     const distance = step.distance.text;
-    const duration = step.duration.text;
 
-    logMessage(`案内: ${instruction.replace(/<[^>]*>/g, "")}`);
     updateNavDisplay(instruction, `あと ${distance}`, "#333");
+
+    const speechText = `${distance}先、 ${instruction}`;
+    speak(speechText);
 
     if (stepPolyline) {
         stepPolyline.setMap(null);
