@@ -30,7 +30,7 @@
 
     new google.maps.Marker({
         position: initialLocation,
-        mao: map,
+        map: map,
         title: "あなたの現在地",
     });
 
