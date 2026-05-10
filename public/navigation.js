@@ -41,6 +41,9 @@ function startStepNavigation(leg, resume = false) {
  */
 function showCurrentStep() {
     if (!navigationActive || currentStepIndex >= steps.length) {
+        const finishMsg = "目的地周辺に到着しました。案内を終了します。";
+        logMessage(finishMsg);
+        speak(finishMsg);
         logMessage("ナビ終了");
         navigationActive = false;
         return;
@@ -87,10 +90,14 @@ function showCurrentStep() {
         stepPolyline = new google.maps.Polyline({
             path,
             map,
+            strokeColor: "#3498db",
             strokeOpacity: 0.8,
             strokeWeight: 6
         });
     }
+
+    const speechText = `${distance}先、${instruction}`;
+    speak(speechText);
 
     //if (startLoc) map.panTo(startLoc);
     //map.setZoom(17);

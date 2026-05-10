@@ -125,3 +125,23 @@ function updateNavDisplay(instruction, distance = "", bgColor = "#333") {
       distText.innerText = distance;
    }
 }
+
+/**
+ * テキストで音声を読み上げる
+ * @param {string} text 読み上げるテキスト
+ */
+function speak (text) {
+   if (!('speechSynthesis' in window)) {
+      console.warn("このブラウザは音声合成をサポートしてません");
+      return;
+   }
+
+   window.speechSynthesis.cancel();
+
+   const uttr = new SpeechSynthesisUtterance(text);
+   uttr.lang = 'ja-JP';
+   uttr.rate = 1.0;
+   uttr.pitch = 1.0;
+
+   window.speechSynthesis.speak(uttr);
+}
