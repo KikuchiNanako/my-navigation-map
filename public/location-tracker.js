@@ -504,6 +504,10 @@ function updateHeadingHandler(event) {
                 icon.rotation = filteredHeading;
                 currentLocationMarker.setIcon(icon);
             }
+
+            if (window.map && typeof window.map.setHeading === 'function') {
+                window.map.setHeading(filteredHeading);
+            }
         }
     }
 
