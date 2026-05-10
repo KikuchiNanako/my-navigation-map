@@ -73,6 +73,7 @@
             <button onclick="startNavigation()" id="startButton" style="display: none;">
             ナビ再開
             </button>
+
         </div>     
         
         <div id="statusLabel" style="font-weight:bold; padding:10px; background:#f0f0f0; margin-top: 10px; border-radius: 5px;">
@@ -145,7 +146,8 @@
                         d[l] ? console.warn(p + " only loads once. RE-referencing library %s.", r) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l] (f, ...n))
                     })({
                         key: API_KEY,
-                        v: "weekly",
+                        v: "beta",
+                        mapIds: ["3d7b65239e3531fb68add898"],
                     });
 
                     await google.maps.importLibrary("maps");
