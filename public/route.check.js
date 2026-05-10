@@ -51,7 +51,7 @@ async function startRouteCheck() {
             return;
         }
 
-        if (isOutsideRoute(currentLat, currentLon) || true) {
+        if (isOutsideRoute(currentLat, currentLon)) {
             logMessage("経路外です");
             displayRoute(currentLatLon, destinationLatLon);
             drawMap();
