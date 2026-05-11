@@ -25,7 +25,7 @@
         disableDefaultUI: false,
         mapId: "3d7b65239e3531fb68add898",
         heading: 0,
-        tilt: 0,
+        tilt: 45,
         headingInteractionEnabled: true,
         titleInteractionEnabled: true
     });
