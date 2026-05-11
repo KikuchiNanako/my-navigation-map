@@ -446,49 +446,6 @@ async function onPositionUpdate(position) {
     }
  }
 
-/*
- window.addEventListener('deviceorientationabsolute', (event) => {
-    let heading = 0;
-    if (event.webkitCompassHeading) {
-        heading = event.webkitCompassHeading;
-    } else if (event.absolute) {
-        heading = 360 - event.alpha;
-    }
-    
-    if (currentLocationMarker) {
-        const icon = currentLocationMarker.getIcon();
-        if (icon) {
-            icon.rotation = heading;
-            currentLocationMarker.setIcon(icon);
-        }
-    }
-}, true);
-
-*/
-
-
-/*
-async function requestDeviceOrientation () {
-    if ( typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-        try {
-            const permission = await DeviceOrientationEvent.requestPermission();
-            if (permission === 'granted') {
-                window.addEventListener('deviceorientation', updateHeadingHandler, true);
-                logMessage("向きセンサーの権限を取得しました");
-            } else {
-                logMessage("方向情報の取得が拒否されました");
-            }
-        } catch (e) {
-            logMessage("方向情報の権限リクエスト中にエラーが発生しました");
-        }
-    } else {
-            const eventname = ('ondeviceorientationabsolute' in window) ? 'deviceorientationabsolute' : 'deviceorientation';
-            window.addEventListener(eventname, updateHeadingHandler, true);
-            logMessage("向きセンサーを開始しました");
-    }
-}
-*/
-
 /**
  * 実際にマーカーを回転させる処理
  */
@@ -513,26 +470,26 @@ function updateHeadingHandler(event) {
                 currentLocationMarker.setIcon(icon);
             }
 
-            if (window.map && typeof window.map.setHeading === 'function') {
+            if (window.map && typeof window.map.setHeading === 'function' && navigationActive && !isUserInteracting) {
                 window.map.setHeading(filteredHeading);
             }
         }
     }
-
-    /*
-    if (heading !== null ) {
-        if (typeof currentLocationMarker !== 'undefined' && currentLocationMarker) {
-            const icon = currentLocationMarker.getIcon();
-            if (icon) {
-                icon.rotation = heading;
-                currentLocationMarker.setIcon(icon);
-            }
-        }
-
-        if (window.map && !isUserInteracting && navigationActive) {
-            window.map.setHeading(heading);
-        }
-
-    }
-    */
 }
+
+function resumeAutoFollow() {
+        isUserInteracting = false;
+
+        logMessage("自動追従を再開");
+
+        if (currentLocationMarker) {
+            const pos = currentLocationMarker.getPosition();
+
+            map.moveCamera({
+                center: pos,
+                heading: lastHeading,
+                tilt: 60,
+                zoom: 19
+            });
+        }
+    }

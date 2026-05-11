@@ -94,13 +94,17 @@
         });
     });
 
-    map.addListener('dragstart', () => {
+    map.addListener('drag', () => {
         isUserInteracting = true;
-        logMessage("手動操作検知：回転を一時停止");
+
+        if (interactionTimeout) {
+            clearTimeout(interactionTimeout);
+        }
     });
 
     map.addListener('dragend', () => {
         if (interactionTimeout) clearTimeout(interactionTimeout);
+        
         interactionTimeout = setTimeout(() => {
             isUserInteracting = false;
             logMessage("回転を再開します");

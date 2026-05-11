@@ -74,6 +74,10 @@
             ナビ再開
             </button>
 
+            <button onclick="resumeAutoFollowing()">
+                現在地に戻る
+            </button>
+
         </div>     
         
         <div id="statusLabel" style="font-weight:bold; padding:10px; background:#f0f0f0; margin-top: 10px; border-radius: 5px;">
@@ -115,7 +119,7 @@
             var interactionTimeout = null;
             var destinationMarker = null;
             var lastHeading = 0;
-            
+
             async function loadGoogleMaps() {
                 try {
                     const res = await fetch("/api/get-api-key");
