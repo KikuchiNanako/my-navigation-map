@@ -404,7 +404,10 @@ async function onPositionUpdate(position) {
   * @param {boolean} isOutside - 経路外かどうか
   */
  function updateCurrentLocationMarker(currentLatLon, heading = 0, isOutside = false) {
-    map.panTo(currentLatLon);
+    if (navigationActive) {
+      map.panTo(currentLatLon);
+    }
+    
 
     const fillColor = isOutside ? '#FF0000' : "#4285F4";
 
@@ -495,7 +498,7 @@ function updateHeadingHandler(event) {
 
     if (heading !== null) {
         const alpha = 0.2;
-        let filteredHeading = lastHeading * (1 - alpha) + heading + alpha;
+        let filteredHeading = lastHeading * (1 - alpha) + heading * alpha;
         lastHeading = filteredHeading;
 
         if (currentLocationMarker) {
