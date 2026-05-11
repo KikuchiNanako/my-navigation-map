@@ -25,7 +25,7 @@
         disableDefaultUI: false,
         mapId: "3d7b65239e3531fb68add898",
         heading: 0,
-        tilt: 45,
+        tilt: 0,
         headingInteractionEnabled: true,
         titleInteractionEnabled: true
     });
@@ -104,7 +104,7 @@
 
     map.addListener('dragend', () => {
         if (interactionTimeout) clearTimeout(interactionTimeout);
-        
+
         interactionTimeout = setTimeout(() => {
             isUserInteracting = false;
             logMessage("回転を再開します");

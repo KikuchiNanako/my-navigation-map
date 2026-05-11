@@ -440,7 +440,7 @@ async function onPositionUpdate(position) {
         map.moveCamera({
             center: currentLatLon,
             heading: heading,
-            tilt: 60,
+            tilt: 0,
             zoom: 19
         });
     }
