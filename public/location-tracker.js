@@ -404,9 +404,9 @@ async function onPositionUpdate(position) {
   * @param {boolean} isOutside - 経路外かどうか
   */
  function updateCurrentLocationMarker(currentLatLon, heading = 0, isOutside = false) {
-    if (navigationActive) {
-      map.panTo(currentLatLon);
-    }
+    //if (navigationActive) {
+      //map.panTo(currentLatLon);
+    //}
     
 
     const fillColor = isOutside ? '#FF0000' : "#4285F4";
@@ -436,8 +436,13 @@ async function onPositionUpdate(position) {
         currentLocationMarker.setIcon(icon);
     }
 
-    if (navigationActive) {
-        map.setHeading(heading);
+    if (navigationActive && !isUserInteracting) {
+        map.moveCamera({
+            center: currentLatLon,
+            heading: heading,
+            tilt: 60,
+            zoom: 19
+        });
     }
  }
 
