@@ -200,15 +200,8 @@ function updateRemainingDistance(currentLocation) {
 
     if (!step || !step.end_location) return;
 
-    let endLat, endLng;
-
-    if (typeof step.end_location.lat === 'function') {
-        endLat = step.end_location.lat();
-        endLng = step.end_location.lng();
-    } else {
-        endLat = step.end_location.lat;
-        endLng = step.end_location.lng;
-    }
+    const endLat = (typeof step.end_location.lat === 'function') ? step.end_location.lat() : step.end_location.lat;
+    const endLng = (typeof step.end_location.lng === 'function') ? step.end_location.lng() : step.end_location.lng;
 
     const remainingMeters = getDistanceMeters(
         currentLocation.lat,
@@ -217,7 +210,7 @@ function updateRemainingDistance(currentLocation) {
         endLng
     );
 
-    const instruction = step.instractions.replace(/<[^>]*>/g, "");
+    const instruction = step.instructions.replace(/<[^>]*>/g, "");
 
     let distanceText;
 

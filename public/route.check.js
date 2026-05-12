@@ -81,7 +81,7 @@ async function startRouteCheck() {
  function checkCurrentLocation(lat, lon) {
     const outside = isOutsideRoute(lat, lon);
 
-    if (outside && !NavigationActivation) {
+    if (outside && !navigationActive) {
         logMessage("知らない道に出ました。ナビを開始します");
         startRouteCheck();
     } else if (!outside) {
