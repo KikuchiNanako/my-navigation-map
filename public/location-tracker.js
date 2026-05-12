@@ -439,7 +439,7 @@ function resumeAutoFollow() {
             map.moveCamera({
                 center: pos,
                 heading: lastHeading,
-                tilt: 60,
+                tilt: 0,
                 zoom: 19
             });
         }
