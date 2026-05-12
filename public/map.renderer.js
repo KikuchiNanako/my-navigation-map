@@ -229,7 +229,13 @@ function displayRoute(origin, destination){
                     );
                 });
 
+                directionsRenderer.setDirections({
+                    suppressPolylines: true,
+                    suppressMarker: false
+                });
+
                 directionsRenderer.setDirections(response);
+                
                 logMessage("Google Maps ルートを表示しました");
                 
 
