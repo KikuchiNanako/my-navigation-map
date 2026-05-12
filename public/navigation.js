@@ -174,27 +174,6 @@ function nextStep() {
 }
 
 /**
- * 自動的にステップを進める（デモ）
- 
-function autoNavigate(delayMs = 3000) {
-    if (!navigationActive) {
-        logMessage("ナビが開始されてません");
-        return;
-    }
-
-    const interval = setInterval(() => {
-        if (currentStepIndex >= steps.length) {
-            clearInterval(interval);
-            logMessage("目的地に到着しました");
-            return;
-        }
-        showCurrentStep();
-        currentStepIndex++;
-    }, delayMs);
-}
-*/
-
-/**
  * Directions APIの結果を受け取りナビを開始
  * route.check.jsのdesplayRoute()から呼ばれる
  */
@@ -207,4 +186,49 @@ function handleRouteForNavigation(route) {
 async function handleStartNavigation() {
     await requestDeviceOrientation();
     startStepNavigation();
+}
+
+/**
+ * 現在地から現在ステップ終点までの距離を表示更新
+ * @param {{Lat:number,Lng:number}} currentLocation
+ */
+function updateRemainingDistance(currentLocation) {
+    if (!navigationActive) return;
+    if (currentStepIndex >= steps.length) return;
+
+    const step = steps[currentStepIndex];
+    if (!step || !step.end_location) return;
+
+    let endLat, endLng;
+
+    if (typeof step.end_location.lat === 'function') {
+        endLat = step.end_location.lat();
+        endLng = step.end_location.lng();
+    } else {
+        endLat = step.end_location.lat;
+        endLng = step.end_location.lng;
+    }
+
+    const updateRemainingMeters = getDIstanceMeters(
+        currentLocation.lat,
+        currentLocation.lng,
+        endLat,
+        endLng
+    );
+
+    const instruction = step.instractions.replace(/<[^>]*>/g, "");
+
+    let distanceText;
+
+    if (remainingMeters >= 1000) {
+        distanceText = `${(remainingMeters / 1000).toFixed(1)} km`;
+    } else {
+        distanceText = `${Math.round(remainingMeters)}m`;
+    }
+
+    updateNavDisplay(
+        instruction,
+        `あと${distanceText}`,
+        "#333"
+    );
 }

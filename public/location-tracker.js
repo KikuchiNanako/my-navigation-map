@@ -151,17 +151,6 @@ async function getHybridLocation() {
 
         logMessage(`デバッグ：現在地取得成功 - 緯度： ${originLatLon.lat.toFixed(5)}, 経度： ${originLatLon.lng.toFixed(5)}`);
 
-        /*
-        const destinationLatLon = await getCoordinatesFromPlace(destinationPlace);
-        if (!destinationLatLon) {
-            logMessage("エラー：目的地の座標を取得できませんでした");
-            logMessage(`デバッグ：Geocoding失敗 - 目的地名： '${destinationPlace}'`);
-            return;
-        }
-    
-        logMessage(`デバッグ：目的地座標取得成功 - 緯度： ${destinationLatLon.lat.toFixed(5)}, 経度： ${destinationLatLon.lng.toFixed(5)}`);
-        */
-
         displayRoute(originLatLon, destinationPlace);
 
         logMessage("ルート描画が完了しました");
@@ -179,31 +168,6 @@ async function getHybridLocation() {
     }
     
  }
-
-
- /*
- function startNavigationTracking() {
-    if (navigationTimer !== null) {
-        clearInterval(navigationTimer);
-    }
-
-    navigationTimer = setInterval(async () => {
-
-        const googlePos = await getGoogleGeolocation();
-        if (!googlePos) {
-            logMessage("Google Geolocation API が現在地を取得できません");
-            return;
-        }
-
-        onPositionUpdate({
-            coords: {
-                latitude: googlePos.lat,
-                longitude: googlePos.lng
-            }
-        });
-    }, 3000);
- }
-*/
 
  /**
  * 現在地監視を開始し、ナビゲーションのコアロジックを駆動する
@@ -252,23 +216,6 @@ async function startNavigation() {
     //logMessage("ナビゲーションを開始します")
 
     startStepNavigation(route.legs[0], isResuming);
-
-    /*既存のナビゲーションがあれば停止
-    if (watchId !== null) {
-        logMessage("ナビゲーションはすでに開始されています");
-    }
-
-
-    watchId = navigator.geolocation.watchPosition(
-        onPositionUpdate,
-        (error) => logMessage(`Geolocation監視エラー： ${error.message}`),
-        {
-            enableHighAccuracy: true,
-            timeout: 5000,
-            maximumAge: 0
-        }    
-    );
-    */
 
     if (watchId === null) {
         watchId = navigator.geolocation.watchPosition(
@@ -389,6 +336,8 @@ async function onPositionUpdate(position) {
             if (typeof checkStepProgression === 'function') {
                 checkStepProgression(currentLatLon);
             }
+
+            //updateRemainingDistance(currentLatLon);
         } else {
             logMessage("ナビ案内抑制中：経路内にいます");
         }
