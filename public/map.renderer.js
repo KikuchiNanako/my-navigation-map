@@ -208,6 +208,17 @@ function displayRoute(origin, destination){
                 const route = response.routes[0];
 
                 window.lastDirectionsResponse = response;
+
+                directionsRenderer.setOptions({
+                    suppressPolylines: false,
+                    suppressMarkers: false,
+                    polylineOptions: {
+                        strokeColor: "#4285F4",
+                        strokeOpacity: 0.6,
+                        strokeWeight: 6
+                    }
+                });
+
                 console.log("===ルート確認用===");
                 console.log(response);
 
@@ -229,16 +240,9 @@ function displayRoute(origin, destination){
                     );
                 });
 
-                directionsRenderer.setOptions({
-                    suppressPolylines: true,
-                    suppressMarker: false
-                });
-
                 directionsRenderer.setDirections(response);
 
                 logMessage("Google Maps ルートを表示しました");
-                
-
             } else {
                 logMessage(`ルート検索に失敗しました: ${status}`);
                 directionsRenderer.setDirections({ routes: [] });

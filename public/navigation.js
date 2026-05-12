@@ -51,6 +51,7 @@ function showCurrentStep() {
     
     const step = steps[currentStepIndex];
     const instruction = step.instructions.replace(/<[^>]*>/g, "");
+
     const distance = step.distance.text;
     const duration = step.duration.text;
 
@@ -59,7 +60,6 @@ function showCurrentStep() {
 
     if (stepPolyline) {
         stepPolyline.setMap(null);
-        stepPolyline = null;
     }
 
     let startLoc = step.start_location;
@@ -98,9 +98,6 @@ function showCurrentStep() {
 
     const speechText = `${distance}先、${instruction}`;
     speak(speechText);
-
-    //if (startLoc) map.panTo(startLoc);
-    //map.setZoom(17);
 }
 
 /**
