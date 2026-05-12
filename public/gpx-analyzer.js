@@ -51,40 +51,6 @@
     gpxProcessed = true;
 }
 
-
-    /*
-    if (files.length === 0) {
-        logMessage("ファイルが選択されていません");
-        return;
-    }
-
-    logMessage(`選択されたファイル数: ${files.length}`);
-
-    for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        try {
-            const gpxText = await file.text();
-            const points = parseGpx(gpxText);
-            allPoints.push(...points);
-            logMessage(`ファイル読みこみ終了`);
-        } catch (e) {
-            logMessage(`ファイル読み込みエラー: ${e.message}`);
-        }
-    }
-
-    if (allPoints.length === 0) {
-        logMessage("有効なGPXポイントが見つかりませんでした");
-        gpxProcessed = false;
-        return;
-    }
-
-    logMessage(`全ポイント数: ${allPoints.length}`);
-    calculateFrequentPoints();
-    if (typeof drawMap === 'function') drawMap();
-    gpxProcessed = true;
-    */
- 
-
  function processFilesWrapper() {
     const fileInput = document.getElementById('gpxFile');
 
@@ -131,7 +97,7 @@
 
     const recentHighPoints = [];
     for (const [key, count] of recentPointsMap.entries()) {
-        if (count >= 2) {
+        if (count >= 5) {
             const [lat_r, lon_r] = key.split(',').map(Number);
             recentHighPoints.push({ lat_r, lon_r });
         }
