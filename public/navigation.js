@@ -50,10 +50,10 @@ function showCurrentStep() {
     }
     
     const step = steps[currentStepIndex];
-    const instruction = step.instructions.replace(/<[^>]*>/g, "");
+    const instruction = (step.instructions || "").replace(/<[^>]*>/g, "");
 
     const distance = step.distance.text;
-    const duration = step.duration.text;
+    //const duration = step.duration.text;
 
     logMessage(`案内: ${instruction.replace(/<[^>]*>/g, "")}`);
     updateNavDisplay(instruction, `あと ${distance}`, "#333");
@@ -62,6 +62,18 @@ function showCurrentStep() {
         stepPolyline.setMap(null);
     }
 
+    if (step.path) {
+        stepPolyline = new google.maps.Polyline({
+            path: step.path,
+            map: map,
+            strokeColor: "#FF0000",
+            strokeOpacity: 0.9,
+            strokeWeight: 8,
+            zIndex: 100
+        });
+    }
+
+    /*/
     let startLoc = step.start_location;
     let endLoc = step.end_location;
 
@@ -95,6 +107,7 @@ function showCurrentStep() {
             strokeWeight: 6
         });
     }
+    */
 
     const speechText = `${distance}先、${instruction}`;
     speak(speechText);
@@ -105,7 +118,7 @@ function showCurrentStep() {
  * @param {{lat: number, lng: number}} currentLocation　現在地の座標
  */
 function checkStepProgression(currentLocation) {
-    if (!steps || steps.length === 0) {
+    if (!navigationActive || !steps || steps.length === 0) {
         logMessage("ナビゲーションエラー：ステップ情報がありません");
         return;
     }
@@ -121,25 +134,10 @@ function checkStepProgression(currentLocation) {
     } 
 
     const step = steps[currentStepIndex];
-    if (!step || !step.end_location) {
-        logMessage("ステップ終点の位置が取得できません");
-        return;
-    }
+    const endLoc = step.end_location;
 
-    let endLat, endLng;
-
-    if (typeof step.end_location.lat === 'function') {
-        endLat = step.end_location.lat();
-        endLng = step.end_location.lng();
-        } else {
-            endLat = step.end_location.lat;
-            endLng = step.end_location.lng;
-    }
-
-    if (typeof endLat !== "number" || typeof endLng !== "number") {
-        logMessage("ステップ終点の位置が取得できません")
-        return;
-    }
+    const endLat = (typeof endLoc.lat === 'function') ? endLoc.lat() : endLoc.lat;
+    const endLng = (typeof endLoc.lng === 'function') ? endLoc.lng() : endLoc.lng;
 
     const distanceToEnd = getDistanceMeters(
         currentLocation.lat, currentLocation.lng,
@@ -182,7 +180,13 @@ function handleRouteForNavigation(route) {
 
 async function handleStartNavigation() {
     await requestDeviceOrientation();
-    startStepNavigation();
+
+    if (window.lastDirectionsResponse && window.lastDirectionsResponse.routes[0].legs[0]) {
+        startStepNavigation(window.lastDirectionsResponse.routes[0].legs[0]);
+    } else {
+        logMessage("開始できる経路が見つかりません");
+    }
+    
 }
 
 /**
