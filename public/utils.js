@@ -1,6 +1,6 @@
 //定数
 const THRESHOLD_M = 70;
-const ROUND_DECIMALS = 4;
+const ROUND_DECIMALS = 5;
 
 //===ユーティリティ関数===
 /**

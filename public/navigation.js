@@ -194,9 +194,10 @@ async function handleStartNavigation() {
  */
 function updateRemainingDistance(currentLocation) {
     if (!navigationActive) return;
-    if (currentStepIndex >= steps.length) return;
+    if (!steps || currentStepIndex >= steps.length) return;
 
     const step = steps[currentStepIndex];
+
     if (!step || !step.end_location) return;
 
     let endLat, endLng;
@@ -209,7 +210,7 @@ function updateRemainingDistance(currentLocation) {
         endLng = step.end_location.lng;
     }
 
-    const updateRemainingMeters = getDIstanceMeters(
+    const remainingMeters = getDistanceMeters(
         currentLocation.lat,
         currentLocation.lng,
         endLat,
