@@ -1,5 +1,3 @@
-//const { type } = require("express/lib/response");
-
 const { raw } = require("express");
 
  window.googleMapsReady = false;
