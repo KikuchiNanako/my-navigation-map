@@ -1,5 +1,3 @@
-const { raw } = require("express");
-
  window.googleMapsReady = false;
  
  async function initMap() {
@@ -169,7 +167,7 @@ async function drawMap() {
         }
     }
 
-    const rawPonints = window.frequentPoints || [];
+    const rawPoints = window.frequentPoints || [];
     const pts = window.allPoints || [];
     const fpts = mergeNearbyPoints(rawPonints, 20);
 
