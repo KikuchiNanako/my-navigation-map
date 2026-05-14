@@ -1,5 +1,7 @@
 //const { type } = require("express/lib/response");
 
+const { raw } = require("express");
+
  window.googleMapsReady = false;
  
  async function initMap() {
@@ -126,6 +128,38 @@
 
  }
 
+ /**
+  * 近い頻出点を統合する
+  * @param {Array} points
+  * @param {number} threshold 距離(m)
+  * @returns {Array}
+  */
+ function mergeNearbyPoints(points, threshold = 20) {
+    const merged = [];
+
+    points.forEach(p => {
+        const existing = merged.find(m => {
+            const dist = getDistanceMeters(
+                p.lat_r,
+                p.lon_r,
+                m.lat_r,
+                m.lon_r
+            );
+
+            return dist < threshold;
+        });
+
+        if (!existing) {
+            merged.push({
+                lat_r: p.lat_r,
+                lon_r: p.lon_r
+            });
+        }
+    });
+
+    return merged;
+}
+
 async function drawMap() {
     if (typeof map === 'undefined' || !map) {
         if (window.map) {
@@ -137,8 +171,9 @@ async function drawMap() {
         }
     }
 
+    const rawPonints = window.frequentPoints || [];
     const pts = window.allPoints || [];
-    const fpts = window.frequentPoints || [];
+    const fpts = mergeNearbyPoints(rawPonints, 20);
 
     if (pts.length === 0 && fpts.length === 0) {
         logMessage("可視化エラー：描画するデータがありません");
@@ -165,10 +200,10 @@ async function drawMap() {
         fpts.forEach(p => {
             const circle = new google.maps.Circle({
             strokeColor: "#ff0000",
-            strokeOpacity: 0.3,
+            strokeOpacity: 0,
             strokeWeight: 1,
             fillColor: "#ff0000",
-            fillOpacity: 0.15,
+            fillOpacity: 0.05,
             map: map,
             center: { lat: p.lat_r, lng: p.lon_r},
             radius: THRESHOLD_M,
