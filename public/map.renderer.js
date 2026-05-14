@@ -169,7 +169,7 @@ async function drawMap() {
 
     const rawPoints = window.frequentPoints || [];
     const pts = window.allPoints || [];
-    const fpts = mergeNearbyPoints(rawPonints, 20);
+    const fpts = mergeNearbyPoints(rawPoints, 20);
 
     if (pts.length === 0 && fpts.length === 0) {
         logMessage("可視化エラー：描画するデータがありません");
