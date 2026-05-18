@@ -380,7 +380,7 @@ function animateMarker() {
         while (diff > 180) diff -= 360;
 
         const headingRatio = 0.15;
-        currentDisplayedHeading = diff * headingRatio;
+        currentDisplayedHeading += diff * headingRatio;
 
         if (typeof currentDisplayedHeading === 'number' && !isNaN(currentDisplayedHeading)) {
             const icon = currentLocationMarker.getIcon();
@@ -392,8 +392,6 @@ function animateMarker() {
             if (window.map && typeof window.map.setHeading === 'function' && navigationActive && !isUserInteracting) {
                 window.map.moveCamera({
                     center: newPos,
-                    heading: currentDisplayedHeading,
-                    tilt: 0,
                     zoom: 16
                 });
             }
@@ -430,7 +428,7 @@ function animateMarker() {
     if (!currentLocationMarker) {
         currentDisplayedLat = targetLat;
         currentDisplayedLng = targetLng;
-        currentDisplayedHeading = heading == 0;
+        currentDisplayedHeading = validHeading;
 
         currentLocationMarker = new google.maps.Marker({
             position: currentLatLon,
