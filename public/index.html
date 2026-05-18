@@ -119,6 +119,13 @@
             var interactionTimeout = null;
             var destinationMarker = null;
             var lastHeading = 0;
+            var markerAnimationId = null;
+            var taegetLat = null;
+            var taegetLng = null;
+            var targetHeading = null;
+            var currentDisplayedLat = null;
+            var currentDisplayedLng = null;
+            var currentDisplayedHeaging = 0;
 
             async function loadGoogleMaps() {
                 try {

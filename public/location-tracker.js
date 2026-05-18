@@ -348,6 +348,58 @@ async function onPositionUpdate(position) {
     }
 }
 
+/**
+ * 位置と向きを毎フレーム滑らかに近づけるアニメーションループ
+ */
+function animateMarker() {
+    if (!currentLocationMarker || targetLat === null || targetLng === null) {
+        markerAnimationId = null;
+        return;
+    }
+
+    //初回実行時の初期化
+    if (currentDisplayedLat === null) currentDisplayedLat = targetLat;
+    if (currentDisplayedLng === null) currentDisplayedLng = targetLng;
+
+    //位置の補完（線形補完: Lerp）
+    const posRatio = 0.1;
+    currentDisplayedLat += (targetLat - currentDisplayedLat) * posRatio;
+    currentDisplayedLng += (targetLng - currentDisplayedLng) * posRatio;
+
+    const newPos = new google.maps.LatLng(currentDisplayedLat, currentDisplayedLng);
+    currentLocationMarker.setPosition(newPos);
+
+    //向きの補完
+    if (targetHeading !== null) {
+        let diff = targetHeading - currentDisplayedHeading;
+        while (diff < -180) diff += 360;
+        while (diff > 180) diff -= 360;
+
+        const headingRatio = 0.15;
+        currentDisplayedHeading = diff * headingRatio;
+
+        const icon = currentLocationMarker.getIcon();
+        if (icon) {
+            icon.rotation = currentDisplayedHeading;
+            currentLocationMarker.setIcon(icon);
+        }
+
+        if (window.map && typeof window.map.setHeading === 'function' && navigationActive && !isUserInteracting) {
+            window.map.moveCamera({
+                center: newPos,
+                heading: currentDisplayedHeading,
+                tilt: 0
+            });
+        }
+    } else {
+        if (window.map && navigationActive && !isUserInteracting) {
+            window.map.setCenter(newPos);
+        }
+    }
+
+    markerAnimationId = requestAnimationFrame(animateMarker);
+}
+
  /**
   * 現在地マーカーを更新し、向きを反映させる
   * @param {object} currentLatLon -{lat, lng}
@@ -355,14 +407,20 @@ async function onPositionUpdate(position) {
   * @param {boolean} isOutside - 経路外かどうか
   */
  function updateCurrentLocationMarker(currentLatLon, heading = 0, isOutside = false) {
-    //if (navigationActive) {
-      //map.panTo(currentLatLon);
-    //}
+    if (!map) return;
+
+    targetLat = currentLatLon.lat;
+    targetLng = currentLatLon.lng;
+    targetHeading = heading;
     
 
     const fillColor = isOutside ? '#FF0000' : "#4285F4";
 
     if (!currentLocationMarker) {
+        currentDisplayedLat = targetLat;
+        currentDisplayedLng = targetLng;
+        currentDisplayedHeading = heading == 0;
+
         currentLocationMarker = new google.maps.Marker({
             position: currentLatLon,
             map: map,
@@ -370,23 +428,29 @@ async function onPositionUpdate(position) {
             icon: {
                 path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
                 scale: 6,
-                fillColor: fillColor,
+                fillColor: "#4285F4",
                 fillOpacity: 1,
+                strokeColor: "#FFFFFF",
                 strokeWeight: 2,
-                strokeColor: "white",
-                rotation: heading
+                rotation: currentDisplayedHeading,
+                anchor: new google.maps.Point(0, 0)
             }
         });
         logMessage("現在地マーカーを作成しました");
-    } else {
-        currentLocationMarker.setPosition(currentLatLon);
+    } //else {
+        //currentLocationMarker.setPosition(currentLatLon);
 
-        const icon = currentLocationMarker.getIcon();
-        icon.fillColor = fillColor;
-        icon.rotation = heading;
-        currentLocationMarker.setIcon(icon);
-    }
+        //const icon = currentLocationMarker.getIcon();
+        //icon.fillColor = fillColor;
+        //icon.rotation = heading;
+        //currentLocationMarker.setIcon(icon);
 
+    //アニメーションが動いていなければ起動
+    if (!markerAnimationId) {
+        markerAnimationId = requestAnimationFrame(animateMarker);
+    }    
+    
+    /*
     if (navigationActive && !isUserInteracting) {
         map.moveCamera({
             center: currentLatLon,
@@ -395,6 +459,7 @@ async function onPositionUpdate(position) {
             zoom: 17
         });
     }
+    */
  }
 
 /**
