@@ -361,6 +361,10 @@ function animateMarker() {
     if (currentDisplayedLat === null) currentDisplayedLat = targetLat;
     if (currentDisplayedLng === null) currentDisplayedLng = targetLng;
 
+    if (currentDisplayedHeading === null || isNaN(currentDisplayedHeading)) {
+        currentDisplayedHeading = (targetHeading !== null && !isNan(targetHeading)) ? targetHeading : 0;
+    }
+
     //位置の補完（線形補完: Lerp）
     const posRatio = 0.1;
     currentDisplayedLat += (targetLat - currentDisplayedLat) * posRatio;
@@ -370,7 +374,7 @@ function animateMarker() {
     currentLocationMarker.setPosition(newPos);
 
     //向きの補完
-    if (targetHeading !== null) {
+    if (targetHeading !== null && !isNan(targetHeading)) {
         let diff = targetHeading - currentDisplayedHeading;
         while (diff < -180) diff += 360;
         while (diff > 180) diff -= 360;
@@ -378,18 +382,20 @@ function animateMarker() {
         const headingRatio = 0.15;
         currentDisplayedHeading = diff * headingRatio;
 
-        const icon = currentLocationMarker.getIcon();
-        if (icon) {
-            icon.rotation = currentDisplayedHeading;
-            currentLocationMarker.setIcon(icon);
-        }
+        if (!isNan(currentDisplayedHeading)) {
+            const icon = currentLocationMarker.getIcon();
+            if (icon) {
+                icon.rotation = currentDisplayedHeading;
+                currentLocationMarker.setIcon(icon);
+            }       
 
-        if (window.map && typeof window.map.setHeading === 'function' && navigationActive && !isUserInteracting) {
-            window.map.moveCamera({
-                center: newPos,
-                heading: currentDisplayedHeading,
-                tilt: 0
-            });
+            if (window.map && typeof window.map.setHeading === 'function' && navigationActive && !isUserInteracting) {
+                window.map.moveCamera({
+                    center: newPos,
+                    heading: currentDisplayedHeading,
+                    tilt: 0
+                });
+            }
         }
     } else {
         if (window.map && navigationActive && !isUserInteracting) {
@@ -411,7 +417,7 @@ function animateMarker() {
 
     targetLat = currentLatLon.lat;
     targetLng = currentLatLon.lng;
-    targetHeading = heading;
+    targetHeading = (heading !== null && !isNan(heading)) ? heading : null;
     
 
     const fillColor = isOutside ? '#FF0000' : "#4285F4";
