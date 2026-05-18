@@ -18,7 +18,7 @@
 
     map = new google.maps.Map(document.getElementById("map"), {
         center: initialLocation,
-        zoom: 17,
+        zoom: 15,
         gestureHandling: "greedy",
         disableDefaultUI: false,
         mapId: "3d7b65239e3531fb68add898",
@@ -179,7 +179,7 @@ async function drawMap() {
     const currentpos = await getHybridLocation();
     if (currentpos) {
         map.setCenter(currentpos);
-        map.setZoom(17);
+        map.setZoom(15);
     } else if (pts.length > 0) {
         const avgLat = pts.reduce((sum, p) => sum + p.lat, 0) / pts.length;
         const avgLon = pts.reduce((sum, p) => sum + p.lon, 0) / pts.length;

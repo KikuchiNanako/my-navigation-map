@@ -73,42 +73,6 @@ function showCurrentStep() {
         });
     }
 
-    /*/
-    let startLoc = step.start_location;
-    let endLoc = step.end_location;
-
-    const toLatLngObj = (loc) => {
-        if (!loc) return null;
-        let lat, lng;
-        if (typeof loc.lat === 'function') lat = loc.lat();
-        else if (typeof loc.lat === "number") lat = loc.lat;
-
-
-        if (typeof loc.lng === 'function') lng = loc.lng();
-        else if (typeof loc.lng === 'number') lng = loc.lng;
-        
-        if (typeof lat === 'number' && typeof lng === 'number') return { lat, lng };
-        return null;
-    };
-
-    startLoc = toLatLngObj(startLoc);
-    endLoc = toLatLngObj(endLoc);
-
-    const path = [];
-    if (startLoc) path.push(startLoc);
-    if (endLoc) path.push(endLoc);
-
-    if (path.length > 0) {
-        stepPolyline = new google.maps.Polyline({
-            path,
-            map,
-            strokeColor: "#3498db",
-            strokeOpacity: 0.8,
-            strokeWeight: 6
-        });
-    }
-    */
-
     const speechText = `${distance}先、${instruction}`;
     speak(speechText);
 }
