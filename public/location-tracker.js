@@ -392,7 +392,7 @@ async function onPositionUpdate(position) {
             center: currentLatLon,
             heading: heading,
             tilt: 0,
-            zoom: 19
+            zoom: 17
         });
     }
  }
@@ -440,7 +440,7 @@ function resumeAutoFollow() {
                 center: pos,
                 heading: lastHeading,
                 tilt: 0,
-                zoom: 19
+                zoom: 17
             });
         }
     }
