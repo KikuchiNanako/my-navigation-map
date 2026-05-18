@@ -397,7 +397,7 @@ function animateMarker() {
             }
         }
     } else {
-        if (window.map && navigationActive && !isUserInteracting) {
+        if (window.map && typeof window.map.moveCamera === 'function' && navigationActive && !isUserInteracting) {
             window.map.setCenter({
                 center: newPos,
                 zoom: 16
@@ -416,6 +416,8 @@ function animateMarker() {
   */
  function updateCurrentLocationMarker(currentLatLon, heading = 0, isOutside = false) {
     if (!map) return;
+
+    const validHeading = (heading !== null && typeof heading === 'number' && !isNaN(heading)) ? heading : 0;
 
     targetLat = (currentLatLon && typeof currentLatLon.lat === 'number') ? currentLatLon.lat : null;
     targetLng = (currentLatLon && typeof currentLatLon.lng === 'number') ? currentLatLon.lng: null;
