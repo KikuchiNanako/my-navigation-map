@@ -374,7 +374,7 @@ function animateMarker() {
     currentLocationMarker.setPosition(newPos);
 
     //向きの補完
-    if (targetHeading !== null && !isNan(targetHeading)) {
+    if (targetHeading !== null && !isNaN(targetHeading)) {
         let diff = targetHeading - currentDisplayedHeading;
         while (diff < -180) diff += 360;
         while (diff > 180) diff -= 360;
@@ -417,7 +417,7 @@ function animateMarker() {
 
     targetLat = currentLatLon.lat;
     targetLng = currentLatLon.lng;
-    targetHeading = (heading !== null && !isNan(heading)) ? heading : null;
+    targetHeading = (heading !== null && !isNaN(heading)) ? heading : null;
     
 
     const fillColor = isOutside ? '#FF0000' : "#4285F4";
