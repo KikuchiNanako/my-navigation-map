@@ -361,8 +361,8 @@ function animateMarker() {
     if (currentDisplayedLat === null) currentDisplayedLat = targetLat;
     if (currentDisplayedLng === null) currentDisplayedLng = targetLng;
 
-    if (currentDisplayedHeading === null || isNaN(currentDisplayedHeading)) {
-        currentDisplayedHeading = (targetHeading !== null && !isNan(targetHeading)) ? targetHeading : 0;
+    if (currentDisplayedHeading === null || typeof currentDisplayedHeading !== 'number' || isNaN(currentDisplayedHeading)) {
+        currentDisplayedHeading = (targetHeading !== null && typeof targetHeading === 'number' && !isNaN(targetHeading)) ? targetHeading : 0;
     }
 
     //位置の補完（線形補完: Lerp）
@@ -374,7 +374,7 @@ function animateMarker() {
     currentLocationMarker.setPosition(newPos);
 
     //向きの補完
-    if (targetHeading !== null && !isNaN(targetHeading)) {
+    if (targetHeading !== null && typeof targetHeading === 'number' && !isNaN(targetHeading)) {
         let diff = targetHeading - currentDisplayedHeading;
         while (diff < -180) diff += 360;
         while (diff > 180) diff -= 360;
@@ -382,7 +382,7 @@ function animateMarker() {
         const headingRatio = 0.15;
         currentDisplayedHeading = diff * headingRatio;
 
-        if (!isNan(currentDisplayedHeading)) {
+        if (typeof currentDisplayedHeading === 'number' && !isNaN(currentDisplayedHeading)) {
             const icon = currentLocationMarker.getIcon();
             if (icon) {
                 icon.rotation = currentDisplayedHeading;
@@ -393,13 +393,17 @@ function animateMarker() {
                 window.map.moveCamera({
                     center: newPos,
                     heading: currentDisplayedHeading,
-                    tilt: 0
+                    tilt: 0,
+                    zoom: 16
                 });
             }
         }
     } else {
         if (window.map && navigationActive && !isUserInteracting) {
-            window.map.setCenter(newPos);
+            window.map.setCenter({
+                center: newPos,
+                zoom: 16
+            });
         }
     }
 
@@ -415,12 +419,13 @@ function animateMarker() {
  function updateCurrentLocationMarker(currentLatLon, heading = 0, isOutside = false) {
     if (!map) return;
 
-    targetLat = currentLatLon.lat;
-    targetLng = currentLatLon.lng;
+    targetLat = (currentLatLon && typeof currentLatLon.lat === 'number') ? currentLatLon.lat : null;
+    targetLng = (currentLatLon && typeof currentLatLon.lng === 'number') ? currentLatLon.lng: null;
     targetHeading = (heading !== null && !isNaN(heading)) ? heading : null;
     
-
-    const fillColor = isOutside ? '#FF0000' : "#4285F4";
+    if (targetLat === null || targetLng === null || isNaN(targetLat) || isNaN(targetLng)) {
+        return;
+    }
 
     if (!currentLocationMarker) {
         currentDisplayedLat = targetLat;
