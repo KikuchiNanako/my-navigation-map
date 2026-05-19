@@ -169,8 +169,8 @@ async function getHybridLocation() {
                     //上部のナビパネルに表示
                     if (typeof updateNavDisplay === 'function') {
                         updateNavDisplay(
-                            `目的地: ${destinationPlace}`,
-                            `総距離 ${distanceText} / 所要時間: ${durationText}`,
+                            `<span style="font-size: 24px; color: #ffffff; font-weight: bold; display: block; margin-bottom: 5px;">目的地: ${destinationPlace}</span>`,
+                            `<span style="font-size: 18px; color: #ffffff; font-weight: bold; display: block;">総距離 ${distanceText} / 所要時間: ${durationText}</span>`,
                             "#2c3e50"
                         );
                     }

@@ -122,7 +122,7 @@ function updateNavDisplay(instruction, distance = "", bgColor = "#333") {
       insText.innerHTML = instruction;
    }
    if (distText) {
-      distText.innerText = distance;
+      distText.innerHTML = distance;
    }
 }
 
