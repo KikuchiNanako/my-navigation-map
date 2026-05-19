@@ -158,7 +158,7 @@ async function getHybridLocation() {
 
         //グローバルに保存されてるDirectionsレスポンスから所要時間と距離を取得して表示
         setTimeout(() => {
-            if (window.lastDirectionsResponse && window.lastDirectionsResponse.routes && window.lastDirectionsResponse.routed.length > 0) {
+            if (window.lastDirectionsResponse && window.lastDirectionsResponse.routes && window.lastDirectionsResponse.routes.length > 0) {
                 const route = window.lastDirectionsResponse.routes[0];
                 if (route.legs && route.legs.length > 0) {
                     const leg = route.legs[0];
