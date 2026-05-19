@@ -151,9 +151,34 @@ async function getHybridLocation() {
 
         logMessage(`デバッグ：現在地取得成功 - 緯度： ${originLatLon.lat.toFixed(5)}, 経度： ${originLatLon.lng.toFixed(5)}`);
 
+        //ルートを計算して描画
         displayRoute(originLatLon, destinationPlace);
 
         logMessage("ルート描画が完了しました");
+
+        //グローバルに保存されてるDirectionsレスポンスから所要時間と距離を取得して表示
+        setTimeout(() => {
+            if (window.lastDirectionsResponse && window.lastDirectionsResponse.routes && window.lastDirectionsResponse.routed.lenght > 0) {
+                const route = window.lastDirectionsResponse.routes[0];
+                if (route.legs && route.legs.length > 0) {
+                    const leg = route.legs[0];
+                    const distanceText = leg.distance.text;
+                    const durationText = leg.duration.text;
+                    logMessage(`ルート情報取得成功`);
+
+                    //上部のナビパネルに表示
+                    if (typeof updateNavDisplay === 'function') {
+                        updateNavDisplay(
+                            `目的地: ${destinationPlace}`,
+                            `総距離 ${distanceText} / 所要時間: ${durationText}`,
+                            "#2c3e50"
+                        );
+                    }
+                }
+            } else {
+                console.warn("所要時間表示用のルートデータがまだ準備できていません");
+            }
+        }, 800)
 
         const isOutsideInitial = isOutsideRoute(originLatLon.lat, originLatLon.lng);
         updateCurrentLocationMarker(originLatLon, 0, false);
