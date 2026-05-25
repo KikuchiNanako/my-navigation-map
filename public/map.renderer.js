@@ -261,8 +261,6 @@ function displayRoute(origin, destination){
         },
         (response, status) => {
             if (status === "OK" && response && response.routes && response.routes.length > 0) {
-                const route = response.routes[0];
-
                 window.lastDirectionsResponse = response;
 
                 directionsRenderer.setOptions({
@@ -271,7 +269,6 @@ function displayRoute(origin, destination){
                 });
 
                 clearAlternativePolylines();
-
                 console.log(`ルート検索成功　候補数： ${response.routes.length}個`);
 
                 renderAllRoutes(response);
@@ -305,10 +302,6 @@ function renderAllRoutes(response) {
                     strokeWeight: 6
                 });
 
-                if (typeof startStepNavigation === 'function') {
-                    startStepNavigation(leg);
-                }
-
                 console.log("出発地：", leg.start_address);
                 console.log("目的地：", leg.end_address);
                 console.log("距離：", leg.distance.text);
@@ -329,15 +322,8 @@ function renderAllRoutes(response) {
 
                 const selectedRoute = response.routes.splice(index, 1)[0];
                 response.routes.unshift(selectedRoute);
-
-                const nextLeg = selectedRoute.legs && selectedRoute.legs[0];
-                if (nextLeg) {
-                    window.currentSelectedRouteLeg = nextLeg;
-                }
                 
                 clearAlternativePolylines();
-                if (typeof clearAlternativePolylines === 'function') clearRoutePolylines();
-
                 renderAllRoutes(response);
             });
 
