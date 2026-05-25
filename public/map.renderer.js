@@ -255,7 +255,7 @@ function displayRoute(origin, destination){
                     */
                 });
 
-                clearALternativePolylines();
+                clearAlternativePolylines();
 
                 console.log(`ルート検索成功　候補数： ${response.routes.length}個`);
 
