@@ -45,7 +45,7 @@
     directionsRenderer = new google.maps.DirectionsRenderer({
         map: map,
         suppressMarkers: true,
-        preservePolylines: true
+        suppressPolylines: true
     });
 
     map.addListener("click", async (e) => {
