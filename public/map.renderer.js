@@ -330,6 +330,11 @@ function renderAllRoutes(response) {
                 const selectedRoute = response.routes.splice(index, 1)[0];
                 response.routes.unshift(selectedRoute);
 
+                const nextLeg = selectedRoute.legs && selectedRoute.legs[0];
+                if (nextLeg) {
+                    window.currentSelectedRouteLeg = nextLeg;
+                }
+                
                 clearAlternativePolylines();
                 if (typeof clearAlternativePolylines === 'function') clearRoutePolylines();
 
