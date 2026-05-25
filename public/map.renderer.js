@@ -1,4 +1,4 @@
-const { application } = require("express");
+//const { application } = require("express");
 
  window.googleMapsReady = false;
  
@@ -292,8 +292,12 @@ function displayRoute(origin, destination){
 function renderAllRoutes(response) {
     response.routes.forEach((route, index) => {
         if (index === 0) {
+
             const leg = route.legs && route.legs[0];
             if (leg) {
+                window.currentSelectedRouteLeg = leg;
+
+
                 mainRoutePolyline = new google.maps.Polyline({
                     path: route.overview_path,
                     map: map,
@@ -312,7 +316,7 @@ function renderAllRoutes(response) {
                 console.log("所要時間：", leg.duration.text);
             }
         } else {
-            const alternativePolylines = new google.maps.Polyline({
+            const singlePolyline = new google.maps.Polyline({
                 path: route.overview_path,
                 map: map,
                 strokeColor: "#a0a0a0",
@@ -321,19 +325,19 @@ function renderAllRoutes(response) {
                 clickable: true
             });
 
-            google.maps.event.addListener(alternativePolylines, 'click', () => {
+            google.maps.event.addListener(singlePolyline, 'click', () => {
                 logMessage(`代替ルート（候補${index}）が選択されました。ルートを切り替えます`);
 
                 const selectedRoute = response.routes.splice(index, 1)[0];
                 response.routes.unshift(selectedRoute);
 
                 clearAlternativePolylines();
-                if (typeof clearAlternativePolylines === 'function') clearAlternativePolylines();
+                if (typeof clearAlternativePolylines === 'function') clearRoutePolylines();
 
                 renderAllRoutes(response);
             });
 
-            alternativePolylines.push(alternativePolyline);
+            alternativePolylines.push(singlePolyline);
         }
     });
 
