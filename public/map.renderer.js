@@ -234,7 +234,8 @@ function displayRoute(origin, destination){
         {
             origin: origin,
             destination: destination,
-            travelMode: google.maps.TravelMode.DRIVING
+            travelMode: google.maps.TravelMode.DRIVING,
+            provideRouteAlternatives: true
         },
         (response, status) => {
             if (status === "OK" && response && response.routes && response.routes.length > 0) {
