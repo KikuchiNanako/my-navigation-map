@@ -246,40 +246,55 @@ function displayRoute(origin, destination){
                 directionsRenderer.setOptions({
                     suppressPolylines: false,
                     suppressMarkers: true,
+                    /*
                     polylineOptions: {
                         strokeColor: "#4285F4",
                         strokeOpacity: 0.6,
-                        trokeWeight: 6
+                        strokeWeight: 6
+                    }
+                    */
+                });
+
+                clearALternativePolylines();
+
+                console.log(`ルート検索成功　候補数： ${response.routes.length}個`);
+
+                response.routes.forEach((route, index) => {
+                    if (index === 0) {
+                        const leg = route.legs && route.legs[0];
+                        if (leg) {
+                            startStepNavigation(leg);
+                        }
+                    } else {
+                        const clearALternativePolylines = new google.Polyline({
+                            path: route.overview_path,
+                            map: map,
+                            strokeColor: "#a0a0a0",
+                            strokeOpacity: 0.5,
+                            strokeWeight: 5,
+                            clickable: false
+                        });
+
+                        alternativePolylines.push(alternativePolylines);
                     }
                 });
 
-                console.log("===ルート確認用===");
-                console.log(response);
-
-                const leg = route.legs && route.legs[0];
+                const mainRoute = response.routes[0];
+                const leg = mainRoute.legs && mainRoute.legs[0];
                 if (!leg) {
                     console.warm("ルートは取得できましたが、legsがありません");
-                    return;
+                    console.log("出発地:", leg.start_address);
+                    console.log("目的地:", leg.end_address);
+                    console.log("距離:", leg.distance.text);
+                    console.log("所要時間:", leg.duration.text);
                 }
 
-                console.log("出発地:", leg.start_address);
-                console.log("目的地:", leg.end_address);
-                console.log("距離:", leg.distance.text);
-                console.log("所要時間:", leg.duration.text);
-                console.log("ステップ数:", leg.steps.length);
-
-                leg.steps.forEach((step, idx) => {
-                    console.log(
-                        `${idx + 1}: ${step.instructions.replace(/<[^>]*>/g, "")} (${step.distance.text}, ${step.duration.text})`
-                    );
-                });
-
-                directionsRenderer.setDirections(response);
-
-                logMessage("Google Maps ルートを表示しました");
+                logMessage(`ルートを ${response.routes.length}件表示しました`);
+                
             } else {
                 logMessage(`ルート検索に失敗しました: ${status}`);
-                directionsRenderer.setDirections({ routes: [] });
+                clearAlternativePolylines();
+                if (typeof clearRoutePolylines === 'function') clearRoutePolylines();
             }
         }
     );
