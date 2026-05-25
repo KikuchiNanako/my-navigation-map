@@ -243,7 +243,7 @@ function displayRoute(origin, destination){
                 window.lastDirectionsResponse = response;
 
                 directionsRenderer.setOptions({
-                    suppressPolylines: true,
+                    suppressPolylines: false,
                     suppressMarkers: true,
                     polylineOptions: {
                         strokeColor: "#4285F4",
