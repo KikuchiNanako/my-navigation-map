@@ -51,9 +51,6 @@
     map.addListener("click", async (e) => {
         const geocoder = new google.maps.Geocoder();
 
-        //const lat = e.latLng.lat();
-        //const lng = e.latLng.lng();
-
         geocoder.geocode({ location: e.latLng }, (results, status) => {
             if (status === "OK" && results[0]) {
                 const address = results[0].formatted_address;

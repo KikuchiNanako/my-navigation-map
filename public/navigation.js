@@ -90,29 +90,8 @@ function showCurrentStep() {
     map.setZoom(15);
 }
 
-    /*
-    logMessage(`案内: ${instruction.replace(/<[^>]*>/g, "")}`);
-    updateNavDisplay(instruction, `あと ${distance}`, "#333");
+   
 
-    if (stepPolyline) {
-        stepPolyline.setMap(null);
-    }
-
-    if (step.path) {
-        stepPolyline = new google.maps.Polyline({
-            path: step.path,
-            map: map,
-            strokeColor: "#FF0000",
-            strokeOpacity: 0.9,
-            strokeWeight: 8,
-            zIndex: 100
-        });
-    }
-
-    const speechText = `${distance}先、${instruction}`;
-    speak(speechText);
-}
-*/
 
 function toLatLngObj(loc) {
     if (!loc) return null;
@@ -209,20 +188,6 @@ function handleRouteForNavigation(route) {
     const leg = route.legs[0];
     startStepNavigation(leg);
 }
-
-/*
-async function handleStartNavigation() {
-    await requestDeviceOrientation();
-
-    if (window.lastDirectionsResponse && window.lastDirectionsResponse.routes[0].legs[0]) {
-        startStepNavigation(window.lastDirectionsResponse.routes[0].legs[0]);
-    } else {
-        logMessage("開始できる経路が見つかりません");
-    }
-    
-}
-*/
-
 
 /**
  * 現在地から現在ステップ終点までの距離を表示更新
