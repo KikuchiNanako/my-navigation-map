@@ -50,6 +50,8 @@
         suppressPolylines: true
     });
 
+    updateCurrentLocationMarker(initialLocation, 0, false);
+
     map.addListener("click", async (e) => {
         const geocoder = new google.maps.Geocoder();
 
@@ -241,13 +243,13 @@ function displayRoute(origin, destination){
                 window.lastDirectionsResponse = response;
 
                 directionsRenderer.setOptions({
-                    suppressPolylines: false,
-                    suppressMarkers: false,
-                    polylineOptions: {
-                        strokeColor: "#4285F4",
-                        strokeOpacity: 0.6,
-                        strokeWeight: 6
-                    }
+                    suppressPolylines: true,
+                    suppressMarkers: true,
+                    //polylineOptions: {
+                       // strokeColor: "#4285F4",
+                        //strokeOpacity: 0.6,
+                        //strokeWeight: 6
+                    //}
                 });
 
                 console.log("===ルート確認用===");
