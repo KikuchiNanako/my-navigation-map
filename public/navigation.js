@@ -1,12 +1,11 @@
 let currentStepIndex = 0;
 let steps = [];
-let stepPolyline = null;
 let navigationActive = false;
+let routePolylines = [];
 
 /**
  * 経路ナビを開始・再開する
  * @param {object} leg - route.legs[0]
- * @param {boolean} resume -再開かどうか
  */
 function startStepNavigation(leg, resume = false) {
     if (!leg || !leg.steps) {
@@ -15,25 +14,40 @@ function startStepNavigation(leg, resume = false) {
     }
     
     steps = leg.steps;
-
-    if (!resume) {
-        currentStepIndex = 0;
-        logMessage("ナビを最初から開始します");
-    } else {
-        logMessage(`ナビをステップ ${currentStepIndex + 1} から再開します`);
-    }
-    
+    surrentStepIndex = 0;
     navigationActive = true;
 
-    if (window.lastDirectionsResponse && window.lastDirectionsResponse.routes && window.lastDirectionsResponse.routes.length > 0) {
+    clearRoutePolylines();
+
+    drawAllRouteSteps();
+
+    if(window.lastDirectionsResponse && window.lastDirectionsResponse.routes && window.lastDirectionsResponse.routes.length > 0) {
         const bounds = window.lastDirectionsResponse.routes[0].bounds;
         if (bounds && typeof map.fitBounds === 'function') map.fitBounds(bounds);
     } else {
-        console.warn("DirectionsAPIレスポンスからboundsが取れませんでした");
-
+        console.marn("DirectionsAPIレスポンスからboundsが取れませんでした");
     }
-    logMessage(`全 ${steps.length} ステップ中、現在 ${currentStepIndex + 1} ステップ目`);
+    logMessage(`ナビ開始： ${steps.length}ステップ`);
     showCurrentStep();
+}
+
+/**
+ * ルートの全てのステップを最初に青い線で描画する
+ */
+function drawAllRouteSteps() {
+    steps.forEach((step, index) => {
+        const path = step.path || [toLatLngObj(step.start_location), toLatLngObj(step.end_location)];
+
+        const polyline = new google.maps.Polyline({
+            path: path,
+            map: map,
+            strokeColor: "#0000FF",
+            strokeOpacity: 0.7,
+            strokeWeight: 6
+        });
+
+        routePolylines.push(polyline);
+    });
 }
 
 /**
@@ -41,9 +55,6 @@ function startStepNavigation(leg, resume = false) {
  */
 function showCurrentStep() {
     if (!navigationActive || currentStepIndex >= steps.length) {
-        const finishMsg = "目的地周辺に到着しました。案内を終了します。";
-        logMessage(finishMsg);
-        speak(finishMsg);
         logMessage("ナビ終了");
         navigationActive = false;
         return;
@@ -51,10 +62,35 @@ function showCurrentStep() {
     
     const step = steps[currentStepIndex];
     const instruction = (step.instructions || "").replace(/<[^>]*>/g, "");
-
     const distance = step.distance.text;
-    //const duration = step.duration.text;
+    const duration = step.duration.text;
 
+    logMessage(`次の案内： ${instruction} (${distance}, ${duration})`);
+
+    routePolylines.forEach((polyline, index) => {
+        if (index < currentStepIndex) {
+            polyline.setOptions({
+                strokeColor: "#888888",
+                strokeOpacity: 0.4,
+                strokeWeight: 4
+            });
+        } else {
+            polyline.setOptions({
+                strokeColor: "#0000FF",
+                strokeOpacity: 0.7,
+                strokeWeight: 6
+            });
+        }
+    });
+
+    let startLoc = toLatLngObj(step.start_location);
+    if (startLoc) {
+        map.panTo(startLoc);
+    }
+    map.setZoom(15);
+}
+
+    /*
     logMessage(`案内: ${instruction.replace(/<[^>]*>/g, "")}`);
     updateNavDisplay(instruction, `あと ${distance}`, "#333");
 
@@ -76,13 +112,26 @@ function showCurrentStep() {
     const speechText = `${distance}先、${instruction}`;
     speak(speechText);
 }
+*/
+
+function toLatLngObj(loc) {
+    if (!loc) return null;
+    let lat, lng;
+    if (typeof loc.lat === 'function') lat = loc.lat();
+    else if (typeof loc.lat === "number") lat = loc.lat;
+
+    if (typeof loc.lng === 'function') lng = loc.lng();
+    else if (typeof loc.lng === 'number') lng = loc.lng;
+
+    if (typeof lat === 'number' && typeof lng === 'number') return {lat, lng};
+    return null;
+}
 
 /**
  * 現在地が現在のステップの終点に近づいたかチェックし、進行を促す
- * @param {{lat: number, lng: number}} currentLocation　現在地の座標
  */
 function checkStepProgression(currentLocation) {
-    if (!navigationActive || !steps || steps.length === 0) {
+    if (!steps || steps.length === 0) {
         logMessage("ナビゲーションエラー：ステップ情報がありません");
         return;
     }
@@ -98,11 +147,25 @@ function checkStepProgression(currentLocation) {
     } 
 
     const step = steps[currentStepIndex];
-    const endLoc = step.end_location;
+    if (!step || !step.end_location) {
+        logMessage("ステップ終点の位置が取得できません");
+        return;
+    }
 
-    const endLat = (typeof endLoc.lat === 'function') ? endLoc.lat() : endLoc.lat;
-    const endLng = (typeof endLoc.lng === 'function') ? endLoc.lng() : endLoc.lng;
+    let endLat, endLng;
+    if (typeof step.end_location.lat === 'function') {
+        endLat = step.end_location.lat();
+        endLng = step.end_location.lng();
+    } else {
+        endLat = step.end_location.lat;
+        endLng = step.end_location.lng;
+    }
 
+    if (typeof endLat !== "number" || typeof endLng !== "number") {
+        logMessage("ステップ終点の位置が取得できません");
+        return;
+    }
+    
     const distanceToEnd = getDistanceMeters(
         currentLocation.lat, currentLocation.lng,
         endLat, endLng
@@ -111,7 +174,7 @@ function checkStepProgression(currentLocation) {
     const NEXT_STEP_THRESHOLD_M = 20;
 
     if (distanceToEnd > NEXT_STEP_THRESHOLD_M || currentStepIndex % 5 === 0) {
-        logMessage(`[ナビ中]ステップ　${currentStepIndex + 1} の終点まで：　${distanceToEnd.toFixed(1)} m`);
+        logMessage(`[ナビ中]ステップ ${currentStepIndex + 1} の終点まで：　${distanceToEnd.toFixed(1)} m`);
     }
 
     if (distanceToEnd < NEXT_STEP_THRESHOLD_M) {
@@ -142,6 +205,7 @@ function handleRouteForNavigation(route) {
     startStepNavigation(leg);
 }
 
+/*
 async function handleStartNavigation() {
     await requestDeviceOrientation();
 
@@ -152,6 +216,8 @@ async function handleStartNavigation() {
     }
     
 }
+*/
+
 
 /**
  * 現在地から現在ステップ終点までの距離を表示更新
