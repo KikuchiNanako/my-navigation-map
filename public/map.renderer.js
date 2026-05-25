@@ -320,8 +320,11 @@ function renderAllRoutes(response) {
             google.maps.event.addListener(singlePolyline, 'click', () => {
                 logMessage(`代替ルート（候補${index}）が選択されました。ルートを切り替えます`);
 
-                const selectedRoute = response.routes.splice(index, 1)[0];
-                response.routes.unshift(selectedRoute);
+                const currentRoutes = [...response.routes];
+                const selectedRoute = currentRoutes.splice(index, 1)[0];
+                currentRoutes.unshift(selectedRoute);
+
+                response.routes = currentRoutes;
                 
                 clearAlternativePolylines();
                 renderAllRoutes(response);

@@ -229,7 +229,8 @@ async function startNavigation() {
     }
 
     const route = response.routes[0];
-    if (!route.legs || route.legs.length === 0) {
+    const currentLeg = route.legs && route.legs[0];
+    if (!currentLeg || !currentLeg.steps) {
         logMessage("ナビ開始エラー：ルートにレッグ情報がありません");
         return;
     }
@@ -240,7 +241,7 @@ async function startNavigation() {
     navigationActive = true;
     //logMessage("ナビゲーションを開始します")
 
-    startStepNavigation(route.legs[0], isResuming);
+    startStepNavigation(currentLeg, isResuming);
 
     if (watchId === null) {
         watchId = navigator.geolocation.watchPosition(
