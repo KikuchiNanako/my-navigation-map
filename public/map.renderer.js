@@ -1,5 +1,3 @@
-//const { application } = require("express");
-
  window.googleMapsReady = false;
  
  async function initMap() {
@@ -226,126 +224,62 @@ function clearFrequentCircle() {
     }
 }
 
-let alternativePolylines = [];
-let mainRoutePolyline = null;
-
-/**
- * 描画されてるすべての経路ポリラインをマップから消去する
- */
-function clearAlternativePolylines() {
-    if (alternativePolylines && alternativePolylines.length > 0) {
-        alternativePolylines.forEach(p => {
-            if (p && typeof p.setMap === 'function') p.setMap(null);
-        });
-    }
-    alternativePolylines = [];
-
-    if (mainRoutePolyline) {
-        mainRoutePolyline.setMap(null);
-        mainRoutePolyline = null;
-    }
-}
-
 /**
  * 
- * @param {{lat: number, lng: number}} origin 
- * @param {{lat: number, lng: number}} destination 
+ * @parm {{lat: number, lng: number}} origin 現在地
+ * @parm {{lat: number, lng: number}} destination 目的地
  */
 function displayRoute(origin, destination){
     directionsService.route(
         {
             origin: origin,
             destination: destination,
-            travelMode: google.maps.TravelMode.DRIVING,
-            provideRouteAlternatives: true
+            travelMode: google.maps.TravelMode.DRIVING
         },
         (response, status) => {
-            window.lastDirectionsResponse = null;
+            if (status === "OK" && response && response.routes && response.routes.length > 0) {
+                const route = response.routes[0];
 
-            if (status !== "OK" || !response || response.routes || response.routes.length === 0) {
-                logMessage(`ルート検索に失敗しました： ${status}`);
-                directionsRenderer.setDirections({ routes: [] });
-                window.lastDirectionsResponse = null;
-                return;                 
-            }
+                window.lastDirectionsResponse = response;
 
-            window.lastDirectionsResponse = response;
-
-            console.log("===ルート確認用===");
-            console.log(response);
-
-            directionsRenderer.setDirections(response);
-
-            renderAllRoutes(response);
-        }
-    );
-}
-
-/**
- * レスポンスデータを基に、メインの青い全体像とだいたいのグレーの候補線を配置・描画する関数
- * @param {object} response
- */
-function renderAllRoutes(response) {
-    response.routes.forEach((route, index) => {
-        if (index === 0) {
-
-            const leg = route.legs && route.legs[0];
-            if (leg) {
-                window.currentSelectedRouteLeg = leg;
-
-                mainRoutePolyline = new google.maps.Polyline({
-                    path: route.overview_path,
-                    map: map,
-                    strokeColor: "#4285F4",
-                    strokeOpacity: 0.8,
-                    strokeWeight: 6
+                directionsRenderer.setOptions({
+                    suppressPolylines: false,
+                    suppressMarkers: true,
+                    polylineOptions: {
+                        strokeColor: "#4285F4",
+                        strokeOpacity: 0.6,
+                        trokeWeight: 6
+                    }
                 });
 
-                console.log("出発地：", leg.start_address);
-                console.log("目的地：", leg.end_address);
-                console.log("距離：", leg.distance.text);
-                console.log("所要時間：", leg.duration.text);
+                console.log("===ルート確認用===");
+                console.log(response);
 
-                logMessage(`GoogleMapsルート表示完了 (${leg.steps.length}ステップ)`);
+                const leg = route.legs && route.legs[0];
+                if (!leg) {
+                    console.warm("ルートは取得できましたが、legsがありません");
+                    return;
+                }
+
+                console.log("出発地:", leg.start_address);
+                console.log("目的地:", leg.end_address);
+                console.log("距離:", leg.distance.text);
+                console.log("所要時間:", leg.duration.text);
+                console.log("ステップ数:", leg.steps.length);
+
+                leg.steps.forEach((step, idx) => {
+                    console.log(
+                        `${idx + 1}: ${step.instructions.replace(/<[^>]*>/g, "")} (${step.distance.text}, ${step.duration.text})`
+                    );
+                });
+
+                directionsRenderer.setDirections(response);
+
+                logMessage("Google Maps ルートを表示しました");
+            } else {
+                logMessage(`ルート検索に失敗しました: ${status}`);
+                directionsRenderer.setDirections({ routes: [] });
             }
-        } else {
-            const singlePolyline = new google.maps.Polyline({
-                path: route.overview_path,
-                map: map,
-                strokeColor: "#a0a0a0",
-                strokeOpacity: 0.6,
-                strokeWeight: 6,
-                clickable: true
-            });
-
-            google.maps.event.addListener(singlePolyline, 'click', () => {
-                logMessage(`代替ルート（候補${index}）が選択されました。ルートを切り替えます`);
-
-                const currentRoutes = [...response.routes];
-                const selectedRoute = currentRoutes.splice(index, 1)[0];
-                currentRoutes.unshift(selectedRoute);
-
-                response.routes = currentRoutes;
-                window.lastDirectionsResponse = response;
-        
-                renderAllRoutes(response);
-            });
-
-            alternativePolylines.push(singlePolyline);
         }
-    });
-
-    const mainRoute = response.routes[0];
-    const leg = mainRoute.legs && mainRoute.legs[0];
-    if (leg && typeof updateNavDisplay === 'function') {
-        const destinationInput = document.getElementById('destinationInput');
-        const destinationPlace = destinationInput ? destinationInput.value.trim() : "目的地";
-
-        updateNavDisplay(
-            `<span style="font-size: 22px; colot: #ffffff; font-weight: bold; display: block; margin-bottom: 5px;">目的地； ${destinationPlace}</span>`,
-            `<span style="font-size: 18px; color: #ffffff; font-weight: bold; display: block;">総距離 ${leg.distance.text}/所要時間： ${leg.duration.text}</span>`,
-            "#2c3e50"
-        );
-    }
-    logMessage(`ルートを ${response.routes.length}件表示しました`);
+    );
 }

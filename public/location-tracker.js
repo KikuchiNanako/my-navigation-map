@@ -156,7 +156,6 @@ async function getHybridLocation() {
 
         logMessage("ルート描画が完了しました");
 
-        /*
         //グローバルに保存されてるDirectionsレスポンスから所要時間と距離を取得して表示
         setTimeout(() => {
             if (window.lastDirectionsResponse && window.lastDirectionsResponse.routes && window.lastDirectionsResponse.routes.length > 0) {
@@ -180,7 +179,6 @@ async function getHybridLocation() {
                 console.warn("所要時間表示用のルートデータがまだ準備できていません");
             }
         }, 800)
-        */
 
         //const isOutsideInitial = isOutsideRoute(originLatLon.lat, originLatLon.lng);
         updateCurrentLocationMarker(originLatLon, 0, false);
@@ -200,7 +198,6 @@ async function getHybridLocation() {
  * 現在地監視を開始し、ナビゲーションのコアロジックを駆動する
  */
 async function startNavigation() {
-
     if ( typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
         try {
             const permission = await DeviceOrientationEvent.requestPermission();
@@ -232,8 +229,7 @@ async function startNavigation() {
     }
 
     const route = response.routes[0];
-    const currentLeg = route.legs && route.legs[0];
-    if (!currentLeg || !currentLeg.steps) {
+    if (!route.legs || route.legs.length === 0) {
         logMessage("ナビ開始エラー：ルートにレッグ情報がありません");
         return;
     }
@@ -244,7 +240,7 @@ async function startNavigation() {
     navigationActive = true;
     //logMessage("ナビゲーションを開始します")
 
-    startStepNavigation(currentLeg, isResuming);
+    startStepNavigation(route.legs[0], isResuming);
 
     if (watchId === null) {
         watchId = navigator.geolocation.watchPosition(
@@ -418,16 +414,11 @@ function animateMarker() {
                 currentLocationMarker.setIcon(icon);
             }       
 
-            if (window.map && navigationActive && !isUserInteracting) {
-                if (typeof window.map.moveCamera === 'function') {
-                    window.map.moveCamera({
+            if (window.map && typeof window.map.setHeading === 'function' && navigationActive && !isUserInteracting) {
+                window.map.moveCamera({
                     center: newPos,
-                    heading: currentDisplayedHeading,
                     zoom: 16
                 });
-            } else {
-                window.map.setCenter(newPos);
-                if (typeof window.map.setHeading === 'function') window.map.setHeading(currentDisplayedHeading);
             }
         }
     } else {
@@ -440,7 +431,7 @@ function animateMarker() {
     }
 
     markerAnimationId = requestAnimationFrame(animateMarker);
-}}
+}
 
  /**
   * 現在地マーカーを更新し、向きを反映させる
