@@ -198,7 +198,7 @@ async function getHybridLocation() {
  * 現在地監視を開始し、ナビゲーションのコアロジックを駆動する
  */
 async function startNavigation() {
-    
+
     if ( typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
         try {
             const permission = await DeviceOrientationEvent.requestPermission();
@@ -419,8 +419,12 @@ function animateMarker() {
             if (window.map && typeof window.map.setHeading === 'function' && navigationActive && !isUserInteracting) {
                 window.map.moveCamera({
                     center: newPos,
+                    heading: currentDisplayedHeading,
                     zoom: 16
                 });
+            } else {
+                window.map.setCenter(newPos);
+                if (typeof window.map.setHeading === 'function') window.map.setHeading(currentDisplayedHeading);
             }
         }
     } else {
