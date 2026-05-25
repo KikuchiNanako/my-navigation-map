@@ -28,11 +28,13 @@
         titleInteractionEnabled: true
     });
 
+    /*
     new google.maps.Marker({
         position: initialLocation,
         map: map,
         title: "あなたの現在地",
     });
+    */
 
     window.map = map;
     window.googleMapsReady = true;

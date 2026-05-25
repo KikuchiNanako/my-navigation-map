@@ -180,7 +180,7 @@ async function getHybridLocation() {
             }
         }, 800)
 
-        const isOutsideInitial = isOutsideRoute(originLatLon.lat, originLatLon.lng);
+        //const isOutsideInitial = isOutsideRoute(originLatLon.lat, originLatLon.lng);
         updateCurrentLocationMarker(originLatLon, 0, false);
 
         document.getElementById('routestartButton').style.display = 'block';
