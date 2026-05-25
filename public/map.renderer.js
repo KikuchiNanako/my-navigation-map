@@ -245,11 +245,11 @@ function displayRoute(origin, destination){
                 directionsRenderer.setOptions({
                     suppressPolylines: true,
                     suppressMarkers: true,
-                    //polylineOptions: {
-                       // strokeColor: "#4285F4",
-                        //strokeOpacity: 0.6,
-                        //strokeWeight: 6
-                    //}
+                    polylineOptions: {
+                        strokeColor: "#4285F4",
+                        strokeOpacity: 0.6,
+                        trokeWeight: 6
+                    }
                 });
 
                 console.log("===ルート確認用===");
