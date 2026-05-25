@@ -224,6 +224,12 @@ function clearFrequentCircle() {
     }
 }
 
+let alternativePolylines = [];
+function clearALternativePolylines() {
+    alternativePolylines.forEach(p => p.setMap(null));
+    alternativePolylines = [];
+}
+
 /**
  * 
  * @parm {{lat: number, lng: number}} origin 現在地
