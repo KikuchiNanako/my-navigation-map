@@ -7,13 +7,10 @@ let routePolylines = [];
  * 経路ナビを開始・再開する
  * @param {object} leg - route.legs[0]
  */
-function startStepNavigation(leg, resume = false) {
-    if (window.currentSelectedRouteLeg) {
-        leg = window.currentSelectefRouteLeg;
-    }
-
-    if (!leg || !leg.steps) {
-        logMessage("ナビ開始エラー：leg情報が不足しています");
+function startStepNavigation(leg) {
+    if (!leg?.steps?.length) {
+        logMessage("ナビ開始エラー：ステップ情報がありません");
+        navigationActive = false;
         return;
     }
     

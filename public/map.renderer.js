@@ -260,24 +260,23 @@ function displayRoute(origin, destination){
             provideRouteAlternatives: true
         },
         (response, status) => {
-            if (status === "OK" && response && response.routes && response.routes.length > 0) {
-                window.lastDirectionsResponse = response;
+            window.lastDirectionsResponse = null;
 
-                directionsRenderer.setOptions({
-                    suppressPolylines: true,
-                    suppressMarkers: true,                    
-                });
-
-                clearAlternativePolylines();
-                console.log(`ルート検索成功　候補数： ${response.routes.length}個`);
-
-                renderAllRoutes(response);
-
-            } else {
-                logMessage(`ルート検索に失敗しました: ${status}`);
-                clearAlternativePolylines();
-                if (typeof clearRoutePolylines === 'function') clearRoutePolylines();
+            if (status === "OK" || !response?.routes?.length) {
+                logMessage(`ルート検索に失敗しました： ${status}`);
+                directionsRenderer.setDirections({ routes: [] });
+                return;                 
             }
+
+            window.lastDirectionsResponse = response;
+
+            console.log("===ルート確認用===");
+            console.log(response);
+
+            directionsRenderer.setDirections(response);
+            logMessage(`GoogleMapsルート表示完了 (${leg.steps.length}ステップ)`);
+
+            document.getElementById(`startButton`).disabled = false;
         }
     );
 }

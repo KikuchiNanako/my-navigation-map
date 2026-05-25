@@ -198,6 +198,7 @@ async function getHybridLocation() {
  * 現在地監視を開始し、ナビゲーションのコアロジックを駆動する
  */
 async function startNavigation() {
+    
     if ( typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
         try {
             const permission = await DeviceOrientationEvent.requestPermission();
