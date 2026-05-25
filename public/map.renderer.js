@@ -265,6 +265,7 @@ function displayRoute(origin, destination){
             if (status !== "OK" || !response || response.routes || response.routes.length === 0) {
                 logMessage(`ルート検索に失敗しました： ${status}`);
                 directionsRenderer.setDirections({ routes: [] });
+                window.lastDirectionsResponse = null;
                 return;                 
             }
 

@@ -156,6 +156,7 @@ async function getHybridLocation() {
 
         logMessage("ルート描画が完了しました");
 
+        /*
         //グローバルに保存されてるDirectionsレスポンスから所要時間と距離を取得して表示
         setTimeout(() => {
             if (window.lastDirectionsResponse && window.lastDirectionsResponse.routes && window.lastDirectionsResponse.routes.length > 0) {
@@ -179,6 +180,7 @@ async function getHybridLocation() {
                 console.warn("所要時間表示用のルートデータがまだ準備できていません");
             }
         }, 800)
+        */
 
         //const isOutsideInitial = isOutsideRoute(originLatLon.lat, originLatLon.lng);
         updateCurrentLocationMarker(originLatLon, 0, false);
@@ -416,8 +418,9 @@ function animateMarker() {
                 currentLocationMarker.setIcon(icon);
             }       
 
-            if (window.map && typeof window.map.setHeading === 'function' && navigationActive && !isUserInteracting) {
-                window.map.moveCamera({
+            if (window.map && navigationActive && !isUserInteracting) {
+                if (typeof window.map.moveCamera === 'function') {
+                    window.map.moveCamera({
                     center: newPos,
                     heading: currentDisplayedHeading,
                     zoom: 16
@@ -437,7 +440,7 @@ function animateMarker() {
     }
 
     markerAnimationId = requestAnimationFrame(animateMarker);
-}
+}}
 
  /**
   * 現在地マーカーを更新し、向きを反映させる
