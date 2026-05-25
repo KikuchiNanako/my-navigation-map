@@ -276,7 +276,7 @@ function displayRoute(origin, destination){
                             startStepNavigation(leg);
                         }
                     } else {
-                        const clearALternativePolylines = new google.Polyline({
+                        const clearAlternativePolylines = new google.Polyline({
                             path: route.overview_path,
                             map: map,
                             strokeColor: "#a0a0a0",
