@@ -127,6 +127,11 @@ function toLatLngObj(loc) {
     return null;
 }
 
+function clearRoutePolylines() {
+    routePolylines.forEach(p => p.setMap(null));
+    routePolylines = [];
+}
+
 /**
  * 現在地が現在のステップの終点に近づいたかチェックし、進行を促す
  */
