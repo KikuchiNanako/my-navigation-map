@@ -248,8 +248,8 @@ function clearAlternativePolylines() {
 
 /**
  * 
- * @parm {{lat: number, lng: number}} origin 現在地
- * @parm {{lat: number, lng: number}} destination 目的地
+ * @param {{lat: number, lng: number}} origin 
+ * @param {{lat: number, lng: number}} destination 
  */
 function displayRoute(origin, destination){
     directionsService.route(
@@ -262,7 +262,7 @@ function displayRoute(origin, destination){
         (response, status) => {
             window.lastDirectionsResponse = null;
 
-            if (status === "OK" || !response?.routes?.length) {
+            if (status !== "OK" || !response || response.routes || response.routes.length === 0) {
                 logMessage(`ルート検索に失敗しました： ${status}`);
                 directionsRenderer.setDirections({ routes: [] });
                 return;                 
@@ -274,9 +274,8 @@ function displayRoute(origin, destination){
             console.log(response);
 
             directionsRenderer.setDirections(response);
-            logMessage(`GoogleMapsルート表示完了 (${leg.steps.length}ステップ)`);
 
-            document.getElementById(`startButton`).disabled = false;
+            renderAllRoutes(response);
         }
     );
 }
@@ -305,6 +304,8 @@ function renderAllRoutes(response) {
                 console.log("目的地：", leg.end_address);
                 console.log("距離：", leg.distance.text);
                 console.log("所要時間：", leg.duration.text);
+
+                logMessage(`GoogleMapsルート表示完了 (${leg.steps.length}ステップ)`);
             }
         } else {
             const singlePolyline = new google.maps.Polyline({
@@ -324,8 +325,8 @@ function renderAllRoutes(response) {
                 currentRoutes.unshift(selectedRoute);
 
                 response.routes = currentRoutes;
-                
-                clearAlternativePolylines();
+                window.lastDirectionsResponse = response;
+        
                 renderAllRoutes(response);
             });
 
