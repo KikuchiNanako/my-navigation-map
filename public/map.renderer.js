@@ -297,7 +297,6 @@ function renderAllRoutes(response) {
             if (leg) {
                 window.currentSelectedRouteLeg = leg;
 
-
                 mainRoutePolyline = new google.maps.Polyline({
                     path: route.overview_path,
                     map: map,

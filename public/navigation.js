@@ -8,6 +8,10 @@ let routePolylines = [];
  * @param {object} leg - route.legs[0]
  */
 function startStepNavigation(leg, resume = false) {
+    if (window.currentSelectedRouteLeg) {
+        leg = window.currentSelectefRouteLeg;
+    }
+
     if (!leg || !leg.steps) {
         logMessage("ナビ開始エラー：leg情報が不足しています");
         return;
