@@ -225,8 +225,12 @@ function clearFrequentCircle() {
 }
 
 let alternativePolylines = [];
-function clearALternativePolylines() {
-    alternativePolylines.forEach(p => p.setMap(null));
+function clearAlternativePolylines() {
+    if (alternativePolylines && alternativePolylines.length > 0) {
+        alternativePolylines.forEach(p => {
+            if (p && typeof p.setMap === 'function') p.setMap(null);
+        });
+    }
     alternativePolylines = [];
 }
 
@@ -252,13 +256,13 @@ function displayRoute(origin, destination){
                 directionsRenderer.setOptions({
                     suppressPolylines: false,
                     suppressMarkers: true,
-                    /*
+                    
                     polylineOptions: {
                         strokeColor: "#4285F4",
                         strokeOpacity: 0.6,
                         strokeWeight: 6
                     }
-                    */
+                    
                 });
 
                 clearAlternativePolylines();
