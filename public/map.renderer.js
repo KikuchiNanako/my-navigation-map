@@ -278,7 +278,7 @@ function displayRoute(origin, destination){
                 });
 
                 updateRouteInfoUI(0);
-                renderRouteStgepsList(0);
+                renderRouteStepsList(0);
 
                 logMessage(`Google Maps 複数のルート (${response.routes.length}件)を表示しました`);
 
@@ -313,7 +313,7 @@ function selectRoute(index) {
 
     updateRouteInfoUI(index);
 
-    renderRouteStgepsList(index);
+    renderRouteStepsList(index);
 
     logMessage(`ルート ${index + 1} が選択されました`);
 }
