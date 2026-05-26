@@ -28,14 +28,6 @@
         titleInteractionEnabled: true
     });
 
-    /*
-    new google.maps.Marker({
-        position: initialLocation,
-        map: map,
-        title: "あなたの現在地",
-    });
-    */
-
     window.map = map;
     window.googleMapsReady = true;
 
@@ -108,7 +100,7 @@
         interactionTimeout = setTimeout(() => {
             isUserInteracting = false;
             logMessage("回転を再開します");
-        }, 3000);
+        }, 4000);
     });
 
     const input = document.getElementById("destinationInput");
