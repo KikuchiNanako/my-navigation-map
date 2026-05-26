@@ -345,7 +345,7 @@ function renderRouteStgepsList(routeIndex) {
             const distance = step.distance.text;
             const duration = step.duration.text;
 
-            li.innnerHTML = `<strong>${clearnInstruction}</strong> <span style="color: #666; font-size: 12px;">(${distance} / ${duration}</span>)`;
+            li.innnerHTML = `<strong>${cleanInstruction}</strong> <span style="color: #666; font-size: 12px;">(${distance} / ${duration}</span>)`;
             listElement.appendChild(li);
         });
 
