@@ -327,41 +327,51 @@ function renderRouteStgepsList(routeIndex) {
     if (!response || !response.routes[routeIndex]) return;
 
     const route = response.routes[routeIndex];
-    const leg = route.legs[0];
-    if (!leg || !leg.steps) return;
+    if (!route) return;
 
-    const listElement = document.getElementById("routeStepsList");        const containerElement = document.getElementById("routeStepsContainer");
+    let legs = [];
+    if (typeof route.getLegs === 'function'){
+        legs = route.getLegs();
+    } else if (route.legs) {
+        legs = route.legs;
+    }
+
+    const leg = route.legs[0];
+    if (!leg) return;
+
+    let steps = [];
+    if (typeof leg.getSteps === 'function') {
+        steps = leg.getSteps();
+    } else if (leg.steps) {
+        steps = leg.steps;
+    }
+
+    const listElement = document.getElementById("routeStepsList");
+    const containerElement = document.getElementById("routeStepsContainer");
 
     if (listElement && containerElement) {
         listElement.inneerHTML = "";
 
-        leg.steps.forEach((step, idx) => {
+        console.log(`---ルートの全ステップ詳細---`, steps);
+
+        if (!steps || steps.length === 0) {
+            listElement.innerHTML = "<li>ステップ情報が取得できませんでした。</li>";
+            return;
+        }
+
+        steps.forEach((step, idx) => {
             const li = document.createElement("li");
             li.style.marginBottom = "10px";
             li.style.fontSize = "14px";
             li.style.color = "#333";
 
-            let rawInstruction = "";
 
-            if (step.instructions) {
-                rawInstruction = step.instructions;
-            } else if (step.maneuver) {
-                rawInstruction = step.maneuver;
-            } else if (step.html_instructions) {
-                rawInstruction = step.html_instructions;
-            } else {
-                rawInstruction = "直進又は道なりに進みます";
-            }
 
             const cleanInstruction = (step.instructions || "").replace(/<[^>]*>/g, "");
 
             const distance = (step.distance && step.distance.text) ? step.distance.text : "";
             const duration = (step.dration && step.duration.text) ? step.duration.text : "";
-
-            if (!cleanInstruction || cleanInstruction.trim() === "") {
-                console.log(`ステップ ${idx}のデータ構造に文字が見つかりません:`, step);
-            }
-
+            
             li.innnerHTML = `<strong>${cleanInstruction}</strong> <span style="color: #666; font-size: 12px;">(${distance} / ${duration}</span>)`;
             listElement.appendChild(li);
         });
