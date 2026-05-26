@@ -1,8 +1,7 @@
-window.googleMapsReady = false;
-window.alternativePolylines = [];
-window.selectedRouteIndex = 0;
+ window.googleMapsReady = false;
  
  async function initMap() {
+    window.googleMapsReady = true;
     logMessage("GoogleMaps初期化完了");
 
     let  initialLocation = { lat: 35.681236, lng: 139.767125 };
@@ -45,12 +44,9 @@ window.selectedRouteIndex = 0;
 
     updateCurrentLocationMarker(initialLocation, 0, false);
 
-    //地図クリック時の処理
     map.addListener("click", async (e) => {
         const geocoder = new google.maps.Geocoder();
-        const input = document.getElementById("destinationInput");
 
-        /*
         geocoder.geocode({ location: e.latLng }, (results, status) => {
             if (status === "OK" && results[0]) {
                 const address = results[0].formatted_address;
@@ -62,32 +58,31 @@ window.selectedRouteIndex = 0;
                 } else {
                     console.error("destinationInputというIDの要素が見つかりません");
                 }
-*/
-        if(typeof destinationMarker !== 'undefined' && destinationMarker) {
-            destinationMarker.setMap(null);
-        }
 
-        destinationMarker = new google.maps.Marker({
-            position: e.latLng,
-            map: map,
-            icon: "http://maps.google.co.jp/mapfiles/ms/icons/blue-dot.png"
-        });
-
-        geocoder.geocode({ location: e.latLng }, (results, status) => {
-            if (status === "OK" && results[0]) {
-                const address = results[0].formatted_address;
-
-                if (input) {
-                    input.value = address;
-                    logMessage(`目的地をセットしました： ${address}`);
-                } else {
-                    logMessage("住所を取得できませんでした");
-                    if (input) {
-                        input.value = `${e.latLng.lat().toFixed(6)}, ${e.latLng.lng().toFixed(6)}`;
-                    }
-                    console.error("destinationInputというIDの要素が見つかりません");
+                if(typeof destinationMarker !== 'undefined' && destinationMarker) {
+                    destinationMarker.setMap(null);
                 }
-            } 
+
+                destinationMarker = new google.maps.Marker({
+                    position: e.latLng,
+                    map: map,
+                    icon: "http://maps.google.co.jp/mapfiles/ms/icons/blue-dot.png"
+                });
+            } else {
+                logMessage("住所を取得できませんでした");
+
+                if (typeof destinationMarker !== 'undefined' && destinationMarker) {
+                    destinationMarker.setMap(null);
+                }
+                destinationMarker = new google.maps.Marker({
+                    position: e.latLng,
+                    map: map,
+                    icon: "http://maps.google.co.jo/mapfiles/ms/icons/blue-dot.png"
+                });
+
+                const coords = `${e.latLng.lat().toFixed(6)}, ${e.latLng.lng().toFixed(6)}`;
+                document.getElementById("destinationInput").value = coords;
+            }
         });
     });
 
@@ -134,10 +129,21 @@ window.selectedRouteIndex = 0;
 
     points.forEach(p => {
         const existing = merged.find(m => {
-            return getDistanceMeters(p.lat_r, p.lon_r, m.lat_r, m.lon_r) < threshold;
+            const dist = getDistanceMeters(
+                p.lat_r,
+                p.lon_r,
+                m.lat_r,
+                m.lon_r
+            );
+
+            return dist < threshold;
         });
+
         if (!existing) {
-            merged.push({ lat_r: p.lat_r, lon_r: p.lon_r });
+            merged.push({
+                lat_r: p.lat_r,
+                lon_r: p.lon_r
+            });
         }
     });
 
@@ -210,9 +216,9 @@ function clearFrequentCircle() {
     }
 }
 
-/**
- * ルート検索と描画
- */
+window.alternativePolylines = [];
+window.selectedRouteIndex = 0;
+
 function displayRoute(origin, destination){
     clearAlternativePolylines();
 
@@ -236,7 +242,8 @@ function displayRoute(origin, destination){
                     suppressMarkers: true,
                 });
 
-                console.log("===ルート確認用===", response);
+                console.log("===ルート確認用===");
+                console.log(response);
 
                 response.routes.forEach((route, routeIdx) => {
 
@@ -317,11 +324,27 @@ function selectRoute(index) {
  */
 function renderRouteStepsList(routeIndex) {
     const response = window.lastDirectionsResponse;
-    if (!response || !response.routes || !response.routes[routeIndex]) return;
+    if (!response || !response.routes[routeIndex]) return;
 
     const route = response.routes[routeIndex];
-    const leg = route.legs ? route.legs[0] : null;
     if (!route) return;
+
+    let legs = [];
+    if (typeof route.getLegs === 'function'){
+        legs = route.getLegs();
+    } else if (route.legs) {
+        legs = route.legs;
+    }
+
+    const leg = route.legs[0];
+    if (!leg) return;
+
+    let steps = [];
+    if (typeof leg.getSteps === 'function') {
+        steps = leg.getSteps();
+    } else if (leg.steps) {
+        steps = leg.steps;
+    }
 
     const listElement = document.getElementById("routeStepsList");
     const containerElement = document.getElementById("routeStepsContainer");
@@ -329,15 +352,21 @@ function renderRouteStepsList(routeIndex) {
     if (listElement && containerElement) {
         listElement.innerHTML = "";
 
-        console.log(`---ルートの全ステップ詳細---`, leg.steps);
+        console.log(`---ルートの全ステップ詳細---`, steps);
 
-        leg.steps.forEach((step, idx) => {
+        if (!steps || steps.length === 0) {
+            listElement.innerHTML = "<li>ステップ情報が取得できませんでした。</li>";
+            return;
+        }
+
+        steps.forEach((step, idx) => {
             const li = document.createElement("li");
             li.style.marginBottom = "10px";
             li.style.fontSize = "14px";
             li.style.color = "#333";
 
-            const rawInstruction = step.instructions || steps.html_instructions || "道なりに進みます";
+
+
             const cleanInstruction = (step.instructions || "").replace(/<[^>]*>/g, "");
 
             const distance = (step.distance && step.distance.text) ? step.distance.text : "";
