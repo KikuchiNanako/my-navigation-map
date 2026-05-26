@@ -159,22 +159,10 @@ async function getHybridLocation() {
         //グローバルに保存されてるDirectionsレスポンスから所要時間と距離を取得して表示
         setTimeout(() => {
             if (window.lastDirectionsResponse && window.lastDirectionsResponse.routes && window.lastDirectionsResponse.routes.length > 0) {
-                const route = window.lastDirectionsResponse.routes[0];
-                if (route.legs && route.legs.length > 0) {
-                    const leg = route.legs[0];
-                    const distanceText = leg.distance.text;
-                    const durationText = leg.duration.text;
-                    logMessage(`ルート情報取得成功`);
-
-                    //上部のナビパネルに表示
-                    if (typeof updateNavDisplay === 'function') {
-                        updateNavDisplay(
-                            `<span style="font-size: 22px; color: #ffffff; font-weight: bold; display: block; margin-bottom: 5px;">目的地: ${destinationPlace}</span>`,
-                            `<span style="font-size: 18px; color: #ffffff; font-weight: bold; display: block;">総距離 ${distanceText} / 所要時間: ${durationText}</span>`,
-                            "#2c3e50"
-                        );
-                    }
+                if (typeof updateRouteInfoUI === 'function') {
+                    updateRouteInfoUI(0);
                 }
+                
             } else {
                 console.warn("所要時間表示用のルートデータがまだ準備できていません");
             }
@@ -223,12 +211,14 @@ async function startNavigation() {
     }
 
     const response = window.lastDirectionsResponse;
-    if (!response.routes || response.routes.length === 0) {
+    const activeRouteIndex = window.selectedRouteIndex || 0;
+
+    if (!response.routes || response.routes.length <= activeRouteIndex) {
         logMessage("エラー：ルート情報がありません");
         return;
     }
 
-    const route = response.routes[0];
+    const route = response.routes[activeRouteIndex];
     if (!route.legs || route.legs.length === 0) {
         logMessage("ナビ開始エラー：ルートにレッグ情報がありません");
         return;

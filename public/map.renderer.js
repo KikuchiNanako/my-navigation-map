@@ -224,62 +224,131 @@ function clearFrequentCircle() {
     }
 }
 
-/**
- * 
- * @parm {{lat: number, lng: number}} origin 現在地
- * @parm {{lat: number, lng: number}} destination 目的地
- */
+window.alternativePolylines = [];
+window.selectedRouteIndex = 0;
+
 function displayRoute(origin, destination){
+    clearAlternativePolylines();
+
+
     directionsService.route(
         {
             origin: origin,
             destination: destination,
-            travelMode: google.maps.TravelMode.DRIVING
+            travelMode: google.maps.TravelMode.DRIVING,
+            provideRouteAlternatives: true
         },
         (response, status) => {
             if (status === "OK" && response && response.routes && response.routes.length > 0) {
                 const route = response.routes[0];
 
                 window.lastDirectionsResponse = response;
+                window.selectedRouteIndex = 0;
 
                 directionsRenderer.setOptions({
-                    suppressPolylines: false,
+                    suppressPolylines: true,
                     suppressMarkers: true,
-                    polylineOptions: {
-                        strokeColor: "#4285F4",
-                        strokeOpacity: 0.6,
-                        trokeWeight: 6
-                    }
                 });
 
                 console.log("===ルート確認用===");
                 console.log(response);
 
-                const leg = route.legs && route.legs[0];
-                if (!leg) {
-                    console.warm("ルートは取得できましたが、legsがありません");
-                    return;
-                }
+                response.routes.forEach((route, routeIdx) => {
 
-                console.log("出発地:", leg.start_address);
-                console.log("目的地:", leg.end_address);
-                console.log("距離:", leg.distance.text);
-                console.log("所要時間:", leg.duration.text);
-                console.log("ステップ数:", leg.steps.length);
+                    const path = [];
+                    route.legs.forEach(leg => {
+                        leg.steps.forEach(step => {
+                            step.path.forEach(latLng => {
+                                path.push(latLng);
+                            });
+                        });
+                    });
 
-                leg.steps.forEach((step, idx) => {
-                    console.log(
-                        `${idx + 1}: ${step.instructions.replace(/<[^>]*>/g, "")} (${step.distance.text}, ${step.duration.text})`
-                    );
+                    const isSelected = (routeIdx === window.selectedRouteIndex);
+                    const polyline = new google.maps.Polyline({
+                        path: path,
+                        map: map,
+                        strokeColor: isSelected ? "#4285F4" : "9AA0A6",
+                        strokeOpacity: isSelected ? 0.8 : 0.5,
+                        strokeWeight: isSelected ? 6 : 4,
+                        zIndex: isSelected ? 2 : 1
+                    });
+
+                    polyline.addListener('click', () => {
+                        selectRoute(routeIdx);
+                    });
+
+                    window.alternativePolylines.push({
+                        index: routeIdx,
+                        polyline: polyline,
+                        routeData: route
+                    });
                 });
 
-                directionsRenderer.setDirections(response);
+                updateRouteInfoUI(0);
+                logMessage(`Google Maps 複数のルート (${response.routes.length}件)を表示しました`);
 
-                logMessage("Google Maps ルートを表示しました");
             } else {
                 logMessage(`ルート検索に失敗しました: ${status}`);
                 directionsRenderer.setDirections({ routes: [] });
+                clearAlternativePolylines();
             }
         }
     );
+}
+
+/**
+ * ユーザーが特定のルートを選択したときの処理
+ */
+function selectRoute(index) {
+    if (!window.lastDirectionsResponse) return;
+    window.selectedRouteIndex = index;
+
+    window.alternativePolylines.forEach(item => {
+        const isSelected = (item.index === index);
+        item.polyline.setOptions({
+            strokeColor: isSelected ? "#4285F4" : "#9AA0A6",
+            strokeOpacity: isSelected ? 0.8 : 0.5,
+            strokeWeight: isSelected ? 6 : 4,
+            zIndex: isSelected ? 2 : 1
+        });
+    });
+
+    updateRouteInfoUI(index);
+    logMessage(`ルート ${index + 1} が選択されました`);
+}
+
+/**
+ * ルート情報をUIに更新する共通処理
+ */
+function updateRouteInfoUI(index) {
+    const response = window.lastDirectionsResponse;
+    if (!response || !response.routes[index]) return;
+
+    const route = response.routes[index];
+    const leg = route.legs[0];
+    if (!leg) return;
+
+    const destinationInput = document.getElementById(`destinationInput`);
+    const destinationPlace = destinationInput ? destinationInput.value.trim() : "目的地";
+    const distanceText = leg.distance.text;
+    const durationText = leg.duration.text;
+
+    if ( typeof updateNavDisplay === 'function') {
+        updateNavDisplay(
+            `<span style="font-size: 22px; color: #ffffff; font-weight: bold; display: block; margin-bottom: 5px;"> 目的地： ${destinationPlace}</span>`,
+            `<span style="font-size: 18px; color: #ffffff; font-weight: bold; display: block;">総距離 ${distanceText} / 所要時間 ${durationText}</span>`,
+            "#2c3e50"
+        );
+    }
+}
+
+/**
+ * 複数ルート用のポリラインをクリア
+ */
+function clearAlternativePolylines() {
+    if (window.alternativePolylines && window.alternativePolylines.length > 0) {
+        window.alternativePolylines.forEach(item => item.polyline.setMap(null));
+        window.alternativePolylines = [];
+    }
 }

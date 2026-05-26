@@ -14,10 +14,14 @@ function startStepNavigation(leg, resume = false) {
     }
     
     steps = leg.steps;
-    surrentStepIndex = 0;
+    currentStepIndex = 0;
     navigationActive = true;
 
     clearRoutePolylines();
+
+    if (typeof clearAlternativePolylines === 'function') {
+        clearAlternativePolylines();
+    }
 
     drawAllRouteSteps();
 
@@ -25,7 +29,7 @@ function startStepNavigation(leg, resume = false) {
         const bounds = window.lastDirectionsResponse.routes[0].bounds;
         if (bounds && typeof map.fitBounds === 'function') map.fitBounds(bounds);
     } else {
-        console.marn("DirectionsAPIレスポンスからboundsが取れませんでした");
+        console.warn("DirectionsAPIレスポンスからboundsが取れませんでした");
     }
     logMessage(`ナビ開始： ${steps.length}ステップ`);
     showCurrentStep();
