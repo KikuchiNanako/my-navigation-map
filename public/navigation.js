@@ -25,6 +25,14 @@ function startStepNavigation(leg, resume = false) {
 
     drawAllRouteSteps();
 
+    const listElement = document.getElementById("routeStepsList");
+    if (listElement) {
+        const items = listElement.getElementsByTagName("li");
+        for (let i = 0; i < items.length; i++) {
+            items[i].id = `step-item-${i}`;
+        }
+    }
+
     if(window.lastDirectionsResponse && window.lastDirectionsResponse.routes && window.lastDirectionsResponse.routes.length > 0) {
         const bounds = window.lastDirectionsResponse.routes[0].bounds;
         if (bounds && typeof map.fitBounds === 'function') map.fitBounds(bounds);

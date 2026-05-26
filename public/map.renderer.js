@@ -278,12 +278,17 @@ function displayRoute(origin, destination){
                 });
 
                 updateRouteInfoUI(0);
+                renderRouteStgepsList(0);
+
                 logMessage(`Google Maps 複数のルート (${response.routes.length}件)を表示しました`);
 
             } else {
                 logMessage(`ルート検索に失敗しました: ${status}`);
                 directionsRenderer.setDirections({ routes: [] });
                 clearAlternativePolylines();
+
+                const container = document.getElementById("routeStepsContainer");
+                if (container) container.style.display = "none";
             }
         }
     );
@@ -307,8 +312,47 @@ function selectRoute(index) {
     });
 
     updateRouteInfoUI(index);
+
+    renderRouteStgepsList(index);
+
     logMessage(`ルート ${index + 1} が選択されました`);
 }
+
+/**
+ * 指定されたルートインデックスの全ステップをHTMLに書き出す
+ * @param {number} routeIndex
+ */
+function renderRouteStgepsList(routeIndex) {
+    const response = window.lastDirectionsResponse;
+    if (!response || !response.routes[routeIndex]) return;
+
+    const route = response.routes[routeIndex];
+    const leg = route.legs[0];
+    if (!leg || !leg.steps) return;
+
+    const listElement = document.getElementById("routeStepsList");        const containerElement = document.getElementById("routeStepsContainer");
+
+    if (listElement && containerElement) {
+        listElement.inneerHTML = "";
+
+        leg.steps.forEach((step, idx) => {
+            const li = document.createElement("li");
+            li.style.marginBottom = "10px";
+            li.style.fontSize = "14px";
+            li.style.color = "#333";
+
+            const cleanInstruction = (step.instructions || "").replace(/<[^>]*>/g, "");
+            const distance = step.distance.text;
+            const duration = step.duration.text;
+
+            li.innnerHTML = `<strong>${clearnInstruction}</strong> <span style="color: #666; font-size: 12px;">(${distance} / ${duration}</span>)`;
+            listElement.appendChild(li);
+        });
+
+        containerElement.style.display = "block";
+    }
+}
+
 
 /**
  * ルート情報をUIに更新する共通処理
