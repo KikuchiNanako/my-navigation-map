@@ -345,18 +345,18 @@ async function onPositionUpdate(position) {
 
     //ナビゲーションがアクティブな場合のみ案内ロジックを実行
     if (navigationActive) {
-        if (typeof updateRemainingDistance === 'function') {
-            updateRemainingDistance(currentLatLon);
-        }
-
-        if (typeof checkStepProgression === 'function') {
-            checkStepProgression(currentLatLon);
-        }
-
         if (isOutside) {
             logMessage("ナビゲーション案内実行中：ルート外です");
+
+            if (typeof updateRemainingDistance === 'function') {
+                updateRemainingDistance(currentLatLon);
+            }
+
+            if (typeof checkStepProgression === 'function') {
+                checkStepProgression(currentLatLon);
+            }
         } else {
-            logMessage("基地ルート走行中：案内を停止");            
+            logMessage("既知ルート走行中：案内を停止");            
         }
     } else {
         logMessage("現在地を追跡中ですがナビゲーションは停止中");
