@@ -341,9 +341,26 @@ function renderRouteStgepsList(routeIndex) {
             li.style.fontSize = "14px";
             li.style.color = "#333";
 
+            let rawInstruction = "";
+
+            if (step.instructions) {
+                rawInstruction = step.instructions;
+            } else if (step.maneuver) {
+                rawInstruction = step.maneuver;
+            } else if (step.html_instructions) {
+                rawInstruction = step.html_instructions;
+            } else {
+                rawInstruction = "直進又は道なりに進みます";
+            }
+
             const cleanInstruction = (step.instructions || "").replace(/<[^>]*>/g, "");
-            const distance = step.distance.text;
-            const duration = step.duration.text;
+
+            const distance = (step.distance && step.distance.text) ? step.distance.text : "";
+            const duration = (step.dration && step.duration.text) ? step.duration.text : "";
+
+            if (!cleanInstruction || cleanInstruction.trim() === "") {
+                console.log(`ステップ ${idx}のデータ構造に文字が見つかりません:`, step);
+            }
 
             li.innnerHTML = `<strong>${cleanInstruction}</strong> <span style="color: #666; font-size: 12px;">(${distance} / ${duration}</span>)`;
             listElement.appendChild(li);
