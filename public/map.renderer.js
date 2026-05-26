@@ -322,7 +322,7 @@ function selectRoute(index) {
  * 指定されたルートインデックスの全ステップをHTMLに書き出す
  * @param {number} routeIndex
  */
-function renderRouteStgepsList(routeIndex) {
+function renderRouteStepsList(routeIndex) {
     const response = window.lastDirectionsResponse;
     if (!response || !response.routes[routeIndex]) return;
 
@@ -350,7 +350,7 @@ function renderRouteStgepsList(routeIndex) {
     const containerElement = document.getElementById("routeStepsContainer");
 
     if (listElement && containerElement) {
-        listElement.inneerHTML = "";
+        listElement.innerHTML = "";
 
         console.log(`---ルートの全ステップ詳細---`, steps);
 
@@ -370,9 +370,9 @@ function renderRouteStgepsList(routeIndex) {
             const cleanInstruction = (step.instructions || "").replace(/<[^>]*>/g, "");
 
             const distance = (step.distance && step.distance.text) ? step.distance.text : "";
-            const duration = (step.dration && step.duration.text) ? step.duration.text : "";
-            
-            li.innnerHTML = `<strong>${cleanInstruction}</strong> <span style="color: #666; font-size: 12px;">(${distance} / ${duration}</span>)`;
+            const duration = (step.duration && step.duration.text) ? step.duration.text : "";
+
+            li.innerHTML = `<strong>${cleanInstruction}</strong> <span style="color: #666; font-size: 12px;">(${distance} / ${duration}</span>)`;
             listElement.appendChild(li);
         });
 
