@@ -260,8 +260,8 @@ function displayRoute(origin, destination){
                     const polyline = new google.maps.Polyline({
                         path: path,
                         map: map,
-                        strokeColor: isSelected ? "#4285F4" : "#9AA0A6",
-                        strokeOpacity: isSelected ? 0.8 : 0.8,
+                        strokeColor: isSelected ? "#4285F4" : "#4254F4",
+                        strokeOpacity: isSelected ? 0.8 : 0.4,
                         strokeWeight: isSelected ? 6 : 4,
                         zIndex: isSelected ? 2 : 1
                     });
@@ -304,8 +304,8 @@ function selectRoute(index) {
     window.alternativePolylines.forEach(item => {
         const isSelected = (item.index === index);
         item.polyline.setOptions({
-            strokeColor: isSelected ? "#4285F4" : "#9AA0A6",
-            strokeOpacity: isSelected ? 0.8 : 0.5,
+            strokeColor: isSelected ? "#4285F4" : "#4285F4",
+            strokeOpacity: isSelected ? 0.8 : 0.4,
             strokeWeight: isSelected ? 6 : 4,
             zIndex: isSelected ? 2 : 1
         });
