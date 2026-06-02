@@ -124,6 +124,11 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
                 }
             }
 
+            const traveledCoords = [];
+            for (let i = 0; i <= closestVertexIndex; i++) {
+                traveledCoords.push(rawPath[i]);
+            }
+
             traveledCoords.push(new google.maps.LatLng(currentLocation.lat,currentLocation.lng));
 
             const remainingCoords = [new google.maps.LatLng (currentLocation.lat, currentLocation.lng)];
