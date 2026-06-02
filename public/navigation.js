@@ -149,7 +149,7 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
                 activeTraveledPolyline.setMap(map);
             }
 
-            if (!activeReminingPolyline) {
+            if (!activeRemainingPolyline) {
                 activeReminingPolyline = new google.maps.Polyline({
                     path: remainingCoords,
                     map: map,
