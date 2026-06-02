@@ -345,15 +345,19 @@ async function onPositionUpdate(position) {
 
     //ナビゲーションがアクティブな場合のみ案内ロジックを実行
     if (navigationActive) {
-        if (isOutside) {
-            logMessage("ナビゲーション案内実行中：ルート外です");
+        if (typeof updateFineGrainedRouteColor === 'function') {
+            updateFineGrainedRouteColor(currentLatLon, currentStepIndex);
+        }
 
+        if (isOutside) {
+            logMessage("ナビゲーション案内実行中：ルート外です")
+        
             if (typeof updateRemainingDistance === 'function') {
                 updateRemainingDistance(currentLatLon);
             }
 
             if (typeof checkStepProgression === 'function') {
-                checkStepProgression(currentLatLon);
+                checkCurrentLocation(currentLatLon);
             }
         } else {
             logMessage("既知ルート走行中：案内を停止");            
