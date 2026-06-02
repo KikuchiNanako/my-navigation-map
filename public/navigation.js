@@ -111,6 +111,7 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
             let closestVertexIndex = 0;
             let minDistance = Infinity;
 
+            console.log("探索するパスの長さ:", rawPath.length);
             for (let i = 0; i < rawPath.length; i++) {
                 const vertex = rawPath[i];
 
@@ -123,6 +124,7 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
                     closestVerterIndex = i;
                 }
             }
+            console.log("計算後の最短距離:", minDistance);
 
             const traveledCoords = [];
             for (let i = 0; i <= closestVertexIndex; i++) {
