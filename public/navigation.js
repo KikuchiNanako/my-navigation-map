@@ -3,7 +3,7 @@ let steps = [];
 let navigationActive = false;
 let routePolylines = [];
 let activeTraveledPolyline = null;
-let activeReminingPolyline = null;
+let activeRemainingPolyline = null;
 
 /**
  * 経路ナビを開始・再開する
@@ -50,20 +50,23 @@ function startStepNavigation(leg, resume = false) {
  */
 function drawAllRouteSteps() {
     clearRoutePolylines();
-    if (activeTraveledPolyline) { activeTraveledPolyline.setMao(null); activeTraveledPolyline = null; }
-    if (activeReminingPolyline) { activeReminingPolyline.setMap(null); activeReminingPolyline = null; }
 
     if (!steps || steps.length === 0) return;
 
     steps.forEach((step, index) => {
-        const path = google.maps.geometry.ecoding.decodePath(step.polyline.points);
+        let path = step.path;
+        if (!path) {
+            const startLoc = toLatLngObj(step.start_location);
+            const endLoc = toLatLngObj(step.end_location);
+            path = (startLoc && endLoc) ? [startLoc, endLoc] : [];
+        }
 
         const polyline = new google.maps.Polyline({
             path: path,
             map: map,
             strokeColor: "#0000FF",
             strokeOpacity: 0.7,
-            strokeWeight: 2
+            strokeWeight: 6
         });
 
         polyline.stepIndex = index;
@@ -85,10 +88,9 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
     routePolylines.forEach((polyline) => {
         if (polyline.stepIndex < currentIdx) {
             polyline.setOptions({
-                strokeColor: "#7f8c8d",
-                strokeOpacity: 0.6,
-                strokeWeight: 5,
-                zIndex: 1
+                strokeColor: "#888888",
+                strokeOpacity: 0.4,
+                strokeWeight: 4,
             });
             polyline.setMap(map);
         }
@@ -97,7 +99,6 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
                 strokeColor: "#0000ff",
                 strokeOpacity: 0.7,
                 strokeWeight: 6,
-                zIndex: 2
             });
             polyline.setMap(map);
         }
@@ -107,34 +108,36 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
             const rawPath = polyline.rawPath;
             if (!rawPath || rawPath.length === 0) return;
 
-            let closestVerterIndex = 0;
+            let closestVertexIndex = 0;
             let minDistance = Infinity;
 
             for (let i = 0; i < rawPath.length; i++) {
                 const vertex = rawPath[i];
 
-                const dist = getDistanceMeters(currentLocation.lat, currentLocation.lng, vertex.lat(), vertex.lng());
+                const vLat = (typeof vertex.lat === 'function') ? vertex.lat() : vertex.lat;
+                const vLng = (typeof vertex.lng === 'function') ? vertex.lng() : vertex.lng; 
+
+                const dist = getDistanceMeters(currentLocation.lat, currentLocation.lng, vLat, vLng);
                 if (dist < minDistance) {
                     minDistance = dist;
                     closestVerterIndex = i;
                 }
             }
 
-            const traveledCoords = rawPath.slice(0, closestVerterIndex + 1);
             traveledCoords.push(new google.maps.LatLng(currentLocation.lat,currentLocation.lng));
 
             const remainingCoords = [new google.maps.LatLng (currentLocation.lat, currentLocation.lng)];
-            const forwardCoords = rawPath.slice(closestVerterIndex + 1);
-            forwardCoords.forEach(coords => remainingCoords.push(coord));
+            for (let i = closestVerterIndex + 1; i < rawPath.length; i++) {
+                remainingCoords.push(rawPath[i]);
+            }
 
             if (!activeTraveledPolyline) {
                 activeTraveledPolyline = new google.maps.Polyline({
                     path: traveledCoords,
                     map: map,
-                    strokeColor: "#7F8C8D",
-                    strokeOpacity: 0.6,
-                    strokeWeight: 5,
-                    zIndex: 1
+                    strokeColor: "#888888",
+                    strokeOpacity: 0.4,
+                    strokeWeight: 4,
                 });
             } else {
                 activeTraveledPolyline.setPath(traveledCoords);
@@ -148,7 +151,6 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
                     strokeColor: "#0000ff",
                     strokeOpacity: 0.8,
                     strokeWeight: 6,
-                    zIndex: 3
                 });
             } else {
                 activeReminingPolyline.setPath(remainingCoords);
@@ -157,24 +159,6 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
         }
     });
 }
-
-/**
- * ナビ終了時やルートクリア時に、分割用ポリラインも一緒に消去する処理を既存の関数に追加
- */
-const originalClearRoutePolylines = clearRoutePolylines;
-clearRoutePolylines = function() {
-    if (typeof originalClearRoutePolylines === 'function') {
-        originalClearRoutePolylines();
-    }
-    if (activeTraveledPolyline) {
-        activeTraveledPolyline.setMap(null);
-        activeTraveledPolyline = null;
-    }
-    if (activeReminingPolyline) {
-        activeReminingPolyline.setMap(null);
-        activeReminingPolyline = null;
-    }
-};
 
 /**
  * 現在のステップインデックスに基づいて、それより前の走破済みルートの色を塗り替える
@@ -221,31 +205,12 @@ function showCurrentStep() {
 
     logMessage(`次の案内： ${instruction} (${distance}, ${duration})`);
 
-    routePolylines.forEach((polyline, index) => {
-        if (index < currentStepIndex) {
-            polyline.setOptions({
-                strokeColor: "#888888",
-                strokeOpacity: 0.4,
-                strokeWeight: 4
-            });
-        } else {
-            polyline.setOptions({
-                strokeColor: "#0000FF",
-                strokeOpacity: 0.7,
-                strokeWeight: 6
-            });
-        }
-    });
-
-    let startLoc = toLatLngObj(step.start_location);
+    let startLoc = toLatLngObj(step.staet_location);
     if (startLoc) {
-        map.panTo(startLoc);
+        updateFineGrainedRouteColor(startLoc, currentStepIndex);
     }
     map.setZoom(15);
 }
-
-   
-
 
 function toLatLngObj(loc) {
     if (!loc) return null;
@@ -261,8 +226,19 @@ function toLatLngObj(loc) {
 }
 
 function clearRoutePolylines() {
-    routePolylines.forEach(p => p.setMap(null));
+    if (routePolylines && routePolylines.length > 0) {
+        routePolylines.forEach(p => p.setMap(null));
+    }
     routePolylines = [];
+
+    if (activeTraveledPolyline) {
+        activeTraveledPolyline.setMap(null);
+        activeTraveledPolyline = null;
+    }
+    if (activeRemainingPolyline) {
+        activeRemainingPolyline.setMap(null);
+        activeRemainingPolyline = null;
+    }
 }
 
 /**
@@ -345,7 +321,7 @@ function handleRouteForNavigation(route) {
 
 /**
  * 現在地から現在ステップ終点までの距離を表示更新
- * @param {{Lat:number,Lng:number}} currentLocation
+ * @param {{lat:number, lng:number}} currentLocation
  */
 function updateRemainingDistance(currentLocation) {
     if (!navigationActive) return;
