@@ -212,7 +212,7 @@ function showCurrentStep() {
 
     logMessage(`次の案内： ${instruction} (${distance}, ${duration})`);
 
-    let startLoc = toLatLngObj(step.staet_location);
+    let startLoc = toLatLngObj(step.start_location);
     if (startLoc) {
         updateFineGrainedRouteColor(startLoc, currentStepIndex);
     }

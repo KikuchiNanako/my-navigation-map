@@ -45,45 +45,53 @@
     updateCurrentLocationMarker(initialLocation, 0, false);
 
     map.addListener("click", async (e) => {
-        const geocoder = new google.maps.Geocoder();
+        if (window.tempMarker) {
+            window.tempMarker.setMap(null);
+        }
+        if (window.currentInfoWindow) {
+            window.currentInfoWindow.close();
+        }
 
-        geocoder.geocode({ location: e.latLng }, (results, status) => {
-            if (status === "OK" && results[0]) {
-                const address = results[0].formatted_address;
+        window.tempMarker = new google.maps.Marker({
+            position: e.latLng,
+            map: map,
+            icon: "http://maps.google.co.jp/mapfiles/ms/icons/red-dot.png"
+        });
 
-                const input = document.getElementById("destinationInput");
-                if (input) {
-                    input.value = address;
-                    logMessage(`目的地をセットしました： ${address}`);
-                } else {
-                    console.error("destinationInputというIDの要素が見つかりません");
-                }
+        const lat = e.latLng.lat();
+        const lng = e.latLng.lng();
+        const infoContent = `
+            <div style="padding: 5px; font-family: sans-serif;">
+                <p style="margin: 0 0 8px 0; fonr-size: 14px; font-weight: bold;">選択した位置</p>
+                <button id="setDestBtn" style="
+                    background-color: #1a73e8;
+                    color: white;
+                    border: none;
+                    padding: 8px 12px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-weight: bold;">
+                    ここを目的地にする
+                </button>
+            </div>
+        `;
 
-                if(typeof destinationMarker !== 'undefined' && destinationMarker) {
-                    destinationMarker.setMap(null);
-                }
+        const infoWindow = new google.maps.InfoWindow({
+            content: infoContent
+        });
+        window.currentInfoWindow = infoWindow;
+        infoWindow.open(map, window.tempMarker);
 
-                destinationMarker = new google.maps.Marker({
-                    position: e.latLng,
-                    map: map,
-                    icon: "http://maps.google.co.jp/mapfiles/ms/icons/blue-dot.png"
+        google.maps.event.addListener(infoWindow, 'domready', () => {
+            const btn = document.getElementById('setDestBtn');
+            if (btn) {
+                btn.addEventListener('click', () => {
+                    setAsDestination(lat, lng);
+                    infoWindow.close();
                 });
-            } else {
-                logMessage("住所を取得できませんでした");
-
-                if (typeof destinationMarker !== 'undefined' && destinationMarker) {
-                    destinationMarker.setMap(null);
-                }
-                destinationMarker = new google.maps.Marker({
-                    position: e.latLng,
-                    map: map,
-                    icon: "http://maps.google.co.jo/mapfiles/ms/icons/blue-dot.png"
-                });
-
-                const coords = `${e.latLng.lat().toFixed(6)}, ${e.latLng.lng().toFixed(6)}`;
-                document.getElementById("destinationInput").value = coords;
             }
         });
+        
     });
 
     map.addListener('drag', () => {
@@ -117,6 +125,41 @@
     }
 
  }
+ /**
+  * 吹き出しのボタンが押されたときに、正式に目的地としてセットする関数
+  */
+ function setAsDestination(lat, lng) {
+    if (window.tempMarker) {
+        window.tempMarker.setMap(null);
+        window.tempMarker = null;
+    }
+
+    if (destinationMarker) {
+        destinationMarker.setMap(null);
+    }
+
+    const latLng = new google.maps.LatLng(lat, lng);
+
+    destinationMarker = new google.maps.Marker({
+        position: latLng,
+        map: map,
+        icon: "http://maps.google.co.jp/mapfiles/ms/icons/blue-dot.png"
+    });
+
+    const geocoder = new google.maps.Geocoder();
+
+    geocoder.geocode({ location: latLng }, (results, status) => {
+        const input = document.getElementById("destinationInput");
+        if (status === google.maps.GeocoderStatus.OK && results.length > 0) {
+            if (input) input.value = result[0].formatted_address;
+            logMessage(`地図タップから目的地を設定： ${results[0].formatted_address}`);
+        } else {
+            if (input) input.value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+            logMessage(`地図タップから目的地を設定：座標 (${lat}, ${lng})`);
+        }
+    });
+        
+}
 
  /**
   * 近い頻出点を統合する
