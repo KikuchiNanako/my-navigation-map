@@ -152,7 +152,7 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
             }
 
             if (!activeRemainingPolyline) {
-                activeReminingPolyline = new google.maps.Polyline({
+                activeRemainingPolyline = new google.maps.Polyline({
                     path: remainingCoords,
                     map: map,
                     strokeColor: "#0000ff",
@@ -160,8 +160,8 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
                     strokeWeight: 6,
                 });
             } else {
-                activeReminingPolyline.setPath(remainingCoords);
-                activeReminingPolyline.setMap(map);
+                activeRemainingPolyline.setPath(remainingCoords);
+                activeRemainingPolyline.setMap(map);
             }
         }
     });
