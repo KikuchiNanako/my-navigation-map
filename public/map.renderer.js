@@ -467,3 +467,50 @@ function clearAlternativePolylines() {
         window.alternativePolylines = [];
     }
 }
+
+/**
+ * 全てのナビゲーション情報を完全に消去してリセットする
+ */
+function clearAllNavigation() {
+    if (window.tempMarker) {
+        window.tempMarker.setMap(null);
+        window.tempMarker = null;
+    }
+
+    if (typeof destinationMarker !== 'undefined' && destinationMarker) {
+        destinationMarker.setMap(null);
+        destinationMarker = null;
+    }
+
+    if (typeof clearAlternativePolylines === 'function') {
+        clearAlternativePolylines();
+    }
+
+    if (typeof directionsRenderer !== 'undefined' && directionsRenderer) {
+        directionsRenderer.setDirections({ routes: [] });
+    }
+
+    const input = document.getElementById("destinationInput");
+    if (input) {
+        input.value = "";
+    }
+
+    const bottomPanel = document.getElementById("map-bottom-panel");
+    if (bottomPanel) {
+        bottomPanel.style.display = "none";
+    }
+
+    const stepsContainer = document.getElementById("routeStepsContainer");
+    if (stepsContainer) {
+        stepsContainer.style.display = "none";
+    }
+
+    if (typeof NavigationActive !== 'undefined') {
+        navigationActive = false;
+    }
+    if (typeof clearRoutePolylines === 'function') {
+        clearRoutePolylines();
+    }
+
+    logMessage("すべての目的地、ピン、経路、および画面表示をリセットしました");
+}

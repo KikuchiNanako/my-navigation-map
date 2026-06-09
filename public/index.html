@@ -56,8 +56,27 @@
         </div>
 
         <hr>
+        
+        <div style="display: inline-flex; align-items: center; gap: 8px; width: 100%; max-width: 500px; margin-bottom: 10px;">
+            <div style="position: relative; flex: 1; display: flex; align-items: center;">
+                <input type="text" id="destinationInput" placeholder="目的地を入力（例：東京タワー）" style="width: 100%; padding: 6px 32px 6px 8px; box-sizing: border-box; font-size: 14px;">
 
-        <input type="text" id="destinationInput" placeholder="目的地を入力（例：東京タワー）">
+                <button id="clearInputButton" onclick="clearDestinationInputOnly()" style="
+                    position: absolute;
+                    right: 6px;
+                    background: none;
+                    border: none;
+                    color: #999;
+                    font-size: 16px;
+                    cursor: pointer;
+                    font-weight: bold;
+                    padding: 4px;
+                    line-height: 1;">
+                    ×
+                </button>
+            </div>
+        </div>
+        
         <button onclick="requestRouteDrawing()" id="drawingButton">
             ルート検索開始
         </button>
@@ -79,7 +98,20 @@
                 現在地に戻る
             </button>
 
-        </div>     
+        </div>
+        
+        <button id="clearAllButton" onclick="clearAllNavigation()" style="
+            background-color: #d93025;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            margin-left: 8px;">
+            すべて消去
+        </button>
         
         <div id="statusLabel" style="font-weight:bold; padding:10px; background:#f0f0f0; margin-top: 10px; border-radius: 5px;">
             状態：待機中
@@ -98,7 +130,8 @@
             bottom: 24px;
             left: 50%;
             transform: translateX(-50%);
-            background: 16px;
+            background: white;
+            padding: 16px;
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.25);
             z-index: 1000;
