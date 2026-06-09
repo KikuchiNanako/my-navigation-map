@@ -52,46 +52,42 @@
             window.currentInfoWindow.close();
         }
 
+        const lat = e.latLng.lat();
+        const lng = e.latLng.lng();
+
         window.tempMarker = new google.maps.Marker({
             position: e.latLng,
             map: map,
             icon: "http://maps.google.co.jp/mapfiles/ms/icons/red-dot.png"
         });
 
-        const lat = e.latLng.lat();
-        const lng = e.latLng.lng();
-        const infoContent = `
-            <div style="padding: 5px; font-family: sans-serif;">
-                <p style="margin: 0 0 8px 0; fonr-size: 14px; font-weight: bold;">選択した位置</p>
-                <button id="setDestBtn" style="
-                    background-color: #1a73e8;
-                    color: white;
-                    border: none;
-                    padding: 8px 12px;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    font-weight: bold;">
-                    ここを目的地にする
-                </button>
-            </div>
-        `;
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ location: e.latLng }, (results, status) => {
+            let addressText = "選択した位置";
+            if (status === google.maps.GeocoderStatus.OK && results && results.length > 0) {
+                addressText = results[0].formatted_address.replace(/^日本、/, '');
+            } else {
+                addressText = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+            }
 
-        const infoWindow = new google.maps.InfoWindow({
-            content: infoContent
-        });
-        window.currentInfoWindow = infoWindow;
-        infoWindow.open(map, window.tempMarker);
+            const panel = document.getElementById("map-bottom-panel");
+            const addressDiv = document.getElementById("bottom-panel-address");
+            const btn = document.getElementById("bottom-panel-btn");
 
-        google.maps.event.addListener(infoWindow, 'domready', () => {
-            const btn = document.getElementById('setDestBtn');
-            if (btn) {
-                btn.addEventListener('click', () => {
+            if (panel && addressDiv && btn) {
+                addressDiv.innerText = addressText;
+
+                panel.style.display = "block";
+
+                const nerBtn = btn.cloneNode(true);
+                btn.parentNode.replaceChild(newBtn, btn);
+
+                newBtn.addEventListener("click", () => {
                     setAsDestination(lat, lng);
-                    infoWindow.close();
+                    panel.style.display = "none";
                 });
             }
-        });
-        
+        });        
     });
 
     map.addListener('drag', () => {
