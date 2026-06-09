@@ -79,7 +79,7 @@
 
                 panel.style.display = "block";
 
-                const nerBtn = btn.cloneNode(true);
+                const newBtn = btn.cloneNode(true);
                 btn.parentNode.replaceChild(newBtn, btn);
 
                 newBtn.addEventListener("click", () => {
@@ -147,7 +147,7 @@
     geocoder.geocode({ location: latLng }, (results, status) => {
         const input = document.getElementById("destinationInput");
         if (status === google.maps.GeocoderStatus.OK && results.length > 0) {
-            if (input) input.value = result[0].formatted_address;
+            if (input) input.value = results[0].formatted_address;
             logMessage(`地図タップから目的地を設定： ${results[0].formatted_address}`);
         } else {
             if (input) input.value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
