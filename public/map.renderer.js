@@ -512,5 +512,15 @@ function clearAllNavigation() {
         clearRoutePolylines();
     }
 
+    const navPanel = document.getElementById("nav-panel");
+    if (navPanel) {
+        navPanel.style.display = "none";
+    }
+
+    const statusLabel = document.getElementById("statusLabel");
+    if (statusLabel) {
+        statusLabel.innerText = "状態：待機中";
+    }
+
     logMessage("すべての目的地、ピン、経路、および画面表示をリセットしました");
 }
