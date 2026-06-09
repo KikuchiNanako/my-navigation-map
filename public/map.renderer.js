@@ -45,6 +45,17 @@
     updateCurrentLocationMarker(initialLocation, 0, false);
 
     map.addListener("click", async (e) => {
+        const panel = document.getElementById("map-bottom-panel");
+
+        if (!e.placeId && window.tempMarker) {
+            window.tempMarker.setMap(null);
+            window.tempMarker = null;
+
+            if (panel) {
+                panel.style.display = "none";
+            } return;
+        }
+
         if (window.tempMarker) {
             window.tempMarker.setMap(null);
         }
@@ -70,13 +81,11 @@
                 addressText = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
             }
 
-            const panel = document.getElementById("map-bottom-panel");
             const addressDiv = document.getElementById("bottom-panel-address");
             const btn = document.getElementById("bottom-panel-btn");
 
             if (panel && addressDiv && btn) {
                 addressDiv.innerText = addressText;
-
                 panel.style.display = "block";
 
                 const newBtn = btn.cloneNode(true);
