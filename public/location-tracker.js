@@ -357,7 +357,7 @@ async function onPositionUpdate(position) {
             }
 
             if (typeof checkStepProgression === 'function') {
-                checkCurrentLocation(currentLatLon);
+                checkStepProgression(currentLatLon);
             }
         } else {
             logMessage("既知ルート走行中：案内を停止");            
