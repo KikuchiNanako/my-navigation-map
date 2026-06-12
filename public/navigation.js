@@ -134,7 +134,7 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
             traveledCoords.push(new google.maps.LatLng(currentLocation.lat,currentLocation.lng));
 
             const remainingCoords = [new google.maps.LatLng (currentLocation.lat, currentLocation.lng)];
-            for (let i = closestVerterIndex + 1; i < rawPath.length; i++) {
+            for (let i = closestVertexIndex + 1; i < rawPath.length; i++) {
                 remainingCoords.push(rawPath[i]);
             }
 
