@@ -121,7 +121,7 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
                 const dist = getDistanceMeters(currentLocation.lat, currentLocation.lng, vLat, vLng);
                 if (dist < minDistance) {
                     minDistance = dist;
-                    closestVertxIndex = i;
+                    closestVertexIndex = i;
                 }
             }
             console.log("計算後の最短距離:", minDistance);
