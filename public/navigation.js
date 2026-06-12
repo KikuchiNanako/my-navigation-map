@@ -240,18 +240,18 @@ function clearRoutePolylines() {
 
     if (activeTraveledPolyline) {
         activeTraveledPolyline.setMap(null);
-        activeTraveledPolyline = null;
     }
+    activeTraveledPolyline = null;
 
     if (activeTraveledPolyline) {
         activeTraveledPolyline.setMap(null);
-        activeTraveledPolyline = null;
-    }
+    } 
+    activeTraveledPolyline = null;
 
     if (activeRemainingPolyline) {
         activeRemainingPolyline.setMap(null);
-        activeRemainingPolyline = null;
     }
+    activeRemainingPolyline = null;
     console.log("ナビゲーション用ポリラインをすべてクリアしました");
 }
 
