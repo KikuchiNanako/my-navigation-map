@@ -532,3 +532,16 @@ function clearAllNavigation() {
 
     logMessage("すべての目的地、ピン、経路、および画面表示をリセットしました");
 }
+
+/**
+ * 目的地入力欄のオールデリートボタンが押されたときの処理
+ */
+function clearDestinationInputOnly() {
+    const input = document.getElementById("destinationInput");
+    if (input) {
+        input.value = "";
+        input.focus();
+    }
+    logMessage("目的地の文字入力をクリアしました");
+
+}
