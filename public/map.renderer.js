@@ -270,6 +270,14 @@ window.selectedRouteIndex = 0;
 function displayRoute(origin, destination){
     clearAlternativePolylines();
 
+    if (typeof clearRoutePolylines === 'function') {
+        clearRoutePolylines();
+    }
+
+    if (typeof navigationActive !== 'undefined') {
+        navigationActive = false;
+    }
+
     if (typeof destinationMarker !== 'undefined' && destinationMarker) {
         destinationMarker.setMap(null);
         destinationMarker = null;
