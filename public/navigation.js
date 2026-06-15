@@ -1,3 +1,5 @@
+const { version } = require("react");
+
 let currentStepIndex = 0;
 let steps = [];
 let navigationActive = false;
@@ -248,6 +250,69 @@ function clearRoutePolylines() {
     }
     activeRemainingPolyline = null;
     console.log("ナビゲーション用ポリラインをすべてクリアしました");
+}
+
+/**
+ * 現在地から以降のステップの中で最も近いステップを探し、
+ * ユーザーが現在のステップから外れたとみなせる場合のみ案内をスキップする
+ * @param {{lat: number, lng: number}} currentLocation
+ */
+function skipToNearestStep(currentLocation) {
+    if (!steps || steps.length === 0 || !navigationActive) return;
+
+    const currentStep = steps[currentStepIndex];
+    let currentStepPath = currentStep.path || [];
+    if (currentStepPath.length === 0) {
+        const sLoc = toLatLngObj(currentStep.start_location);
+        const eLoc = toLatLngObj(currentStep.end_location);
+        currentStepPath = (sLoc && eLoc) ? [sLoc, eLoc] : [];
+    }
+
+    let distanceFromCurrentStepLine = Infinity;
+    currentStepPath.forEach(vertex => {
+        const vLat = (typeof vertex.lat === 'function') ? vertex.lat() : vertex.lat;
+        const vLng =(typeof vertex.lng === 'function') ? vertex.lng() : vertex.lng;
+        const dist = getDistanceMeters(currentLocation.lat, currentLocation.lng, vLat, vLng);
+        if (dist < distanceFromCurrentStepLine) {
+            distanceFromCurrentStepLine = dist;
+        }
+    });
+
+    const ON_ROUTE_THRESHOLD_M = 15;
+    if (distanceFromCurrentStepLine < ON_ROUTE_THRESHOLD_M) {
+        return;
+    }
+
+    let closestStepIndex = currentStepIndex;
+    let minDistance = Infinity;
+    const SNAP_THRESHOLD_M = 30;
+
+    for (let i = currentStepIndex; i < steps.length; i++) {
+        const step = steps[i];
+        let path = step.path || [];
+        if (path.length === 0) {
+            const sLoc = toLatLngObj(step.start_location);
+            const eLoc = toLatLngObj(step.end_location);
+            path = (sLoc && eLoc) ? [sLoc, eLoc] : [];
+        }
+
+        path.forEach((vertex) => {
+            const vLat = (typeof vertex.lat === 'function') ? vertex.lat() : vertex.lat;
+            const vLng = (typeof vertex.lng === 'function') ? vertex.lng() : vertex.lng;
+            const dist = getDistanceMeters(currentLocation.lat, currentLocation.lng, vLat, vLng);
+            if (dist < minDistance) {
+                minDistance = dist;
+                closestStepIndex = i;
+            }
+        });
+    }
+
+    if (minDistance < SNAP_THRESHOLD_M && closestStepIndex > currentStepIndex && minDistance < distanceFromCurrentStepLine) {
+        logMessage(`ルート復帰検知：現在のステップから離れたため、案内をスキップします`);
+        currentStepIndex = closestStepIndex;
+        showCurrentStep;
+        
+    }
 }
 
 /**
