@@ -87,4 +87,12 @@ async function startRouteCheck() {
     } else if (!outside) {
         logMessage("経路内を走行中");
     }
+ 
+    if (navigationActive) {
+        checkStepProgression(currentLocation);
+        updateFineGrainedRouteColor(currentLocation, currentStepIndex);
+        updateRemainingDistance(currentLocation);
+    }
  }
+
+
