@@ -1,4 +1,4 @@
-const { version } = require("react");
+//const { version } = require("react");
 
 let currentStepIndex = 0;
 let steps = [];
@@ -311,7 +311,7 @@ function skipToNearestStep(currentLocation) {
         logMessage(`ルート復帰検知：現在のステップから離れたため、案内をスキップします`);
         currentStepIndex = closestStepIndex;
         showCurrentStep;
-        
+
     }
 }
 
