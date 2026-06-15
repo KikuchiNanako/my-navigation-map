@@ -350,7 +350,38 @@ function updateRemainingDistance(currentLocation) {
         endLng
     );
 
-    const instruction = step.instructions.replace(/<[^>]*>/g, "");
+    const isFinalStep = (currentStepIndex === steps.length - 1);
+
+    if (isFinalStep && remainingMeters <= 20) {
+        navigation = false;
+
+        if (window.navigationTimer) {
+            clearInterval(window.navigationTimer);
+            window.navigationTimer = null;
+        }
+
+        updateNavDisplay("目的地に到着しました");
+
+        const statusLabel = document.getElementById("statusLabel");
+        if (statusLabel) {
+            statusLabel.innerText = "状態：目的地到着";
+        }
+
+        if (typeof speakText === 'function') {
+            speakText("目的地に到着しました。ナビゲーションを終了します");
+        }
+
+        logMessage("目的地到着。ナビゲーション終了");
+
+        const startBtn = document.getElementById("routestartButton");
+        const stopBtn = document.getElementById("stopButton");
+        const resumeBtn = document.getElementById("startButton");
+        if (startBtn) startBtn.style.disply = "block";
+        if (stopnBtn) stopBtn.style.display = "none";
+        if (resumeBtn) resumeBtn.style.display = "none";
+    } else {
+        const instruction = step.instructions.replace(/<[^>]*>/g, "");
+    }    
 
     let distanceText;
 
