@@ -337,7 +337,6 @@ function updateRemainingDistance(currentLocation) {
     if (!steps || currentStepIndex >= steps.length) return;
 
     const step = steps[currentStepIndex];
-
     if (!step || !step.end_location) return;
 
     const endLat = (typeof step.end_location.lat === 'function') ? step.end_location.lat() : step.end_location.lat;
@@ -349,6 +348,15 @@ function updateRemainingDistance(currentLocation) {
         endLat,
         endLng
     );
+
+    const instruction = step.instructions.replace(/<[^>]*>/g, "");
+
+    let distanceText;
+    if (remainingMeters >= 1000) {
+        distanceText = `${(remainingMeters / 1000).toFixed(1)} km`;
+    } else {
+        distanceText = `${Math.round(remainingMeters)}m`;
+    }
 
     const isFinalStep = (currentStepIndex === steps.length - 1);
 
@@ -376,24 +384,14 @@ function updateRemainingDistance(currentLocation) {
         const startBtn = document.getElementById("routestartButton");
         const stopBtn = document.getElementById("stopButton");
         const resumeBtn = document.getElementById("startButton");
-        if (startBtn) startBtn.style.disply = "block";
-        if (stopnBtn) stopBtn.style.display = "none";
+        if (startBtn) startBtn.style.display = "block";
+        if (stopBtn) stopBtn.style.display = "none";
         if (resumeBtn) resumeBtn.style.display = "none";
     } else {
-        const instruction = step.instructions.replace(/<[^>]*>/g, "");
-    }    
-
-    let distanceText;
-
-    if (remainingMeters >= 1000) {
-        distanceText = `${(remainingMeters / 1000).toFixed(1)} km`;
-    } else {
-        distanceText = `${Math.round(remainingMeters)}m`;
-    }
-
-    updateNavDisplay(
+        updateNavDisplay(
         instruction,
         `あと${distanceText}`,
         "#333"
-    );
+        );
+    }    
 }
