@@ -310,7 +310,17 @@ function skipToNearestStep(currentLocation) {
     if (minDistance < SNAP_THRESHOLD_M && closestStepIndex > currentStepIndex && minDistance < distanceFromCurrentStepLine) {
         logMessage(`ルート復帰検知：現在のステップから離れたため、案内をスキップします`);
         currentStepIndex = closestStepIndex;
-        showCurrentStep;
+        showCurrentStep();
+
+        updateFineGrainedRouteColor(currentLocation, currentStepIndex);
+        
+        updateRemainingDistance(currentLocation);
+
+        const nextStepObj = steps[currentStepIndex];
+        if (nextStepObj && typeof speakText === 'function') {
+            const cleanInstruction = nextStepObj.instructions.replace(/<[^>]*>/g, "");
+            speakText(`ルートに復帰しました。次は、${cleanInstruction}です`);
+        } 
 
     }
 }
@@ -426,7 +436,7 @@ function updateRemainingDistance(currentLocation) {
     const isFinalStep = (currentStepIndex === steps.length - 1);
 
     if (isFinalStep && remainingMeters <= 20) {
-        navigation = false;
+        navigationActive = false;
 
         if (window.navigationTimer) {
             clearInterval(window.navigationTimer);
