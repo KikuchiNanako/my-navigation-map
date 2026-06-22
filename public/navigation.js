@@ -338,7 +338,7 @@ function skipToNearestStep(currentLocation) {
             navInstruction.innerText = "経路を再検索しています";
         }
 
-        if (typeof reqestRouteDrawing === 'function') {
+        if (typeof requestRouteDrawing === 'function') {
             requestRouteDrawing(currentLocation);
         }
         return;

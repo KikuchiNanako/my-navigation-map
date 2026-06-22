@@ -119,7 +119,7 @@ async function getHybridLocation() {
  /**
   * 現在地と目的地からルートを計算し、地図に描画する
   */
- async function requestRouteDrawing() {
+ async function requestRouteDrawing(forcedOrigin) {
     logMessage("ルート描画を開始します");
 
     try {
