@@ -127,6 +127,8 @@ async function getHybridLocation() {
     
         if (!destinationInput) {
             logMessage("致命的エラー:目的地を入力してください");
+            
+            if (typeof isRerouting !== 'undefined') isRerouting = false;
             return;
         }
 
@@ -134,18 +136,29 @@ async function getHybridLocation() {
 
         if (rawValue === undefined || rawValue === null) {
             logMessage("致命的エラー２");
+            if (typeof isRerouting !== 'undefined') isRerouting = false;
             return;
         }
 
         const destinationPlace = String(rawValue).trim();
         if (!destinationPlace) {
             logMessage("エラー：目的地を入力してください");
+            if(typeof isRerouting !== 'undefined') isRerouting = false;
             return;        
         }
 
-        const originLatLon = await getHybridLocation();
+        let originLatLon;
+
+        if (forcedOrigin && typeof forcedOrigin.lat === 'number' && typeof forcedOrigin.lng === 'number') {
+            originLatLon = forcedOrigin;
+            logMessage("引数の現在地座標を利用して経路を再計算します");
+        } else {
+            originLatLon = await getHybridLocation();
+        }
+
         if (!originLatLon) {
             logMessage("エラー：現在地を取得できません");
+            if (typeof isRerouting !== 'undefined') isRerouting = false;
             return;
         }
 
@@ -161,15 +174,15 @@ async function getHybridLocation() {
             if (window.lastDirectionsResponse && window.lastDirectionsResponse.routes && window.lastDirectionsResponse.routes.length > 0) {
                 if (typeof updateRouteInfoUI === 'function') {
                     updateRouteInfoUI(0);
-                }
-                
+                } 
             } else {
                 console.warn("所要時間表示用のルートデータがまだ準備できていません");
             }
-        }, 800)
+        }, 800);
 
-        //const isOutsideInitial = isOutsideRoute(originLatLon.lat, originLatLon.lng);
-        updateCurrentLocationMarker(originLatLon, 0, false);
+        if (typeof updateCurrentLocationMarker === 'function') {
+            updateCurrentLocationMarker(originLatLon, 0, false);
+        }
 
         document.getElementById('routestartButton').style.display = 'block';
         document.getElementById(`startButton`).style.display = 'none';
@@ -178,6 +191,8 @@ async function getHybridLocation() {
     } catch (e) {
         logMessage(`**致命的エラー発生(rquestRouteDrawing) :** ${e.name}: ${e.message}`);
         console.error("ルート描画中のキャッチされたエラー", e);
+
+        if (typeof isRerouting !== 'undefined') isRerouting = false;
     }
     
  }

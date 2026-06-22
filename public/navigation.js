@@ -6,6 +6,7 @@ let navigationActive = false;
 let routePolylines = [];
 let activeTraveledPolyline = null;
 let activeRemainingPolyline = null;
+let isRerouting = false;
 
 /**
  * 経路ナビを開始・再開する
@@ -16,6 +17,8 @@ function startStepNavigation(leg, resume = false) {
         logMessage("ナビ開始エラー：leg情報が不足しています");
         return;
     }
+
+    isRerouting = false;
     
     steps = leg.steps;
     currentStepIndex = 0;
@@ -294,6 +297,8 @@ function clearRoutePolylines() {
 function skipToNearestStep(currentLocation) {
     if (!steps || steps.length === 0 || !navigationActive) return;
 
+    if (isRerouting) return;
+
     const currentStep = steps[currentStepIndex];
     let currentStepPath = currentStep.path || [];
     if (currentStepPath.length === 0) {
@@ -313,7 +318,29 @@ function skipToNearestStep(currentLocation) {
     });
 
     const ON_ROUTE_THRESHOLD_M = 15;
+    const REROUTE_THRESHOLD_M = 50;
+
+    
     if (distanceFromCurrentStepLine < ON_ROUTE_THRESHOLD_M) {
+        return;
+    }
+
+    if (distanceFromCurrentStepLine >= REROUTE_THRESHOLD_M) {
+        isRerouting = true;
+
+        logMessage("ルートから離れました。自動リルートを開始します");
+
+        if (typeof speakText === 'function') {
+            speakText("ルートから外れました。");
+        }
+        const navInstruction = document.getElementById("nav-instruction");
+        if (navInstruction) {
+            navInstruction.innerText = "経路を再検索しています";
+        }
+
+        if (typeof reqestRouteDrawing === 'function') {
+            requestRouteDrawing(currentLocation);
+        }
         return;
     }
 
