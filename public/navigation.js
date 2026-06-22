@@ -87,6 +87,27 @@ function drawAllRouteSteps() {
 function updateFineGrainedRouteColor(currentLocation, currentIdx) {
     if (!routePolylines || routePolylines.length === 0) return;
 
+
+    const ON_ROUTE_THRESHOLD_M = 15;
+    let isOffRoute = false;
+
+    const currentPolyline = routePolylines.find(p => p.stepIndex === currentIdx);
+    if (currentPolyline && currentPolyline.rawPath && currentPolyline.rawPath.length > 0) {
+        let minDistanceToLine = Infinity;
+        currentPolyline.rawPath.forEach((vertex) => {
+            const vLat = (typeof vertex.lat === 'function') ? vertex.lat() : vertex.lat;
+            const vLng = (typeof vertex.lng === 'function') ? vertex.lng() : vertex.lng;
+            const dist = getDistanceMeters(currentLocation.lat, currentLocation.lng, vLat, vLng);
+            if (dist < minDistanceToLine) {
+                minDistanceToLine = dist;
+            }
+        });
+
+        if (minDistanceToLine >= ON_ROUTE_THRESHOLD_M) {
+            isOffRoute = true;
+        }
+    }
+
     routePolylines.forEach((polyline) => {
         if (polyline.stepIndex < currentIdx) {
             polyline.setOptions({
@@ -105,6 +126,19 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
             polyline.setMap(map);
         }
         else if (polyline.stepIndex === currentIdx) {
+            if (isOffRoute) {
+                if (activeTraveledPolyline) activeTraveledPolyline.setMap(null);
+                if (activeRemainingPolyline) activeRemainingPolyline.setMap(null);
+
+                polyline.setOptions({
+                    strokeColor: "#0000ff",
+                    strokeOpacity: 0.7,
+                    strokeWeight: 6,
+                });
+                polyline.setMap(map);
+                return;
+            }
+
             polyline.setMap(null);
 
             const rawPath = polyline.rawPath;
