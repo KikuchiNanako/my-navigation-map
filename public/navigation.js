@@ -334,7 +334,7 @@ function skipToNearestStep(currentLocation) {
         });
 
         const ON_ROUTE_THRESHOLD_M = 15;
-        const REROUTE_THRESHOLD_M = 50;
+        const REROUTE_THRESHOLD_M = 100;
 
     
         if (distanceFromCurrentStepLine < ON_ROUTE_THRESHOLD_M) {
@@ -362,7 +362,7 @@ function skipToNearestStep(currentLocation) {
 
         let closestStepIndex = currentStepIndex;
         let minDistance = Infinity;
-        const SNAP_THRESHOLD_M = 30;
+        const SNAP_THRESHOLD_M = 60;
 
         for (let i = currentStepIndex; i < steps.length; i++) {
             const step = steps[i];
