@@ -19,10 +19,20 @@ function startStepNavigation(leg, resume = false) {
     }
 
     isRerouting = false;
-    
     steps = leg.steps;
+
     currentStepIndex = 0;
     navigationActive = true;
+
+    if (activeTraveledPolyline) {
+        activeTraveledPolyline.setMap(null);
+        activeTraveledPolyline = null;
+    }
+
+    if (activeRemainingPolyline) {
+        activeRemainingPolyline.setMap(null);
+        activeRemainingPolyline = null;
+    }
 
     clearRoutePolylines();
 
