@@ -295,96 +295,106 @@ function clearRoutePolylines() {
  * @param {{lat: number, lng: number}} currentLocation
  */
 function skipToNearestStep(currentLocation) {
-    if (!steps || steps.length === 0 || !navigationActive) return;
+    try {
+        logMessage(`[デバッグ]skipToNearestStepが呼び出されました！ lat: ${currentLocation.lat.toFixed(4)}`);
 
-    if (isRerouting) return;
-
-    const currentStep = steps[currentStepIndex];
-    let currentStepPath = currentStep.path || [];
-    if (currentStepPath.length === 0) {
-        const sLoc = toLatLngObj(currentStep.start_location);
-        const eLoc = toLatLngObj(currentStep.end_location);
-        currentStepPath = (sLoc && eLoc) ? [sLoc, eLoc] : [];
-    }
-
-    let distanceFromCurrentStepLine = Infinity;
-    currentStepPath.forEach(vertex => {
-        const vLat = (typeof vertex.lat === 'function') ? vertex.lat() : vertex.lat;
-        const vLng =(typeof vertex.lng === 'function') ? vertex.lng() : vertex.lng;
-        const dist = getDistanceMeters(currentLocation.lat, currentLocation.lng, vLat, vLng);
-        if (dist < distanceFromCurrentStepLine) {
-            distanceFromCurrentStepLine = dist;
-        }
-    });
-
-    const ON_ROUTE_THRESHOLD_M = 15;
-    const REROUTE_THRESHOLD_M = 50;
-
-    
-    if (distanceFromCurrentStepLine < ON_ROUTE_THRESHOLD_M) {
-        return;
-    }
-
-    if (distanceFromCurrentStepLine >= REROUTE_THRESHOLD_M) {
-        isRerouting = true;
-
-        logMessage("ルートから離れました。自動リルートを開始します");
-
-        if (typeof speakText === 'function') {
-            speakText("ルートから外れました。");
-        }
-        const navInstruction = document.getElementById("nav-instruction");
-        if (navInstruction) {
-            navInstruction.innerText = "経路を再検索しています";
-        }
-
-        if (typeof requestRouteDrawing === 'function') {
-            requestRouteDrawing(currentLocation);
-        }
-        return;
-    }
-
-    let closestStepIndex = currentStepIndex;
-    let minDistance = Infinity;
-    const SNAP_THRESHOLD_M = 30;
-
-    for (let i = currentStepIndex; i < steps.length; i++) {
-        const step = steps[i];
-        let path = step.path || [];
-        if (path.length === 0) {
-            const sLoc = toLatLngObj(step.start_location);
-            const eLoc = toLatLngObj(step.end_location);
-            path = (sLoc && eLoc) ? [sLoc, eLoc] : [];
-        }
-
-        path.forEach((vertex) => {
-            const vLat = (typeof vertex.lat === 'function') ? vertex.lat() : vertex.lat;
-            const vLng = (typeof vertex.lng === 'function') ? vertex.lng() : vertex.lng;
-            const dist = getDistanceMeters(currentLocation.lat, currentLocation.lng, vLat, vLng);
-            if (dist < minDistance) {
-                minDistance = dist;
-                closestStepIndex = i;
-            }
-        });
-    }
-
-    if (minDistance < SNAP_THRESHOLD_M && closestStepIndex > currentStepIndex && minDistance < distanceFromCurrentStepLine) {
-        logMessage(`ルート復帰検知：現在のステップから離れたため、案内をスキップします`);
-        currentStepIndex = closestStepIndex;
-        showCurrentStep();
-
-        updateFineGrainedRouteColor(currentLocation, currentStepIndex);
-        
-        updateRemainingDistance(currentLocation);
-
-        const nextStepObj = steps[currentStepIndex];
-        if (nextStepObj && typeof speakText === 'function') {
-            const cleanInstruction = nextStepObj.instructions.replace(/<[^>]*>/g, "");
-            speakText(`ルートに復帰しました。次は、${cleanInstruction}です`);
+        if (!steps || steps.length === 0 || !navigationActive) {
+            logMessage(`[デバッグ]案内中のステップがない、又はナビ停止中のため中断。active: ${navigationActive}`);
+            return;
         } 
 
+        if (isRerouting) return;
+
+        const currentStep = steps[currentStepIndex];
+        let currentStepPath = currentStep.path || [];
+        if (currentStepPath.length === 0) {
+            const sLoc = toLatLngObj(currentStep.start_location);
+            const eLoc = toLatLngObj(currentStep.end_location);
+            currentStepPath = (sLoc && eLoc) ? [sLoc, eLoc] : [];
+        }
+
+        let distanceFromCurrentStepLine = Infinity;
+        currentStepPath.forEach(vertex => {
+            const vLat = (typeof vertex.lat === 'function') ? vertex.lat() : vertex.lat;
+            const vLng =(typeof vertex.lng === 'function') ? vertex.lng() : vertex.lng;
+            const dist = getDistanceMeters(currentLocation.lat, currentLocation.lng, vLat, vLng);
+            if (dist < distanceFromCurrentStepLine) {
+                distanceFromCurrentStepLine = dist;
+            }
+        });
+
+        const ON_ROUTE_THRESHOLD_M = 15;
+        const REROUTE_THRESHOLD_M = 50;
+
+    
+        if (distanceFromCurrentStepLine < ON_ROUTE_THRESHOLD_M) {
+            return;
+        }
+
+        if (distanceFromCurrentStepLine >= REROUTE_THRESHOLD_M) {
+            isRerouting = true;
+
+            logMessage("ルートから離れました。自動リルートを開始します");
+
+            if (typeof speakText === 'function') {
+                speakText("ルートから外れました。");
+            }
+            const navInstruction = document.getElementById("nav-instruction");
+            if (navInstruction) {
+                navInstruction.innerText = "経路を再検索しています";
+            }
+
+            if (typeof requestRouteDrawing === 'function') {
+                requestRouteDrawing(currentLocation);
+            }
+            return;
+        }
+
+        let closestStepIndex = currentStepIndex;
+        let minDistance = Infinity;
+        const SNAP_THRESHOLD_M = 30;
+
+        for (let i = currentStepIndex; i < steps.length; i++) {
+            const step = steps[i];
+            let path = step.path || [];
+            if (path.length === 0) {
+                const sLoc = toLatLngObj(step.start_location);
+                const eLoc = toLatLngObj(step.end_location);
+                path = (sLoc && eLoc) ? [sLoc, eLoc] : [];
+            }
+
+            path.forEach((vertex) => {
+                const vLat = (typeof vertex.lat === 'function') ? vertex.lat() : vertex.lat;
+                const vLng = (typeof vertex.lng === 'function') ? vertex.lng() : vertex.lng;
+                const dist = getDistanceMeters(currentLocation.lat, currentLocation.lng, vLat, vLng);
+                if (dist < minDistance) {
+                    minDistance = dist;
+                    closestStepIndex = i;
+                }
+            });
+        }
+
+        if (minDistance < SNAP_THRESHOLD_M && closestStepIndex > currentStepIndex && minDistance < distanceFromCurrentStepLine) {
+            logMessage(`ルート復帰検知：現在のステップから離れたため、案内をスキップします`);
+            currentStepIndex = closestStepIndex;
+            showCurrentStep();
+
+            updateFineGrainedRouteColor(currentLocation, currentStepIndex);
+        
+            updateRemainingDistance(currentLocation);
+
+            const nextStepObj = steps[currentStepIndex];
+            if (nextStepObj && typeof speakText === 'function') {
+                const cleanInstruction = nextStepObj.instructions.replace(/<[^>]*>/g, "");
+                speakText(`ルートに復帰しました。次は、${cleanInstruction}です`);
+            } 
+
+        }
+        logMessage(`[デバッグ]skipTpNearestStepの最後まで正常に通過`);
+    } catch (error) {
+        logMessage(`[致命的エラー]skipToNearestStep内でクラッシュ: ${error.message}`);
     }
-}
+}  
 
 /**
  * 現在地が現在のステップの終点に近づいたかチェックし、進行を促す
