@@ -360,6 +360,10 @@ async function onPositionUpdate(position) {
 
     //ナビゲーションがアクティブな場合のみ案内ロジックを実行
     if (navigationActive) {
+        if (typeof skipToNearestStep === 'function') {
+            skipToNearestStep(currentLatLon);
+        }
+        
         if (typeof updateFineGrainedRouteColor === 'function') {
             updateFineGrainedRouteColor(currentLatLon, currentStepIndex);
         }
