@@ -334,7 +334,7 @@ function skipToNearestStep(currentLocation) {
         });
 
         const ON_ROUTE_THRESHOLD_M = 15;
-        const REROUTE_THRESHOLD_M = 100;
+        const REROUTE_THRESHOLD_M = 120;
 
     
         if (distanceFromCurrentStepLine < ON_ROUTE_THRESHOLD_M) {
