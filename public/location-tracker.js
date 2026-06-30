@@ -188,6 +188,13 @@ async function getHybridLocation() {
         document.getElementById(`startButton`).style.display = 'none';
         document.getElementById('stopButton').style.display = 'none';
 
+        if (typeof isRerouting !== 'undefined' && isRerouting) {
+            logMessage("自動でナビゲーションを再開します");
+
+            window.selectedRouteIndex = 0;
+
+            startNavigation();
+        }
     } catch (e) {
         logMessage(`**致命的エラー発生(rquestRouteDrawing) :** ${e.name}: ${e.message}`);
         console.error("ルート描画中のキャッチされたエラー", e);
