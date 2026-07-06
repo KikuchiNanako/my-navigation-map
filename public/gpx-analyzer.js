@@ -80,7 +80,7 @@
     // ===点を丸めてカウント==
 
     const monthlyCountsMap = new Map();
-    processsedPoints.forEach(p => {
+    processedPoints.forEach(p => {
         const key = `${p.month}_${p.lat_r},${p.lon_r}`;
         monthlyCountsMap.set(key, (monthlyCountsMap.get(key) || 0) + 1);
     });
@@ -102,7 +102,7 @@
     const recentPointsMap = new Map();
 
     processedPoints.filter(p => p.time >= cutoffDate).forEach(p => {
-        const key = `${p.lat_r}, ${p.lon_r}`;
+        const key = `${p.lat_r},${p.lon_r}`;
         recentPointsMap.set(key, (recentPointsMap.get(key) || 0) + 1);
     });
 
@@ -114,13 +114,13 @@
         }
     }
 
-    const frequentPointsSet = new Set(recentHighPoints.map(p => `${p.lat_r}, ${p.lon_r}`));
+    const frequentPointsSet = new Set(recentHighPoints.map(p => `${p.lat_r},${p.lon_r}`));
     frequentOldPointsKeys.forEach(key => frequentPointsSet.add(key));
 
     //地図表示用の配列に変換
     frequentPoints = Array.from(frequentPointsSet).map(key => {
         const [lat_r, lon_r] = key.split(',').map(Number);
-        return
+        return { lat_r, lon_r };
     });
     
     logMessage(`よく通る道の点数: ${frequentPoints.length}`);
