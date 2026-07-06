@@ -86,6 +86,18 @@
         pointCountsMap.set(key, (pointCountsMap.get(key) || 0) + 1);
     });
 
+    //過去のいずれかの月で２０回以上カウントされた場所をすべて保存するセット
+    const frequentOldPointsKeys = new Set();
+
+    //全データを見て、月ごとの基準を超えた場所をすべて蓄積
+    for (const [key, count] of monthlyCountsMap.entries()) {
+        if (count >= 20) {
+            const [month, latLonKey] = Key.split('_');
+            frequentOldPointsKeys.add(latLonKey);
+        }
+    }
+
+    //直近３０日間のカウント
     const now = new Date();
     const cutoffDate = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
     const recentPointsMap = new Map();
@@ -103,28 +115,15 @@
         }
     }
 
-    const monthlyCountsMap = new Map();
-    processedPoints.forEach(p => {
-        const key = `${p.month}_${p.lat_r},${p.lon_r}`;
-        monthlyCountsMap.set(key, (monthlyCountsMap.get(key) || 0) + 1);
-    });
-
-    const frequentOldPointsKeys = new Set();
-    for (const [key, count] of monthlyCountsMap.entries()) {
-        if (count >= 20) {
-            const [month, latLonKey] = key.split('_');
-            frequentOldPointsKeys.add(latLonKey);
-        }
-    }
-
     const frequentPointsSet = new Set(recentHighPoints.map(p => `${p.lat_r}, ${p.lon_r}`));
     frequentOldPointsKeys.forEach(key => frequentPointsSet.add(key));
 
+    //地図表示用の配列に変換
     frequentPoints = Array.from(frequentPointsSet).map(key => {
         const [lat_r, lon_r] = key.split(',').map(Number);
-        return { lat_r, lon_r };
+        return
     });
-   
+    
     logMessage(`よく通る道の点数: ${frequentPoints.length}`);
  }
 
