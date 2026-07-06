@@ -80,12 +80,9 @@
     // ===点を丸めてカウント==
 
     const monthlyCountsMap = new Map();
-
-    //全期間のカウント
-    //const pointCountsMap = new Map();
-    processedPoints.forEach(p => {
-        const key = `${p.lat_r}, ${p.lon_r}`;
-        pointCountsMap.set(key, (pointCountsMap.get(key) || 0) + 1);
+    processsedPoints.forEach(p => {
+        const key = `${p.month}_${p.lat_r},${p.lon_r}`;
+        monthlyCountsMap.set(key, (monthlyCountsMap.get(key) || 0) + 1);
     });
 
     //過去のいずれかの月で２０回以上カウントされた場所をすべて保存するセット
@@ -94,7 +91,7 @@
     //全データを見て、月ごとの基準を超えた場所をすべて蓄積
     for (const [key, count] of monthlyCountsMap.entries()) {
         if (count >= 20) {
-            const [month, latLonKey] = Key.split('_');
+            const [month, latLonKey] = key.split('_');
             frequentOldPointsKeys.add(latLonKey);
         }
     }
