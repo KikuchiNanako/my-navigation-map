@@ -79,8 +79,10 @@
 
     // ===点を丸めてカウント==
 
+    const monthlyCountsMap = new Map();
+
     //全期間のカウント
-    const pointCountsMap = new Map();
+    //const pointCountsMap = new Map();
     processedPoints.forEach(p => {
         const key = `${p.lat_r}, ${p.lon_r}`;
         pointCountsMap.set(key, (pointCountsMap.get(key) || 0) + 1);
