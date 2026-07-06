@@ -90,7 +90,7 @@
 
     //全データを見て、月ごとの基準を超えた場所をすべて蓄積
     for (const [key, count] of monthlyCountsMap.entries()) {
-        if (count >= 15) {
+        if (count >= 10) {
             const [month, latLonKey] = key.split('_');
             frequentOldPointsKeys.add(latLonKey);
         }
