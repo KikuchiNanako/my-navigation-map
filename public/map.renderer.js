@@ -223,8 +223,11 @@ async function drawMap() {
     const points = mergedPoints.map(p => ({ lat: p.lat_r, lng: p.lon_r }));
     const chunkSize = 100;
     const chunks = [];
-    for (let i = 0; i < points.length; i += chunkSize) {
-        chunks.push(points.slice(i, i + chunkSize));
+    for (let i = 0; i < points.length; i += chunkSize - 1) {
+        const chunk = points.slice(i, i + chunkSize);
+        chunks.push(chunk);
+
+        if (i + chunkSize >= points.length) break;
     }
 
     const apiKey = window.MAPS_API_KEY;
