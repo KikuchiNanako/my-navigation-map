@@ -198,7 +198,82 @@
     return merged;
 }
 
+//描画したポリラインを管理する配列（クリア用）
+let frequentPolylines = [];
+
 async function drawMap() {
+    if (!map) return;
+
+    //過去に描画した線があれば地図から削除してクリア
+    frequentPolylines.forEach(p => p.setMap(null));
+    frequentPolylines = [];
+
+    //よく通る道のデータがなければ何もしない
+    if (!window.frequentPoints || window.frequentPoints.length === 0) {
+        logMessage("描画するよく通る道のデータがありません");
+        return;
+    }
+
+    const rawPoints = window.frequentPoints;
+    const mergedPoints = mergeNearbyPoints(rawPoints, 20);
+
+    logMessage(`よく通る道の線描画を開始します...(データ数: ${window.frequentPoints.length})`);
+
+    //Roads APIは一度に100点までしか処理できないため、100点ずつの塊（チャンク）に分ける
+    const points = mergedPoints.map(p => ({ lat: p.lat_r, lng: p.lon_r }));
+    const chunkSize = 100;
+    const chunks = [];
+    for (let i = 0; i < points.length; i += chunkSize) {
+        chunks.push(points.slice(i, i + chunkSize));
+    }
+
+    const apiKey = window.MAPS_API_KEY;
+    if (!apiKey) {
+        logMessage("APIエラー：線描画のためのAPIキーが取得できていません");
+        return;
+    }
+
+    //各塊ごとにAPIを呼び出して道路に吸着させる
+    for (let i = 0; i < chunks.length; i++) {
+        const chunk = chunks[i];
+
+        //座標を文字列形式に変換
+        const pathString = chunk.map(p => `${p.lat},${p.lng}`).join('|');
+
+        const url = `https://roads.googleapis.com/v1/snapToRoads?path=${pathString}&interpolate=true&key=${apiKey}`;
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`APIエラー: ${response.status}`);
+
+            const data = await response.json();
+
+            if (data.snappedPoints && data.snappedPoints.length > 0) {
+                const snappedPath = data.snappedPoints.map(sp => ({
+                    lat: sp.location.latitude,
+                    lng: sp.location.longitude
+                }));
+
+                const polyline = new google.maps.Polyline({
+                    path: snappedPath,
+                    map: map,
+                    strokeColor: "#ff0000",
+                    strokeOpacity: 0.6,
+                    strokeWeight: 5,
+                    clickable: false
+                });
+
+                frequentPolylines.push(polyline);
+            }
+        } catch (e) {
+            console.error(`Roads APIエラー（分割 ${i+1}）:`, e);
+            logMessage(`一部の区間の線描画に失敗しました: ${e.message}`);
+        }
+    }
+
+    logMessage("よく通る道の線描画が完了しました");
+}  
+    /*
     if (typeof map === 'undefined' || !map) {
         if (window.map) {
             map = window.map;
@@ -252,12 +327,13 @@ async function drawMap() {
 
     logMessage("地図に描画しました");
  }}
+*/
 
  /**
  * マップ上の頻度ポイントの円をすべてクリアする
  */
 function clearFrequentCircle() {
-    if (frequentCircles.length > 0) {
+    if (typeof frequentCircles !== 'undefined' && frequentCircles.length > 0) {
         frequentCircles.forEach(circle => circle.setMap(null));
         frequentCircles = [];
         logMessage("以前の頻度ポイントを地図からクリアしました");
