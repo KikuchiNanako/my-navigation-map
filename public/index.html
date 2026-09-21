@@ -2,8 +2,11 @@
 <html lang = "ja">
     <head>
         <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>GPX経路分析</title>
+        <link rel="stylesheet" href="style.css">
         <style>
+            /*
             body {
                 margin: 0;
                 padding: 10px;
@@ -36,136 +39,81 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
         <!-- Google Maps-->
+        */
     </head>
     <body>
         <h1>GPXデータ解析と経路判定</h1>
 
-        <div style="background: #f9f9f9; padding: 15px; border: 1px solid #ddd; border-radius: 15px; margin-bottom: 20px;">
-            <p style="margin-top: 0;"><strong>過去のログを読み込む：</strong></p>
-
-            <input type="file" id="gpxFileInput" multiple accept=".gpx" style="margin-bottom: 10px;">
-
-            <br>
-
-            <button onclick="processFiles()" id="processButton" style="padding: 5px 10px; cursor: pointer;">
+        <!-- 1. GPXインポートエリア -->
+        <div class="card-panel">
+            <p style="margin-top: 0; font-weight:bold;">過去のログを読み込む</p>
+            <input type="file" id="gpxFileInput" multiple accept=".gpx">
+            <button onclick="processFiles()" id="processButton" class="btn btn-primary">
                 GPXファイルをデータベースに保存
             </button>
-            <div id="fileNameDisplay" style="font-size: 0.8em; color: #666; margin-top: 5px;">
-                複数選択して一括読み読みが可能です
-            </div>
+
         </div>
 
-        <hr>
-        
-        <div style="display: inline-flex; align-items: center; gap: 8px; width: 100%; max-width: 500px; margin-bottom: 10px;">
-            <div style="position: relative; flex: 1; display: flex; align-items: center;">
-                <input type="text" id="destinationInput" placeholder="目的地を入力（例：東京タワー）" style="width: 100%; padding: 6px 32px 6px 8px; box-sizing: border-box; font-size: 14px;">
-
-                <button id="clearInputButton" onclick="clearDestinationInputOnly()" style="
-                    position: absolute;
-                    right: 6px;
-                    background: none;
-                    border: none;
-                    color: #999;
-                    font-size: 16px;
-                    cursor: pointer;
-                    font-weight: bold;
-                    padding: 4px;
-                    line-height: 1;">
-                    ×
+        <!-- 2. 検索・ナビ操作エリア -->
+        <div class="card-panel">
+            <div class="search-box">
+                <div class="search-input-weapper">
+                    <input type="text" id="destinationInput" placeholder="目的地を入力（例：東京タワー）">
+                    <button class="btn-clear-input" onclick="clearDestinationInputOnly()">×</button>
+                </div>
+                <button onclick="requestRouteDrawing()" id="drawingButton" class="btn btn-primary">
+                    ルート検索    
                 </button>
             </div>
-        </div>
-        
-        <button onclick="requestRouteDrawing()" id="drawingButton">
-            ルート検索開始
-        </button>
 
-        <div id = "navControls" style="margin-top: 10px;">
-            <button onclick="startNavigation()" id="routestartButton" style="display: block";>
-            ルートを確認してナビ開始
-            </button>
-
-             <button onclick="stopNavigation()" id="stopButton" style="display: none;">
-            ナビ停止
-            </button>
-
-            <button onclick="startNavigation()" id="startButton" style="display: none;">
-            ナビ再開
-            </button>
-
-            <button onclick="resumeAutoFollow()">
-                現在地に戻る
-            </button>
-
-        </div>
-        
-        <button id="clearAllButton" onclick="clearAllNavigation()" style="
-            background-color: #d93025;
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 14px;
-            margin-left: 8px;">
-            すべて消去
-        </button>
-        
-        <div id="statusLabel" style="font-weight:bold; padding:10px; background:#f0f0f0; margin-top: 10px; border-radius: 5px;">
-            状態：待機中
-        </div>
-
-        <div id="nav-panel" style="background: #333; color: white; padding: 20px; font-size: 1.4em; min-height: 80px; border-radius: 12px; margin-bottom: 15px; margin-top:15px; display: none; text-align: center; box-shadow: 0 4px15px rgba(0,0,0,0.3); border: 2px solid #555;">
-            <div id="nav-instruction" style="font-weight: bold; line-height: 1.4;">目的地を入力してルートを検索してください</div>
-            <div id="nav-distance" style="font-size: 2em; font-weight: bold; color: #ffeb3b; margin-top: 8px;"></div>
-        </div>
-
-        <div id="map" style="margin-top: 10px;"></div>
-
-        <div id="map-bottom-panel" style="
-            display: none;
-            position: absolute;
-            bottom: 24px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: white;
-            padding: 16px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
-            z-index: 1000;
-            width: 90%;
-            max-width: 360px;
-            font-family: sans-serif;
-            box-sizing: border-box;">
-            
-            <div id="bottom-panel-address" style="font-size: 13px; color: #5f6368; margin-bottom: 8px; word-break: break-all; max-height: 40px; overflow: hidden;">
-                選択した位置
+            <div id="navControls">
+                <button onclick="startNavigation()" id="routestartButton" class="btn btn-success" style="display:none;">
+                    ナビ開始    
+                </button>   
+                <button onclick="stopNavigation()" id="stopButton" class="btn btn-danger" style="display:none;">
+                    ナビ停止
+                </button>
+                <button onclick="startNavigation()" id="startButton" class="btn btn-success" style="display:none;">
+                    ナビ再開
+                </button>
+                <button onclick="resumeAutoFollow()" class="btn btn-secondary">
+                    現在地に戻る
+                </button> 
+                <button id="clearAllButton" onclick="clearAllNavigation()" class="btn btn-danger">
+                    すべて消去
+                </button>
             </div>
-            <button id="bottom-panel-btn" style="
-                background-color: #1a73e8;
-                color: white;
-                border: none;
-                padding: 10px;
-                border-radius: 8px;
-                cursor: pointer;
-                font-weight: bold;
-                width: 100%;
-                font-size: 14px;">
-                ここを目的地にする
-            </button>
+
+            <div id="statusLabel" class="card-panel" style="margin-top:10px; background:#f0f0f0;">
+                状態：待機中
+            </div>
         </div>
 
-        <div id="routeStepsContainer" style="background: #ffffff; padding: 15px; max-height: 300px; overflow-y: auto; border: 1px solid #ccc; margin-top: 10px; display: none;">
-            <h3 style="margin-top: 0; font-size: 16px; border-bottom: 2px solid #2c3e50; padding-bottom: 5px;">選択中の経路</h3>
-            <ol id="routeStepsList" style="padding-left: 20px; margin:0; line-height: 1.6;"></ol>
+        <!-- 3. ナビ案内パネル -->
+        <div id="nav-panel" style="display: none;">
+            <div id="nav-instruction"></div>
+            <div id="nav-distance"></div>    
         </div>
 
-        <hr>
-        <p style="font-size: 0.8em; color: #666; margin-bottom: 2px;">動作ログ</p>
-        <div id="log"></div>
+        <!-- 4. メインマップ -->
+        <div id="map"></div>
 
+        <!-- 5. ステップ表示 -->
+        <div id="routeStepsContainer" class="card-panel" style="display: none;">
+            <h3>選択中の経路</h3>
+            <ol id="routeStepsList"></ol>
+        </div>
+
+        <!-- 6. デバッグログ（開閉トグル付き） -->
+        <div id="logPanel" class="card-panel">
+            <div id="logPanelHeader" onclick="toggleLogDisplay()">
+                <span style="font-size: 0.85em; color: #666;">動作ログ</span>
+                <button class="btn btn-secondary" style="pdding: 2px 8px; font-size:11px;">表示/非表示</button>
+            </div>
+            <div id="log"></div>
+        </div>
+
+        <!-- JSスクリプトの読み込み -->
         <script src="utils.js"></script>
         <script src="gpx-parser.js"></script>
         <script src="gpx-analyzer.js"></script>
@@ -173,161 +121,8 @@
         <script src="route.check.js"></script>
         <script src="location-tracker.js"></script>
         <script src="map.renderer.js"></script>
-        
-        <script>
-            var allPoints = [];
-            var frequentPoints = [];
-            var map;
-            var gpxProcessed = false;
-            var directionsService;
-            var directionsRenderer;
-            var frequentCircles = [];
-            var currentLocationMarker = null;
-            var watchId = null;
-            var pathLog = [];
-            var navigationTimer = null;
-            var isUserInteracting = false;
-            var interactionTimeout = null;
-            var destinationMarker = null;
-            var lastHeading = 0;
-            var markerAnimationId = null;
-            var taegetLat = null;
-            var taegetLng = null;
-            var targetHeading = null;
-            var currentDisplayedLat = null;
-            var currentDisplayedLng = null;
-            var currentDisplayedHeaging = null;
-
-            async function loadGoogleMaps() {
-                try {
-                    const res = await fetch("/api/get-api-key");
-                    if (!res.ok) throw new  Error("APIキーの取得に失敗しました");
-                    const data = await res.json();
-                    const API_KEY = data.key;
-
-                    if (!API_KEY) {
-                        logMessage("Google Maps APIキーが設定されてません");
-                        return;
-                    }
-
-                    window.MAPS_API_KEY = API_KEY;
-
-                    ((g) => {
-                        var h, a, k, p = "The Google Maps Javascript API", c = "google", l = "importLibrary", q = "__ib__", m = document, b = window;
-                        b = b[c] || (b[c] = {});
-                        var d = b.maps || (b.maps = {}), r = new Set, e = new URLSearchParams, u = () => h || (h = new Promise(async (f, n) => {
-                            await (a = m.createElement("script"));
-                            e.set("libraries", [...r] + "");
-                            for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), g[k]);
-                            e.set("callback", c + ".maps." + q);
-                            a.src = `https://maps.${c}apis.com/maps/api/js?` + e;
-                            d[q] = f;
-                            a.onerror = () => h = n(Error(p + " could not load. "));
-                            a.nonce = m.querySelector("script[nonce]")?.nonce || "";
-                            m.head.append(a)
-                        }));
-                        d[l] ? console.warn(p + " only loads once. RE-referencing library %s.", r) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l] (f, ...n))
-                    })({
-                        key: API_KEY,
-                        v: "beta",
-                        language: "ja",
-                        mapIds: ["3d7b65239e3531fb68add898"],
-                    });
-
-                    await google.maps.importLibrary("maps");
-                    await google.maps.importLibrary("routes");
-                    await google.maps.importLibrary("places");
-
-                    if (typeof initMap === "function"){
-                        initMap();
-                        logMessage("Google Maps ロード完了");
-                    }        
-                } catch (error) {
-                    logMessage(`APIキーのロードエラー： ${error.message}`);
-                    console.error("APIキーロードエラー", error);
-                }
-            }
-
-            window.addEventListener("DOMContentLoaded", loadGoogleMaps);
-
-            window.addEventListener("load", async () => {
-                setTimeout(async () => {
-                    try {
-                        logMessage("保存済みのログを確認しています");
-                        const allSaveData = await getAllPointsFromDB();
-
-                        if (allSaveData && allSaveData.length > 0) {
-                            allPoints = allSaveData.map(d => ({ lat: d.lat, lon: d.lon, time: d.time }));
-                            logMessage(`合計 ${allPoints.length} 地点の過去ログを読み込みました`);
-
-                            calculateFrequentPoints();
-                            gpxProcessed = true;
-
-                            if (typeof drawMap === 'function') drawMap();
-                        } else {
-                            logMessage("保存されたログがありません。新しいGPXファイルを読み込んでください");
-                        }
-                    } catch (e) {
-                        console.error("初期読み込みエラー:", e);
-                    }
-                }, 1500);
-            });
-
-            /*
-            async function processFiles() {
-                allPoints = [];
-
-                // --- サーバー上の GPX ファイルを取得 ---
-                try {
-                    const res = await fetch("/api/gpx");
-                    if (res.ok) {
-                        const serverFiles = await res.json();
-                        for (const file of serverFiles) {
-                            const gpxRes = await fetch(`/api/gpx/${file}`);
-                            const gpxText = await gpxRes.text();
-                            const points = parseGpx(gpxText);
-                            allPoints.push(...points);
-                            logMessage(`${file}を読み込みました`);
-                        }
-                    }
-                } catch (e) {
-                    console.log("サーバーGPX読み込みスキップ又は失敗");
-                }
-    
-                // --- ユーザーアップロードファイルの処理 ---
-                const fileInput = document.getElementById('gpxFileInput');
-                const userFiles = fileInput.files;
-
-                if (userFiles) {
-                    for (let i = 0; i < userFiles.length; i++) {
-                    const gpxText = await userFiles[i].text();
-                    const points = parseGpx(gpxText);
-                    allPoints.push(...points);
-                    logMessage(`アップロードファイル　${userFiles[i].name} を追加しました`);
-                    } 
-                }
-
-                if (allPoints.length > 0) {
-                    gpxProcessed = true;
-                    calculateFrequentPoints();
-                    drawMap();
-                    logMessage("GPX処理完了");
-                } else {
-                    logMessage("有効なGPXポイントが見つかりませんでした");
-                    }
-            }
-            */
-
-            async function updateLogCounter() {
-                const points =await getAllPointsFromDB();
-                const counterElement = document.getElementById('logCont');
-                if (counterElement) {
-                    counterElement.innerText = `保存済みログ： ${points.length} 地点`;
-                }
-            }
-
-        </script>
-
-
+        <script src="app.js"></script>
     </body>
 </html>
+
+            
