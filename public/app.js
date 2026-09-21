@@ -70,7 +70,7 @@ async function loadGoogleMaps() {
             key: API_KEY,
             v: "beta",
             language: "ja",
-            mapIds: ["3d7b65239e3531fb68add898"],
+            mapIds: ["3d7b65239e3531fb68add898"]
         });
 
         await google.maps.importLibrary("maps");
