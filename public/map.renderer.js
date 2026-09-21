@@ -29,21 +29,21 @@
     });
 
     window.map = map;
-    window.googleMapsReady = true;
 
-    if (window.frequentPoints && window.frequentPoints.length > 0) {
-        drawMap();
-    }
-
+    //Directions関連の初期化
     directionsService = new google.maps.DirectionsService();
     directionsRenderer = new google.maps.DirectionsRenderer({
         map: map,
-        suppressMarkers: true,
+        suppressPolylines: true,
         suppressPolylines: true
     });
 
-    updateCurrentLocationMarker(initialLocation, 0, false);
+    //現在地マーカーの更新
+    if (typeof updateCurrentLocationMarker === 'function') {
+        updateCurrentLocationMarker(initialLocation, 0, false);
+    }
 
+    //マップクリックイベントの設定
     map.addListener("click", async (e) => {
         const panel = document.getElementById("map-bottom-panel");
 
@@ -99,6 +99,7 @@
         });        
     });
 
+    //ドラッグ操作のイベントリスナー
     map.addListener('drag', () => {
         isUserInteracting = true;
 
@@ -116,6 +117,7 @@
         }, 4000);
     });
 
+    //目的地入力補完
     const input = document.getElementById("destinationInput");
     if (input) {
         const autocomplete = new google.maps.places.Autocomplete(input, {
@@ -129,7 +131,14 @@
         });
     }
 
+    //すべての初期化が終わった後にdrawmapを呼び出す
+    const pointsToDraw = window.frequentPoints || frequentPoints;
+    if (pointsToDraw && pointsToDraw.length > 0 && typeof drawMap === 'function') {
+        drawMap();
+    }
  }
+
+ 
  /**
   * 吹き出しのボタンが押されたときに、正式に目的地としてセットする関数
   */

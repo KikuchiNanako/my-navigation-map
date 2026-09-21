@@ -3,6 +3,29 @@
  */
 
 //グローバル状態管理オブジェクト（必要最小限のグローバル共有）
+var map = null;
+var directionsService = null;
+var directionsRenderer = null;
+var frequentCircles = [];
+var currentLocationMarker = null;
+var watchId = null;
+var pathLog = [];
+var navigationTimer = null;
+var isUserInteracting = false;
+var interactionTimeout = null;
+var destinationMarker = null;
+var lastHeading = 0;
+var markerAnimationId = null;
+var targetLat = null;
+var targetLng = null;
+var targetHeading = null;
+var currentDisplayedLat = null;
+var currentDisplayedLng = null;
+var currentDisplayedHeading = null;
+var allPoints = [];
+var frequentPoints = [];
+var gpxProcessed = false;
+/*
 window.appState = {
     allPoints: [],
     frequentPoints: [],
@@ -27,6 +50,7 @@ window.appState = {
     currentDisplayedLng: null,
     currentDisplayedHeaging: null
 };
+*/
 
 //ログ切り替え関数
 function toggleLogDisplay() {
