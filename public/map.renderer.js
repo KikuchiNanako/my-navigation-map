@@ -560,50 +560,38 @@ function clearAlternativePolylines() {
  * 全てのナビゲーション情報を完全に消去してリセットする
  */
 function clearAllNavigation() {
-    if (window.tempMarker) {
-        window.tempMarker.setMap(null);
-        window.tempMarker = null;
+    if (appState.tempMarker) {
+        appState.tempMarker.setMap(null);
+        appState.tempMarker = null;
     }
 
-    if (typeof destinationMarker !== 'undefined' && destinationMarker) {
-        destinationMarker.setMap(null);
-        destinationMarker = null;
+    if (appState.destinationMarker) {
+        appState.destinationMarker.setMap(null);
+        appState.destinationMarker = null;
     }
 
+    //ポリラインのクリア
     if (typeof clearAlternativePolylines === 'function') {
         clearAlternativePolylines();
     }
 
-    if (typeof directionsRenderer !== 'undefined' && directionsRenderer) {
-        directionsRenderer.setDirections({ routes: [] });
+    if (typeof clearRoutePolylines === 'function') clearRoutePolylines();
+
+    if (appState.directionsRenderer) {
+        appState.directionsRenderer.setDirections({ routes: [] });
     }
 
+    //入力欄のリセット
     const input = document.getElementById("destinationInput");
     if (input) {
         input.value = "";
     }
 
-    const bottomPanel = document.getElementById("map-bottom-panel");
-    if (bottomPanel) {
-        bottomPanel.style.display = "none";
-    }
-
-    const stepsContainer = document.getElementById("routeStepsContainer");
-    if (stepsContainer) {
-        stepsContainer.style.display = "none";
-    }
-
-    if (typeof navigationActive !== 'undefined') {
-        navigationActive = false;
-    }
-    if (typeof clearRoutePolylines === 'function') {
-        clearRoutePolylines();
-    }
-
     const navPanel = document.getElementById("nav-panel");
-    if (navPanel) {
-        navPanel.style.display = "none";
-    }
+    if (navPanel) navPanel.style.display = "none";
+
+    //アプリ状態を一括リセット
+    appState.resetNavigation();
 
     const statusLabel = document.getElementById("statusLabel");
     if (statusLabel) {

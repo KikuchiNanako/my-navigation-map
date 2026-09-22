@@ -136,3 +136,47 @@ window.addEventListener("load", async () => {
         }
     }, 1500);
 });
+
+//アプリ全体で共有する単一の状態管理オブジェクト
+window.appState = {
+    //地図・Google APIインスタンス
+    map: null,
+    directionsService: null,
+    directionsRenderer: null,
+
+    //位置・トラッキング関連
+    currentLocationMarker: null,
+    destinationMarker: null,
+    tempMarker: null,
+    watchId: null,
+    lastHeading: 0,
+
+    //ナビゲーション状態
+    NavigationActive: false,
+    currentStepIndex: 0,
+    steps: [],
+    isRerouting: false,
+    isUserInteracting: false,
+
+    routePolyline: [],
+    activeTraveledPolyline: null,
+    activeRemainingPolylinr: null,
+    alternativePolylines: [],
+    frequentPolylines: [],
+    frequentCircles: [],
+
+    allPoints: [],
+    frequentPoints: [],
+    gpxProcessed: false,
+
+    resetNavigation() {
+        this.NavigationActive = false;
+        this.currentStepIndex = 0;
+        this. steps = [],
+        this.isRerouting = false;
+        if (this.watchId !== null) {
+            navigator.geolocation.clearWatch(this.watchId);
+            this.watchId = null;
+        }
+    }
+};

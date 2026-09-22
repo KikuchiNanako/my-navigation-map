@@ -1,5 +1,6 @@
 //const { version } = require("react");
 
+/*
 let currentStepIndex = 0;
 let steps = [];
 let navigationActive = false;
@@ -7,6 +8,7 @@ let routePolylines = [];
 let activeTraveledPolyline = null;
 let activeRemainingPolyline = null;
 let isRerouting = false;
+*/
 
 /**
  * 経路ナビを開始・再開する
@@ -14,28 +16,26 @@ let isRerouting = false;
  */
 function startStepNavigation(leg, resume = false) {
     if (!leg || !leg.steps) {
-        logMessage("ナビ開始エラー：leg情報が不足しています");
+        logMessage("ナビ開始エラー：leg情報が不足しています")
         return;
     }
 
-    isRerouting = false;
-    steps = leg.steps;
+    appState.isRerouting = false;
+    appState.steps = leg.steps;
+    appState.currentStepIndex = 0;
+    appState.navigationActive = true;
 
-    currentStepIndex = 0;
-    navigationActive = true;
-
-    if (activeTraveledPolyline) {
-        activeTraveledPolyline.setMap(null);
-        activeTraveledPolyline = null;
+    if (appState.activeTraveledPolyline) {
+        appState.activeTraveledPolyline.setMap(null);
+        appState.activeTraveledPolyline = null;
     }
 
-    if (activeRemainingPolyline) {
-        activeRemainingPolyline.setMap(null);
-        activeRemainingPolyline = null;
+    if (appState.activeRemainingPolyline) {
+        appState.activeRemainingPolyline.setMap(null);
+        appState.activeRemainingPolyline = null;
     }
 
     clearRoutePolylines();
-
     if (typeof clearAlternativePolylines === 'function') {
         clearAlternativePolylines();
     }
