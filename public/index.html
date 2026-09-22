@@ -4,42 +4,8 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>GPX経路分析</title>
-        <link rel="stylesheet" href="style.css">
-        <style>
-            /*
-            body {
-                margin: 0;
-                padding: 10px;
-                font-family: sans-serif;
-            }
-            
-            #map {
-                height: 400px;
-                width: 100%;
-            }
-            #log {
-                height: 150px;
-                overflow-y: scroll;
-                border: 1px solid #ccc;
-                padding: 5px;
-                margin-bottom: 10px; 
-            }
-
-            #gpxFileInput{
-                display: inline-block;
-                margin-bottom: 10px;
-            }
-
-            #fileNameDisplay {
-                display: none;
-            }
-
-        </style>
-
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-        <!-- Google Maps-->
-        */
+        <link rel="stylesheet" href="style.css">            
+                
     </head>
     <body>
         <h1>GPXデータ解析と経路判定</h1>
@@ -57,7 +23,7 @@
         <!-- 2. 検索・ナビ操作エリア -->
         <div class="card-panel">
             <div class="search-box">
-                <div class="search-input-weapper">
+                <div class="search-input-wrapper">
                     <input type="text" id="destinationInput" placeholder="目的地を入力（例：東京タワー）">
                     <button class="btn-clear-input" onclick="clearDestinationInputOnly()">×</button>
                 </div>
@@ -108,7 +74,7 @@
         <div id="logPanel" class="card-panel">
             <div id="logPanelHeader" onclick="toggleLogDisplay()">
                 <span style="font-size: 0.85em; color: #666;">動作ログ</span>
-                <button class="btn btn-secondary" style="pdding: 2px 8px; font-size:11px;">表示/非表示</button>
+                <button class="btn btn-secondary" style="padding: 2px 8px; font-size:11px;">表示/非表示</button>
             </div>
             <div id="log"></div>
         </div>

@@ -196,7 +196,7 @@ async function getHybridLocation() {
             startNavigation();
         }
     } catch (e) {
-        logMessage(`**致命的エラー発生(rquestRouteDrawing) :** ${e.name}: ${e.message}`);
+        logMessage(`**致命的エラー発生(requestRouteDrawing) :** ${e.name}: ${e.message}`);
         console.error("ルート描画中のキャッチされたエラー", e);
 
         if (typeof isRerouting !== 'undefined') isRerouting = false;

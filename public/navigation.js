@@ -400,7 +400,7 @@ function skipToNearestStep(currentLocation) {
             } 
 
         }
-        logMessage(`[デバッグ]skipTpNearestStepの最後まで正常に通過`);
+        logMessage(`[デバッグ]skipToNearestStepの最後まで正常に通過`);
     } catch (error) {
         logMessage(`[致命的エラー]skipToNearestStep内でクラッシュ: ${error.message}`);
     }

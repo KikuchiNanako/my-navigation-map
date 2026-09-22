@@ -34,7 +34,7 @@
     directionsService = new google.maps.DirectionsService();
     directionsRenderer = new google.maps.DirectionsRenderer({
         map: map,
-        suppressPolylines: true,
+        suppressMarkers: true,
         suppressPolylines: true
     });
 

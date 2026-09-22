@@ -65,7 +65,7 @@
         processFiles();
         document.getElementById('drawMapButton').disabled = false;
     } else {
-        logMessage("エラー： processeFiles 関数が見つかりません");
+        logMessage("エラー： processFiles 関数が見つかりません");
     }
  }
 
