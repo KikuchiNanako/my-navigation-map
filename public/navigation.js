@@ -282,20 +282,20 @@ function toLatLngObj(loc) {
 }
 
 function clearRoutePolylines() {
-    if (routePolylines && routePolylines.length > 0) {
-        routePolylines.forEach(p => p.setMap(null));
+    if (appState.routePolylines && appState.routePolylines.length > 0) {
+        appState.routePolylines.forEach(p => p.setMap(null));
     }
-    routePolylines = [];
+    appState.routePolylines = [];
 
-    if (activeTraveledPolyline) {
-        activeTraveledPolyline.setMap(null);
-        activeTraveledPolyline = null;
+    if (appState.activeTraveledPolyline) {
+        appState.activeTraveledPolyline.setMap(null);
+        appState.activeTraveledPolyline = null;
     }
 
-    if (activeRemainingPolyline) {
-        activeRemainingPolyline.setMap(null);
+    if (appState.activeRemainingPolyline) {
+        appState.activeRemainingPolyline.setMap(null);
+        appState.activeRemainingPolyline = null;
     }
-    activeRemainingPolyline = null;
     console.log("ナビゲーション用ポリラインをすべてクリアしました");
 }
 
