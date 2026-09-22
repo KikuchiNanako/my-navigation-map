@@ -66,9 +66,9 @@ function startStepNavigation(leg, resume = false) {
 function drawAllRouteSteps() {
     clearRoutePolylines();
 
-    if (!steps || steps.length === 0) return;
+    if (!appState.steps || appState.steps.length === 0) return;
 
-    steps.forEach((step, index) => {
+    appState.steps.forEach((step, index) => {
         let path = step.path;
         if (!path) {
             const startLoc = toLatLngObj(step.start_location);
@@ -87,7 +87,7 @@ function drawAllRouteSteps() {
         polyline.stepIndex = index;
         polyline.rawPath = path;
 
-        routePolylines.push(polyline);
+        appState.routePolylines.push(polyline);
     });
 }
 
@@ -98,13 +98,13 @@ function drawAllRouteSteps() {
  * @param {number} currentIdx -現在のステップ番号
  */
 function updateFineGrainedRouteColor(currentLocation, currentIdx) {
-    if (!routePolylines || routePolylines.length === 0) return;
+    if (!appState.routePolylines || appState.routePolylines.length === 0) return;
 
 
     const ON_ROUTE_THRESHOLD_M = 15;
     let isOffRoute = false;
 
-    const currentPolyline = routePolylines.find(p => p.stepIndex === currentIdx);
+    const currentPolyline = appState.routePolylines.find(p => p.stepIndex === currentIdx);
     if (currentPolyline && currentPolyline.rawPath && currentPolyline.rawPath.length > 0) {
         let minDistanceToLine = Infinity;
         currentPolyline.rawPath.forEach((vertex) => {
@@ -121,14 +121,14 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
         }
     }
 
-    routePolylines.forEach((polyline) => {
+    appState.routePolylines.forEach((polyline) => {
         if (polyline.stepIndex < currentIdx) {
             polyline.setOptions({
                 strokeColor: "#888888",
                 strokeOpacity: 0.4,
                 strokeWeight: 4,
             });
-            polyline.setMap(map);
+            polyline.setMap(appState.map);
         }
         else if (polyline.stepIndex > currentIdx) {
             polyline.setOptions({
@@ -136,19 +136,19 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
                 strokeOpacity: 0.7,
                 strokeWeight: 6,
             });
-            polyline.setMap(map);
+            polyline.setMap(appState.map);
         }
         else if (polyline.stepIndex === currentIdx) {
             if (isOffRoute) {
-                if (activeTraveledPolyline) activeTraveledPolyline.setMap(null);
-                if (activeRemainingPolyline) activeRemainingPolyline.setMap(null);
+                if (appState.activeTraveledPolyline) appState.activeTraveledPolyline.setMap(null);
+                if (appState.activeRemainingPolyline) appState.activeRemainingPolyline.setMap(null);
 
                 polyline.setOptions({
                     strokeColor: "#0000ff",
                     strokeOpacity: 0.7,
                     strokeWeight: 6,
                 });
-                polyline.setMap(map);
+                polyline.setMap(appState.map);
                 return;
             }
 
@@ -187,8 +187,8 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
                 remainingCoords.push(rawPath[i]);
             }
 
-            if (!activeTraveledPolyline) {
-                activeTraveledPolyline = new google.maps.Polyline({
+            if (!appState.activeTraveledPolyline) {
+                appState.activeTraveledPolyline = new google.maps.Polyline({
                     path: traveledCoords,
                     map: map,
                     strokeColor: "#888888",
@@ -196,12 +196,12 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
                     strokeWeight: 4,
                 });
             } else {
-                activeTraveledPolyline.setPath(traveledCoords);
-                activeTraveledPolyline.setMap(map);
+                appState.activeTraveledPolyline.setPath(traveledCoords);
+                appState.activeTraveledPolyline.setMap(map);
             }
 
-            if (!activeRemainingPolyline) {
-                activeRemainingPolyline = new google.maps.Polyline({
+            if (!appState.activeRemainingPolyline) {
+                appState.activeRemainingPolyline = new google.maps.Polyline({
                     path: remainingCoords,
                     map: map,
                     strokeColor: "#0000ff",
@@ -209,8 +209,8 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
                     strokeWeight: 6,
                 });
             } else {
-                activeRemainingPolyline.setPath(remainingCoords);
-                activeRemainingPolyline.setMap(map);
+                appState.activeRemainingPolyline.setPath(remainingCoords);
+                appState.activeRemainingPolyline.setMap(map);
             }
         }
     });
@@ -221,7 +221,7 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
  * @param {number} currentIndex -　現在案内中のs轍鮒番号
  */
 function updateTraveledRouteColor(currentIdx) {
-    if (!routePolylines || routePolylines.length === 0) return;
+    if (routePolylines || routePolylines.length === 0) return;
 
     routePolylines.forEach((polyline) => {
         if (polyline.stepIndex < currentIdx) {
@@ -248,13 +248,13 @@ function updateTraveledRouteColor(currentIdx) {
  * 現在のステップ情報をマップとログに表示
  */
 function showCurrentStep() {
-    if (!navigationActive || currentStepIndex >= steps.length) {
+    if (!appState.navigationActive || appState.currentStepIndex >= appState.steps.length) {
         logMessage("ナビ終了");
-        navigationActive = false;
+        appState.navigationActive = false;
         return;
     }
     
-    const step = steps[currentStepIndex];
+    const step = appState.steps[appState.currentStepIndex];
     const instruction = (step.instructions || "").replace(/<[^>]*>/g, "");
     const distance = step.distance.text;
     const duration = step.duration.text;
@@ -263,9 +263,9 @@ function showCurrentStep() {
 
     let startLoc = toLatLngObj(step.start_location);
     if (startLoc) {
-        updateFineGrainedRouteColor(startLoc, currentStepIndex);
+        updateFineGrainedRouteColor(startLoc, appState.currentStepIndex);
     }
-    map.setZoom(15);
+    if (appState.map) appState.map.setZoom(15);
 }
 
 function toLatLngObj(loc) {
@@ -308,14 +308,14 @@ function skipToNearestStep(currentLocation) {
     try {
         logMessage(`[デバッグ]skipToNearestStepが呼び出されました！ lat: ${currentLocation.lat.toFixed(4)}`);
 
-        if (!steps || steps.length === 0 || !navigationActive) {
+        if (!appState.steps || appState.steps.length === 0 || !appState.navigationActive) {
             logMessage(`[デバッグ]案内中のステップがない、又はナビ停止中のため中断。active: ${navigationActive}`);
             return;
         } 
 
-        if (isRerouting) return;
+        if (appState.isRerouting) return;
 
-        const currentStep = steps[currentStepIndex];
+        const currentStep = appState.steps[currentStepIndex];
         let currentStepPath = currentStep.path || [];
         if (currentStepPath.length === 0) {
             const sLoc = toLatLngObj(currentStep.start_location);
@@ -360,12 +360,12 @@ function skipToNearestStep(currentLocation) {
             return;
         }
 
-        let closestStepIndex = currentStepIndex;
+        let closestStepIndex = appState.currentStepIndex;
         let minDistance = Infinity;
         const SNAP_THRESHOLD_M = 60;
 
-        for (let i = currentStepIndex; i < steps.length; i++) {
-            const step = steps[i];
+        for (let i = appState.currentStepIndex; i < appState.steps.length; i++) {
+            const step = appState.steps[i];
             let path = step.path || [];
             if (path.length === 0) {
                 const sLoc = toLatLngObj(step.start_location);
@@ -384,16 +384,15 @@ function skipToNearestStep(currentLocation) {
             });
         }
 
-        if (minDistance < SNAP_THRESHOLD_M && closestStepIndex > currentStepIndex && minDistance < distanceFromCurrentStepLine) {
+        if (minDistance < SNAP_THRESHOLD_M && closestStepIndex > appState.currentStepIndex && minDistance < distanceFromCurrentStepLine) {
             logMessage(`ルート復帰検知：現在のステップから離れたため、案内をスキップします`);
-            currentStepIndex = closestStepIndex;
+            appState.currentStepIndex = closestStepIndex;
             showCurrentStep();
 
-            updateFineGrainedRouteColor(currentLocation, currentStepIndex);
-        
+            updateFineGrainedRouteColor(currentLocation, appState.currentStepIndex);
             updateRemainingDistance(currentLocation);
 
-            const nextStepObj = steps[currentStepIndex];
+            const nextStepObj = appState.steps[appState.currentStepIndex];
             if (nextStepObj && typeof speakText === 'function') {
                 const cleanInstruction = nextStepObj.instructions.replace(/<[^>]*>/g, "");
                 speakText(`ルートに復帰しました。次は、${cleanInstruction}です`);
@@ -410,22 +409,22 @@ function skipToNearestStep(currentLocation) {
  * 現在地が現在のステップの終点に近づいたかチェックし、進行を促す
  */
 function checkStepProgression(currentLocation) {
-    if (!steps || steps.length === 0) {
+    if (!appState.steps || appState.steps.length === 0) {
         logMessage("ナビゲーションエラー：ステップ情報がありません");
         return;
     }
     
-    if (currentStepIndex >= steps.length) {
+    if (appState.currentStepIndex >= appState.steps.length) {
         //目的地到着
-        if (navigationActive) {
+        if (appState.navigationActive) {
             logMessage("目的地に到着しました");
-            navigationActive = false;
-            if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+            appState.navigationActive = false;
+            if (watchId !== null) navigator.geolocation.clearWatch(appState.watchId);
         }
         return;
     } 
 
-    const step = steps[currentStepIndex];
+    const step = appState.steps[appState.currentStepIndex];
     if (!step || !step.end_location) {
         logMessage("ステップ終点の位置が取得できません");
         return;
@@ -466,11 +465,11 @@ function checkStepProgression(currentLocation) {
  * 次のステップに進む（疑似的な移動）
  */
 function nextStep() {
-    if (!navigationActive) {
+    if (!appState.navigationActive) {
         logMessage("ナビが開始されてません");
         return;
     }
-    currentStepIndex++;
+    appState.currentStepIndex++;
     showCurrentStep();
 }
 
@@ -489,10 +488,10 @@ function handleRouteForNavigation(route) {
  * @param {{lat:number, lng:number}} currentLocation
  */
 function updateRemainingDistance(currentLocation) {
-    if (!navigationActive) return;
-    if (!steps || currentStepIndex >= steps.length) return;
+    if (!appState.navigationActive) return;
+    if (!appState.steps || appState.currentStepIndex >= appState.steps.length) return;
 
-    const step = steps[currentStepIndex];
+    const step = appState.steps[appState.currentStepIndex];
     if (!step || !step.end_location) return;
 
     const endLat = (typeof step.end_location.lat === 'function') ? step.end_location.lat() : step.end_location.lat;
@@ -514,10 +513,10 @@ function updateRemainingDistance(currentLocation) {
         distanceText = `${Math.round(remainingMeters)}m`;
     }
 
-    const isFinalStep = (currentStepIndex === steps.length - 1);
+    const isFinalStep = (appState.currentStepIndex === appState.steps.length - 1);
 
     if (isFinalStep && remainingMeters <= 20) {
-        navigationActive = false;
+        appState.navigationActive = false;
 
         if (window.navigationTimer) {
             clearInterval(window.navigationTimer);
