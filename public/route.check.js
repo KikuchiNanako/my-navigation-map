@@ -16,10 +16,16 @@
 
 
 async function startRouteCheck() {
-    await requestDeviceOrientation();
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        try {
+            await DeviceOrientationEvent.requestPermission();
+        } catch (e) {
+            console.warn("ジャイロセンサーの権限リクエストをスキップしました", e);
+        }
+    }
     
     if (!gpxProcessed) {
-        logMessage("エラー");
+        logMessage("エラー: GPXデータが処理されていません");
         return;
     }
 
@@ -89,9 +95,10 @@ async function startRouteCheck() {
     }
  
     if (navigationActive) {
-        checkStepProgression(currentLocation);
-        updateFineGrainedRouteColor(currentLocation, currentStepIndex);
-        updateRemainingDistance(currentLocation);
+        const currentLocation = { lat, lng: lon };
+        if (typeof checkStepProgression === 'function') checkStepProgression(currentLocation);  
+        if (typeof updateFineGrainedRouteColor === 'function') updateFineGrainedRouteColor(currentLocation, currentStepIndex);
+        if (typeof updateRemainingDistance === 'function') updateRemainingDistance(currentLocation);
     }
  }
 

@@ -63,7 +63,6 @@
 
     if (typeof processFiles === 'function') {
         processFiles();
-        document.getElementById('drawMapButton').disabled = false;
     } else {
         logMessage("エラー： processFiles 関数が見つかりません");
     }

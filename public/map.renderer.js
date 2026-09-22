@@ -593,7 +593,7 @@ function clearAllNavigation() {
         stepsContainer.style.display = "none";
     }
 
-    if (typeof NavigationActive !== 'undefined') {
+    if (typeof navigationActive !== 'undefined') {
         navigationActive = false;
     }
     if (typeof clearRoutePolylines === 'function') {
