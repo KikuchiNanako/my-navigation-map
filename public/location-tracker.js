@@ -1,4 +1,4 @@
-const { application } = require("express");
+//const { application } = require("express");
 
 /**
   * プレース名から座標を取得する
