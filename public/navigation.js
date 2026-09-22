@@ -56,7 +56,7 @@ function startStepNavigation(leg, resume = false) {
     } else {
         console.warn("DirectionsAPIレスポンスからboundsが取れませんでした");
     }
-    logMessage(`ナビ開始： ${steps.length}ステップ`);
+    logMessage(`ナビ開始： ${appState.steps.length}ステップ`);
     showCurrentStep();
 }
 
