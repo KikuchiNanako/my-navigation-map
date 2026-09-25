@@ -130,7 +130,7 @@ async function getHybridLocation() {
         if (!destinationInput) {
             logMessage("致命的エラー:目的地を入力してください");
             
-            if (typeof isRerouting !== 'undefined') isRerouting = false;
+            if (typeof appState.isRerouting !== 'undefined') appState.isRerouting = false;
             return;
         }
 
@@ -138,14 +138,14 @@ async function getHybridLocation() {
 
         if (rawValue === undefined || rawValue === null) {
             logMessage("致命的エラー２");
-            if (typeof isRerouting !== 'undefined') isRerouting = false;
+            if (typeof appState.isRerouting !== 'undefined') appState.isRerouting = false;
             return;
         }
 
         const destinationPlace = String(rawValue).trim();
         if (!destinationPlace) {
             logMessage("エラー：目的地を入力してください");
-            if(typeof isRerouting !== 'undefined') isRerouting = false;
+            if(typeof appState.isRerouting !== 'undefined') appState.isRerouting = false;
             return;        
         }
 
@@ -160,7 +160,7 @@ async function getHybridLocation() {
 
         if (!originLatLon) {
             logMessage("エラー：現在地を取得できません");
-            if (typeof isRerouting !== 'undefined') isRerouting = false;
+            if (typeof appState.isRerouting !== 'undefined') appState.isRerouting = false;
             return;
         }
 
@@ -190,18 +190,16 @@ async function getHybridLocation() {
         document.getElementById(`startButton`).style.display = 'none';
         document.getElementById('stopButton').style.display = 'none';
 
-        if (typeof isRerouting !== 'undefined' && isRerouting) {
+        if (appState.isRerouting) {
             logMessage("自動でナビゲーションを再開します");
-
             window.selectedRouteIndex = 0;
-
             startNavigation();
         }
     } catch (e) {
         logMessage(`**致命的エラー発生(requestRouteDrawing) :** ${e.name}: ${e.message}`);
         console.error("ルート描画中のキャッチされたエラー", e);
 
-        if (typeof isRerouting !== 'undefined') isRerouting = false;
+        if (typeof appState.isRerouting !== 'undefined') appState.isRerouting = false;
     }
     
  }
@@ -248,16 +246,16 @@ async function startNavigation() {
         return;
     }
 
-    const isResuming = (typeof currentStepIndex !== 'undefined' && currentStepIndex > 0);
+    const isResuming = (appState.currentStepIndex > 0);
     logMessage(isResuming ? "ナビゲーションを再開します" : "ナビゲーションを開始します");
 
-    navigationActive = true;
+    appState.navigationActive = true;
     //logMessage("ナビゲーションを開始します")
 
     startStepNavigation(route.legs[0], isResuming);
 
-    if (watchId === null) {
-        watchId = navigator.geolocation.watchPosition(
+    if (appState.watchId === null) {
+        appState.watchId = navigator.geolocation.watchPosition(
             onPositionUpdate,
             (error) => logMessage(`Geolocation監視エラー: ${error.message}`),
             {
@@ -281,20 +279,20 @@ async function startNavigation() {
  * Geolocation 監視を停止し、ナビゲーション状態をリセットする
  */
 function stopNavigation() {
-    if (navigationTimer !== null) {
-        clearInterval(navigationTimer);
-        navigationTimer = null;
+    if (appState.navigationTimer !== null) {
+        clearInterval(appState.navigationTimer);
+        appState.navigationTimer = null;
         logMessage("ナビゲーションを停止しました");
     }
 
-    if (watchId !== null) {
-        navigator.geolocation.clearWatch(watchId);
-        watchId = null;
+    if (appState.watchId !== null) {
+        navigator.geolocation.clearWatch(appState.watchId);
+        appState.watchId = null;
         logMessage("ブラウザの監視を停止しました");
     }
 
     //ナビゲーション状態をリセット
-    navigationActive = false;
+    appState.navigationActive = false;
     logMessage("ナビゲーション案内を停止しました");
 
     //ボタンの表示を切り替える
@@ -312,7 +310,7 @@ function startAutoTracking() {
         timeout: 27000
     };
 
-    watchId = navigator.geolocation.watchPosition(
+    appState.watchId = navigator.geolocation.watchPosition(
         (position) => {
             const { latitude, longitude } = position.coords;
 
@@ -402,35 +400,35 @@ function animateMarker() {
     }
 
     //初回実行時の初期化
-    if (currentDisplayedLat === null) currentDisplayedLat = targetLat;
-    if (currentDisplayedLng === null) currentDisplayedLng = targetLng;
+    if (appState.currentDisplayedLat === null) appState.currentDisplayedLat = appState.targetLat;
+    if (appState.currentDisplayedLng === null) appState.currentDisplayedLng = appState.targetLng;
 
-    if (currentDisplayedHeading === null || typeof currentDisplayedHeading !== 'number' || isNaN(currentDisplayedHeading)) {
-        currentDisplayedHeading = (targetHeading !== null && typeof targetHeading === 'number' && !isNaN(targetHeading)) ? targetHeading : 0;
+    if (appState.currentDisplayedHeading === null || typeof currentDisplayedHeading !== 'number' || isNaN(appState.currentDisplayedHeading)) {
+        appState.currentDisplayedHeading = (appState.targetHeading !== null && typeof targetHeading === 'number' && !isNaN(appState.targetHeading)) ? appState.targetHeading : 0;
     }
 
     //位置の補完（線形補完: Lerp）
     const posRatio = 0.1;
-    currentDisplayedLat += (targetLat - currentDisplayedLat) * posRatio;
-    currentDisplayedLng += (targetLng - currentDisplayedLng) * posRatio;
+    appState.currentDisplayedLat += (appState.targetLat - appState.currentDisplayedLat) * posRatio;
+    appState.currentDisplayedLng += (appState.targetLng - appState.currentDisplayedLng) * posRatio;
 
-    const newPos = new google.maps.LatLng(currentDisplayedLat, currentDisplayedLng);
-    currentLocationMarker.setPosition(newPos);
+    const newPos = new google.maps.LatLng(appState.currentDisplayedLat, appState.currentDisplayedLng);
+    appState.currentLocationMarker.setPosition(newPos);
 
     //向きの補完
-    if (targetHeading !== null && typeof targetHeading === 'number' && !isNaN(targetHeading)) {
-        let diff = targetHeading - currentDisplayedHeading;
+    if (appState.targetHeading !== null && typeof appState.targetHeading === 'number' && !isNaN(appState.targetHeading)) {
+        let diff = appState.targetHeading - appState.currentDisplayedHeading;
         while (diff < -180) diff += 360;
         while (diff > 180) diff -= 360;
 
         const headingRatio = 0.15;
-        currentDisplayedHeading += diff * headingRatio;
+        appState.currentDisplayedHeading += diff * headingRatio;
 
-        if (typeof currentDisplayedHeading === 'number' && !isNaN(currentDisplayedHeading)) {
-            const icon = currentLocationMarker.getIcon();
+        if (typeof appState.currentDisplayedHeading === 'number' && !isNaN(currentDisplayedHeading)) {
+            const icon = appState.currentLocationMarker.getIcon();
             if (icon) {
-                icon.rotation = currentDisplayedHeading;
-                currentLocationMarker.setIcon(icon);
+                icon.rotation = appState.currentDisplayedHeading;
+                appState.currentLocationMarker.setIcon(icon);
             }       
 
             if (appState.map && typeof window.map.setHeading === 'function' && appState.navigationActive && !appState.isUserInteracting) {
@@ -449,7 +447,7 @@ function animateMarker() {
         }
     }
 
-    markerAnimationId = requestAnimationFrame(animateMarker);
+    appState.markerAnimationId = requestAnimationFrame(animateMarker);
 }
 
  /**
@@ -459,24 +457,24 @@ function animateMarker() {
   * @param {boolean} isOutside - 経路外かどうか
   */
  function updateCurrentLocationMarker(currentLatLon, heading = 0, isOutside = false) {
-    if (!map) return;
+    if (!appState.map) return;
 
     const validHeading = (heading !== null && typeof heading === 'number' && !isNaN(heading)) ? heading : 0;
 
-    targetLat = (currentLatLon && typeof currentLatLon.lat === 'number') ? currentLatLon.lat : null;
-    targetLng = (currentLatLon && typeof currentLatLon.lng === 'number') ? currentLatLon.lng: null;
-    targetHeading = (heading !== null && !isNaN(heading)) ? heading : null;
+    appState.targetLat = (currentLatLon && typeof currentLatLon.lat === 'number') ? currentLatLon.lat : null;
+    appState.targetLng = (currentLatLon && typeof currentLatLon.lng === 'number') ? currentLatLon.lng: null;
+    appState.targetHeading = (heading !== null && !isNaN(heading)) ? heading : null;
     
-    if (targetLat === null || targetLng === null || isNaN(targetLat) || isNaN(targetLng)) {
+    if (appState.targetLat === null || appState.targetLng === null || isNaN(appState.targetLat) || isNaN(appState.targetLng)) {
         return;
     }
 
-    if (!currentLocationMarker) {
-        currentDisplayedLat = targetLat;
-        currentDisplayedLng = targetLng;
-        currentDisplayedHeading = validHeading;
+    if (!appState.currentLocationMarker) {
+        appState.currentDisplayedLat = appState.targetLat;
+        appState.currentDisplayedLng = appState.targetLng;
+        appState.currentDisplayedHeading = validHeading;
 
-        currentLocationMarker = new google.maps.Marker({
+        appState.currentLocationMarker = new google.maps.Marker({
             position: currentLatLon,
             map: map,
             title: '現在地',
@@ -501,8 +499,8 @@ function animateMarker() {
         //currentLocationMarker.setIcon(icon);
 
     //アニメーションが動いていなければ起動
-    if (!markerAnimationId) {
-        markerAnimationId = requestAnimationFrame(animateMarker);
+    if (!appState.markerAnimationId) {
+        appState.markerAnimationId = requestAnimationFrame(animateMarker);
     }    
     
     /*
@@ -549,14 +547,14 @@ function updateHeadingHandler(event) {
 }
 
 function resumeAutoFollow() {
-        isUserInteracting = false;
+        appState.isUserInteracting = false;
 
         logMessage("自動追従を再開");
 
-        if (currentLocationMarker) {
-            const pos = currentLocationMarker.getPosition();
+        if (appState.currentLocationMarker) {
+            const pos = appState.currentLocationMarker.getPosition();
 
-            map.moveCamera({
+            appState.map.moveCamera({
                 center: pos,
                 heading: lastHeading,
                 tilt: 0,

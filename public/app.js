@@ -3,6 +3,7 @@
  */
 
 //グローバル状態管理オブジェクト（必要最小限のグローバル共有）
+/*
 var map = null;
 var directionsService = null;
 var directionsRenderer = null;
@@ -25,22 +26,19 @@ var currentDisplayedHeading = null;
 var allPoints = [];
 var frequentPoints = [];
 var gpxProcessed = false;
-/*
+*/
+
 window.appState = {
-    allPoints: [],
-    frequentPoints: [],
+    //地図・GoogleAPIインスタンス
     map: null,
-    gpxProcessed: false,
     directionsService: null,
     directionsRenderer: null,
-    frequentCircles: [],
+
+    //位置・トラッキング関連
     currentLocationMarker: null,
-    watchId: null,
-    pathLog: [],
-    navigationTimer: null,
-    isUserInteracting: false,
-    interactionTimeout: null,
     destinationMarker: null,
+    tempMarker: null,
+    watchId: null,
     lastHeading: 0,
     markerAnimationId: null,
     targetLat: null,
@@ -48,9 +46,41 @@ window.appState = {
     targetHeading: null,
     currentDisplayedLat: null,
     currentDisplayedLng: null,
-    currentDisplayedHeaging: null
+    currentDisplayedHeaging: null,
+
+    //ナビゲーション状態
+    NavigationActive: false,
+    currentStepIndex: 0,
+    steps: [],
+    isRerouting: false,
+    isUserInteracting: false,
+    interactionTimeout: null,
+    navigationTimer: null,
+
+    //ポリライン・データ
+    routePolylines: [],
+    activeTraveledPolyline: null,
+    activeRemainingPolyline: null,
+    alternativePolylines: [],
+    frequentPolylines: [],
+    frequentCircles: [],
+
+    allPoints: [],
+    frequentPoints: [],
+    gpxProcessed: false,
+
+    resetNavigation() {
+        this.NavigationActive = false;
+        this.currentStepIndex = 0;
+        this. steps = [],
+        this.isRerouting = false;
+        if (this.watchId !== null) {
+            navigator.geolocation.clearWatch(this.watchId);
+            this.watchId = null;
+        }
+    }
 };
-*/
+
 
 //ログ切り替え関数
 function toggleLogDisplay() {
@@ -137,6 +167,7 @@ window.addEventListener("load", async () => {
     }, 1500);
 });
 
+/*
 //アプリ全体で共有する単一の状態管理オブジェクト
 window.appState = {
     //地図・Google APIインスタンス
@@ -180,3 +211,4 @@ window.appState = {
         }
     }
 };
+*/

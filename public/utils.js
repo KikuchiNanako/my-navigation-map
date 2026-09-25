@@ -130,7 +130,7 @@ function updateNavDisplay(instruction, distance = "", bgColor = "#333") {
  * テキストで音声を読み上げる
  * @param {string} text 読み上げるテキスト
  */
-function speak (text) {
+function speakText (text) {
    if (!('speechSynthesis' in window)) {
       console.warn("このブラウザは音声合成をサポートしてません");
       return;
