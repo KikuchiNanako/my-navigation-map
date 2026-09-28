@@ -530,10 +530,12 @@ function updateHeadingHandler(event) {
 
     if (heading !== null) {
         const alpha = 0.2;
-        let filteredHeading = lastHeading * (1 - alpha) + heading * alpha;
-        lastHeading = filteredHeading;
 
-        if (currentLocationMarker) {
+        //const currentLastHeading = appState.lastHeading || 0;
+        let filteredHeading = lastHeading * (1 - alpha) + heading * alpha;
+        appState.lastHeading = filteredHeading;
+
+        if (appState.currentLocationMarker) {
             const icon = appState.currentLocationMarker.getIcon();
             if (icon) {
                 icon.rotation = filteredHeading;
