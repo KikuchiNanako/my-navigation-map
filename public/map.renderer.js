@@ -36,7 +36,7 @@
     //Directions関連の初期化
     directionsService = new google.maps.DirectionsService();
     directionsRenderer = new google.maps.DirectionsRenderer({
-        map: map,
+        map: mapInstance,
         suppressMarkers: true,
         suppressPolylines: true
     });
@@ -47,7 +47,7 @@
     }
 
     //マップクリックイベントの設定
-    map.addListener("click", async (e) => {
+    mapInstance.addListener("click", async (e) => {
         const panel = document.getElementById("map-bottom-panel");
 
         if (!e.placeId && window.tempMarker) {
@@ -103,19 +103,19 @@
     });
 
     //ドラッグ操作のイベントリスナー
-    map.addListener('drag', () => {
-        isUserInteracting = true;
+    mapInstance.addListener('drag', () => {
+        if (window.appState) window.appState.isUserInteracting = true;
 
-        if (interactionTimeout) {
-            clearTimeout(interactionTimeout);
+        if (window.interactionTimeout) {
+            clearTimeout(window.interactionTimeout);
         }
     });
 
-    map.addListener('dragend', () => {
-        if (interactionTimeout) clearTimeout(interactionTimeout);
+    mapInstance.addListener('dragend', () => {
+        if (window.interactionTimeout) clearTimeout(window.interactionTimeout);
 
-        interactionTimeout = setTimeout(() => {
-            isUserInteracting = false;
+        window.interactionTimeout = setTimeout(() => {
+            if (window.appState) window.appState.isUserInteracting = false;
             logMessage("回転を再開します");
         }, 4000);
     });
@@ -135,7 +135,7 @@
     }
 
     //すべての初期化が終わった後にdrawmapを呼び出す
-    const pointsToDraw = window.frequentPoints || frequentPoints;
+    const pointsToDraw = window.appState?.frequentPoints || window.frequentPoints;
     if (pointsToDraw && pointsToDraw.length > 0 && typeof drawMap === 'function') {
         drawMap();
     }

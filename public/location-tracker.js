@@ -485,7 +485,7 @@ function animateMarker() {
                 fillOpacity: 1,
                 strokeColor: "#FFFFFF",
                 strokeWeight: 2,
-                rotation: currentDisplayedHeading,
+                rotation: appState.currentDisplayedHeading,
                 anchor: new google.maps.Point(0, 0)
             }
         });
