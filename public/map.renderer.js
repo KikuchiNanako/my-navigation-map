@@ -16,7 +16,7 @@
         logMessage("現在地を取得できなかったのでデフォルト位置を表示");
     }
 
-    map = new google.maps.Map(document.getElementById("map"), {
+    const mapInstance = new google.maps.Map(document.getElementById("map"), {
         center: initialLocation,
         zoom: 15,
         gestureHandling: "greedy",
@@ -28,7 +28,10 @@
         titleInteractionEnabled: true
     });
 
-    window.map = map;
+    window.map = mapInstance;
+    if (window.appState) {
+        window.appState.map = mapInstance;
+    }
 
     //Directions関連の初期化
     directionsService = new google.maps.DirectionsService();
@@ -211,7 +214,12 @@
 let frequentPolylines = [];
 
 async function drawMap() {
-    if (!map) return;
+    const currentMap = window.appState?.map || window.map;
+
+    if (!currentMap) {
+        logMessage("地図インスタンスが未初期化のため、描画を待機します");
+        return;
+    }
 
     //過去に描画した線があれば地図から削除してクリア
     frequentPolylines.forEach(p => p.setMap(null));
@@ -259,7 +267,7 @@ async function drawMap() {
                         { lat: lat, lng: lng},
                         { lat: lat + 0.0001, lng: lng + 0.0001 }
                     ],
-                    map: map,
+                    map: currentMap,
                     strokeColor: "#ff0000",
                     strokeOpacity: 0.6,
                     strokeWeight: 5,

@@ -151,13 +151,15 @@ window.addEventListener("load", async () => {
             const allSaveData = await getAllPointsFromDB();
 
             if (allSaveData && allSaveData.length > 0) {
-                allPoints = allSaveData.map(d => ({ lat: d.lat, lon: d.lon, time: d.time }));
+                const points = allSaveData.map(d => ({ lat: d.lat, lon: d.lon, time: d.time }));
+                window.appState.allPoints = points;
+                window.allPoints = points;
                 logMessage(`合計 ${allPoints.length} 地点の過去ログを読み込みました`);
 
                 calculateFrequentPoints();
                 gpxProcessed = true;
 
-                if (typeof drawMap === 'function') drawMap();
+                if (typeof drawMap === 'function' && (window.appState.map || window.map)) drawMap();
             } else {
                 logMessage("保存されたログがありません。新しいGPXファイルを読み込んでください");
             }
