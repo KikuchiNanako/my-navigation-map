@@ -46,10 +46,10 @@ window.appState = {
     targetHeading: null,
     currentDisplayedLat: null,
     currentDisplayedLng: null,
-    currentDisplayedHeaging: null,
+    currentDisplayedHeading: null,
 
     //ナビゲーション状態
-    NavigationActive: false,
+    navigationActive: false,
     currentStepIndex: 0,
     steps: [],
     isRerouting: false,

@@ -394,8 +394,8 @@ async function onPositionUpdate(position) {
  * 位置と向きを毎フレーム滑らかに近づけるアニメーションループ
  */
 function animateMarker() {
-    if (!currentLocationMarker || targetLat === null || targetLng === null) {
-        markerAnimationId = null;
+    if (!appState.currentLocationMarker || appState.targetLat === null || targetLng === null) {
+        appState.markerAnimationId = null;
         return;
     }
 
@@ -476,7 +476,7 @@ function animateMarker() {
 
         appState.currentLocationMarker = new google.maps.Marker({
             position: currentLatLon,
-            map: map,
+            map: appState.map,
             title: '現在地',
             icon: {
                 path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
