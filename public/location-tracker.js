@@ -534,10 +534,10 @@ function updateHeadingHandler(event) {
         lastHeading = filteredHeading;
 
         if (currentLocationMarker) {
-            const icon = currentLocationMarker.getIcon();
+            const icon = appState.currentLocationMarker.getIcon();
             if (icon) {
                 icon.rotation = filteredHeading;
-                currentLocationMarker.setIcon(icon);
+                appState.currentLocationMarker.setIcon(icon);
             }
 
             if (window.map && typeof window.map.setHeading === 'function' && navigationActive && !isUserInteracting) {
