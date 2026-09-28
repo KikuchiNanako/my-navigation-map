@@ -78,7 +78,7 @@ function drawAllRouteSteps() {
 
         const polyline = new google.maps.Polyline({
             path: path,
-            map: map,
+            map: window.appState?.map,
             strokeColor: "#0000FF",
             strokeOpacity: 0.7,
             strokeWeight: 6
