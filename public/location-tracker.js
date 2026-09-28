@@ -424,23 +424,23 @@ function animateMarker() {
         const headingRatio = 0.15;
         appState.currentDisplayedHeading += diff * headingRatio;
 
-        if (typeof appState.currentDisplayedHeading === 'number' && !isNaN(currentDisplayedHeading)) {
+        if (typeof appState.currentDisplayedHeading === 'number' && !isNaN(appState.currentDisplayedHeading)) {
             const icon = appState.currentLocationMarker.getIcon();
             if (icon) {
                 icon.rotation = appState.currentDisplayedHeading;
                 appState.currentLocationMarker.setIcon(icon);
             }       
 
-            if (appState.map && typeof window.map.setHeading === 'function' && appState.navigationActive && !appState.isUserInteracting) {
-                appState.map.moveCamera({
+            if (mapObj && typeof mapObj.moveCamera === 'function' && appState.navigationActive && !appState.isUserInteracting) {
+                mapObj.moveCamera({
                     center: newPos,
                     zoom: 16
                 });
             }
         }
     } else {
-        if (appState.map && typeof appState.map.moveCamera === 'function' && navigationActive && !isUserInteracting) {
-            appState.map.setCenter({
+        if (mapObj && typeof mapObj.moveCamera === 'function' && appState.navigationActive && !appState.isUserInteracting) {
+            mapObj.moveCamera({
                 center: newPos,
                 zoom: 16
             });
