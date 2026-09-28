@@ -431,16 +431,16 @@ function animateMarker() {
                 appState.currentLocationMarker.setIcon(icon);
             }       
 
-            if (mapObj && typeof mapObj.moveCamera === 'function' && appState.navigationActive && !appState.isUserInteracting) {
-                mapObj.moveCamera({
+            if (appState.map && typeof window.map.setHeading === 'function' && appState.navigationActive && !appState.isUserInteracting) {
+                appState.map.moveCamera({
                     center: newPos,
                     zoom: 16
                 });
             }
         }
     } else {
-        if (mapObj && typeof mapObj.moveCamera === 'function' && appState.navigationActive && !appState.isUserInteracting) {
-            mapObj.moveCamera({
+        if (appState.map && typeof appState.map.moveCamera === 'function' && appState.navigationActive && !appState.isUserInteracting) {
+            appState.map.setCenter({
                 center: newPos,
                 zoom: 16
             });
