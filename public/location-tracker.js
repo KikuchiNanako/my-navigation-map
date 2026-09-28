@@ -394,7 +394,7 @@ async function onPositionUpdate(position) {
  * 位置と向きを毎フレーム滑らかに近づけるアニメーションループ
  */
 function animateMarker() {
-    if (!appState.currentLocationMarker || appState.targetLat === null || targetLng === null) {
+    if (!appState.currentLocationMarker || appState.targetLat === null || appState.targetLng === null) {
         appState.markerAnimationId = null;
         return;
     }
@@ -457,7 +457,8 @@ function animateMarker() {
   * @param {boolean} isOutside - 経路外かどうか
   */
  function updateCurrentLocationMarker(currentLatLon, heading = 0, isOutside = false) {
-    if (!appState.map) return;
+    const currentMap = window.appState?.map || window.map;
+    if (!currentMap) return;
 
     const validHeading = (heading !== null && typeof heading === 'number' && !isNaN(heading)) ? heading : 0;
 
@@ -476,7 +477,7 @@ function animateMarker() {
 
         appState.currentLocationMarker = new google.maps.Marker({
             position: currentLatLon,
-            map: appState.map,
+            map: currentMap,
             title: '現在地',
             icon: {
                 path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
