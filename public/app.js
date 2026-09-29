@@ -70,9 +70,9 @@ window.appState = {
     gpxProcessed: false,
 
     resetNavigation() {
-        this.NavigationActive = false;
+        this.navigationActive = false;
         this.currentStepIndex = 0;
-        this. steps = [],
+        this. steps = [];
         this.isRerouting = false;
         if (this.watchId !== null) {
             navigator.geolocation.clearWatch(this.watchId);
@@ -157,7 +157,8 @@ window.addEventListener("load", async () => {
                 logMessage(`合計 ${allPoints.length} 地点の過去ログを読み込みました`);
 
                 calculateFrequentPoints();
-                gpxProcessed = true;
+                window.appState.gpxProcessed = true;
+                window.gpxProcessed =true;
 
                 if (typeof drawMap === 'function' && (window.appState.map || window.map)) drawMap();
             } else {

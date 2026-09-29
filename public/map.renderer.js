@@ -71,7 +71,7 @@
 
         window.tempMarker = new google.maps.Marker({
             position: e.latLng,
-            map: map,
+            map: mapInstance,
             icon: "http://maps.google.co.jp/mapfiles/ms/icons/red-dot.png"
         });
 
@@ -159,7 +159,7 @@
 
     destinationMarker = new google.maps.Marker({
         position: latLng,
-        map: map,
+        map: currentMap,
         icon: "http://maps.google.co.jp/mapfiles/ms/icons/blue-dot.png"
     });
 
@@ -407,7 +407,7 @@ function displayRoute(origin, destination){
                     const isSelected = (routeIdx === window.selectedRouteIndex);
                     const polyline = new google.maps.Polyline({
                         path: path,
-                        map: map,
+                        map: currentMap,
                         strokeColor: isSelected ? "#4285F4" : "#4254F4",
                         strokeOpacity: isSelected ? 0.8 : 0.4,
                         strokeWeight: isSelected ? 6 : 4,

@@ -403,7 +403,7 @@ function animateMarker() {
     if (appState.currentDisplayedLat === null) appState.currentDisplayedLat = appState.targetLat;
     if (appState.currentDisplayedLng === null) appState.currentDisplayedLng = appState.targetLng;
 
-    if (appState.currentDisplayedHeading === null || typeof currentDisplayedHeading !== 'number' || isNaN(appState.currentDisplayedHeading)) {
+    if (appState.currentDisplayedHeading === null || typeof appState.currentDisplayedHeading !== 'number' || isNaN(appState.currentDisplayedHeading)) {
         appState.currentDisplayedHeading = (appState.targetHeading !== null && typeof targetHeading === 'number' && !isNaN(appState.targetHeading)) ? appState.targetHeading : 0;
     }
 
@@ -531,8 +531,8 @@ function updateHeadingHandler(event) {
     if (heading !== null) {
         const alpha = 0.2;
 
-        //const currentLastHeading = appState.lastHeading || 0;
-        let filteredHeading = lastHeading * (1 - alpha) + heading * alpha;
+        const currentLastHeading = appState.lastHeading || 0;
+        let filteredHeading = currentLastHeading * (1 - alpha) + heading * alpha;
         appState.lastHeading = filteredHeading;
 
         if (appState.currentLocationMarker) {
@@ -542,7 +542,7 @@ function updateHeadingHandler(event) {
                 appState.currentLocationMarker.setIcon(icon);
             }
 
-            if (window.map && typeof window.map.setHeading === 'function' && navigationActive && !isUserInteracting) {
+            if (window.map && typeof window.map.setHeading === 'function' && appState.navigationActive && !appState.isUserInteracting) {
                 window.map.setHeading(filteredHeading);
             }
         }
@@ -559,7 +559,7 @@ function resumeAutoFollow() {
 
             appState.map.moveCamera({
                 center: pos,
-                heading: lastHeading,
+                heading: appState.lastHeading || 0,
                 tilt: 0,
                 zoom: 17
             });

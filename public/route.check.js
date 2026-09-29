@@ -37,8 +37,10 @@ async function startRouteCheck() {
 
     let currentLatLon = await getApproximateLocation();
     
-    if(directionsRenderer) {
-        directionsRenderer.setDirections({ routes: [] });
+    const renderer = window.appState?.directionsRenderer || window.directionsRenderer;
+
+    if(renderer) {
+        renderer.setDirections({ routes: [] });
     }
 
     if (!currentLatLon && allPoints.length > 0) {
@@ -69,8 +71,8 @@ async function startRouteCheck() {
 
             updateNavDisplay("よく通る道です", "案内を休止しています")
 
-            if (watchId === null) {
-                watchId = navigator.geolocation.watchPosition(
+            if (window.appState && window.appState.watchId === null) {
+                window.appState.watchId = navigator.geolocation.watchPosition(
                     onPositionUpdate,
                     (error) => logMessage(`位置監視エラー: ${error.message}`),
                     {
@@ -86,18 +88,20 @@ async function startRouteCheck() {
 
  function checkCurrentLocation(lat, lon) {
     const outside = isOutsideRoute(lat, lon);
+    const isActive = window.appState?.navigationActive;
+    const stepIdx = Window.appState?.currentStepIndex || 0;
 
-    if (outside && !navigationActive) {
+    if (outside && !isActive) {
         logMessage("知らない道に出ました。ナビを開始します");
         startRouteCheck();
     } else if (!outside) {
         logMessage("経路内を走行中");
     }
  
-    if (navigationActive) {
+    if (isActive) {
         const currentLocation = { lat, lng: lon };
         if (typeof checkStepProgression === 'function') checkStepProgression(currentLocation);  
-        if (typeof updateFineGrainedRouteColor === 'function') updateFineGrainedRouteColor(currentLocation, currentStepIndex);
+        if (typeof updateFineGrainedRouteColor === 'function') updateFineGrainedRouteColor(currentLocation, stepIdx);
         if (typeof updateRemainingDistance === 'function') updateRemainingDistance(currentLocation);
     }
  }

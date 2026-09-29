@@ -52,7 +52,8 @@ function startStepNavigation(leg, resume = false) {
 
     if(window.lastDirectionsResponse && window.lastDirectionsResponse.routes && window.lastDirectionsResponse.routes.length > 0) {
         const bounds = window.lastDirectionsResponse.routes[0].bounds;
-        if (bounds && typeof map.fitBounds === 'function') map.fitBounds(bounds);
+        const currentMap = appState.map || window.map;
+        if (bounds && currentMap && typeof currentMap.fitBounds === 'function') currentMap.fitBounds(bounds);
     } else {
         console.warn("DirectionsAPIレスポンスからboundsが取れませんでした");
     }
@@ -198,7 +199,7 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
                 });
             } else {
                 appState.activeTraveledPolyline.setPath(traveledCoords);
-                appState.activeTraveledPolyline.setMap(map);
+                appState.activeTraveledPolyline.setMap(currentMap);
             }
 
             if (!appState.activeRemainingPolyline) {
@@ -211,7 +212,7 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
                 });
             } else {
                 appState.activeRemainingPolyline.setPath(remainingCoords);
-                appState.activeRemainingPolyline.setMap(map);
+                appState.activeRemainingPolyline.setMap(currentMap);
             }
         }
     });
@@ -222,9 +223,9 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
  * @param {number} currentIndex -　現在案内中のs轍鮒番号
  */
 function updateTraveledRouteColor(currentIdx) {
-    if (routePolylines || routePolylines.length === 0) return;
+    if (!appState.routePolylines || appState.routePolylines.length === 0) return;
 
-    routePolylines.forEach((polyline) => {
+    appState.routePolylines.forEach((polyline) => {
         if (polyline.stepIndex < currentIdx) {
             polyline.setOptions({
                 strokeColor: "#7F8c8D",
@@ -310,13 +311,13 @@ function skipToNearestStep(currentLocation) {
         logMessage(`[デバッグ]skipToNearestStepが呼び出されました！ lat: ${currentLocation.lat.toFixed(4)}`);
 
         if (!appState.steps || appState.steps.length === 0 || !appState.navigationActive) {
-            logMessage(`[デバッグ]案内中のステップがない、又はナビ停止中のため中断。active: ${navigationActive}`);
+            logMessage(`[デバッグ]案内中のステップがない、又はナビ停止中のため中断。active: ${appState.navigationActive}`);
             return;
         } 
 
         if (appState.isRerouting) return;
 
-        const currentStep = appState.steps[currentStepIndex];
+        const currentStep = appState.steps[appState.currentStepIndex];
         let currentStepPath = currentStep.path || [];
         if (currentStepPath.length === 0) {
             const sLoc = toLatLngObj(currentStep.start_location);
@@ -343,7 +344,7 @@ function skipToNearestStep(currentLocation) {
         }
 
         if (distanceFromCurrentStepLine >= REROUTE_THRESHOLD_M) {
-            isRerouting = true;
+            appState.isRerouting = true;
 
             logMessage("ルートから離れました。自動リルートを開始します");
 
@@ -420,7 +421,7 @@ function checkStepProgression(currentLocation) {
         if (appState.navigationActive) {
             logMessage("目的地に到着しました");
             appState.navigationActive = false;
-            if (watchId !== null) navigator.geolocation.clearWatch(appState.watchId);
+            if (appState.watchId !== null) navigator.geolocation.clearWatch(appState.watchId);
         }
         return;
     } 
@@ -452,8 +453,8 @@ function checkStepProgression(currentLocation) {
 
     const NEXT_STEP_THRESHOLD_M = 20;
 
-    if (distanceToEnd > NEXT_STEP_THRESHOLD_M || currentStepIndex % 5 === 0) {
-        logMessage(`[ナビ中]ステップ ${currentStepIndex + 1} の終点まで：　${distanceToEnd.toFixed(1)} m`);
+    if (distanceToEnd > NEXT_STEP_THRESHOLD_M || appState.currentStepIndex % 5 === 0) {
+        logMessage(`[ナビ中]ステップ ${appState.currentStepIndex + 1} の終点まで：　${distanceToEnd.toFixed(1)} m`);
     }
 
     if (distanceToEnd < NEXT_STEP_THRESHOLD_M) {
