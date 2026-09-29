@@ -100,6 +100,7 @@ function drawAllRouteSteps() {
 function updateFineGrainedRouteColor(currentLocation, currentIdx) {
     if (!appState.routePolylines || appState.routePolylines.length === 0) return;
 
+    const currentMap = appState.map || window.appState?.map || window.map;
 
     const ON_ROUTE_THRESHOLD_M = 15;
     let isOffRoute = false;
@@ -128,7 +129,7 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
                 strokeOpacity: 0.4,
                 strokeWeight: 4,
             });
-            polyline.setMap(appState.map);
+            polyline.setMap(currentMap);
         }
         else if (polyline.stepIndex > currentIdx) {
             polyline.setOptions({
@@ -136,7 +137,7 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
                 strokeOpacity: 0.7,
                 strokeWeight: 6,
             });
-            polyline.setMap(appState.map);
+            polyline.setMap(currentMap);
         }
         else if (polyline.stepIndex === currentIdx) {
             if (isOffRoute) {
@@ -148,7 +149,7 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
                     strokeOpacity: 0.7,
                     strokeWeight: 6,
                 });
-                polyline.setMap(appState.map);
+                polyline.setMap(currentMap);
                 return;
             }
 
@@ -190,7 +191,7 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
             if (!appState.activeTraveledPolyline) {
                 appState.activeTraveledPolyline = new google.maps.Polyline({
                     path: traveledCoords,
-                    map: map,
+                    map: currentMap,
                     strokeColor: "#888888",
                     strokeOpacity: 0.4,
                     strokeWeight: 4,
