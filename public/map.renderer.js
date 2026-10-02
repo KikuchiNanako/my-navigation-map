@@ -1,5 +1,3 @@
-//const { application } = require("express");
-
  window.googleMapsReady = false;
  
  async function initMap() {
@@ -234,52 +232,22 @@ async function drawMap() {
 
     logMessage(`よく通る道の線描画を開始します...(データ数: ${appState.frequentPoints.length})`);
 
-    const key = window.MAPS_API_KEY || (typeof apiKey !== 'undefined' ? apiKey : null);
-    if (!key) {
-        logMessage("APIエラー");
-        return;
-    }
+    const pathCoodinates = mergedPoints.map(p => ({
+        lat: p.lat_r,
+        lng: p.lon_r
+    }));
 
-    //Roads APIは一度に100点までしか処理できないため、100点ずつの塊（チャンク）に分ける
-    const chunkSize = 100;
-    for (let i = 0; i < mergedPoints.length; i += chunkSize ) {
-        const chunk = mergedPoints.slice(i, i + chunkSize);
-        
-        const pathString = chunk.map(p => `${p.lat_r},${p.lon_r}`).join('|');
+    //一つのポリラインとして一括描画
+    const polyline = new google.maps.Polyline({
+        path: pathCoodinates,
+        map: currentMap, 
+        strokeColor: "#ff0000",
+        strokeOpacity: 0.6,
+        strokeWeight: 5,
+        clickable: false
+    });
 
-        const url = `https://roads.googleapis.com/v1/snapToRoads?path=${pathString}&interpolate=false&key=${key}`;
-
-        try {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`APIエラー: ${response.status}`);
-
-            const data = await response.json();
-
-            if (data.snappedPoints && data.snappedPoints.length > 0) {
-                data.snappedPoints.forEach(sp => {
-                    const lat = sp.location.latitude;
-                    const lng = sp.location.longitude;
-
-                    const polyline = new google.maps.Polyline({
-                    path: [
-                        { lat: lat, lng: lng},
-                        { lat: lat + 0.0001, lng: lng + 0.0001 }
-                    ],
-                    map: currentMap,
-                    strokeColor: "#ff0000",
-                    strokeOpacity: 0.6,
-                    strokeWeight: 5,
-                    clickable: false
-                });
-
-                appState.frequentPolylines.push(polyline);
-            });
-        }
-    } catch (e) {
-            console.error(`Roads APIエラー（分割 ${i+1}）:`, e);
-            logMessage(`一部の区間の線描画に失敗しました: ${e.message}`);
-        }
-    }
+    appState.frequentPolylines.push(polyline);
 
     logMessage("よく通る道の線描画が完了しました");
 }  
@@ -535,7 +503,7 @@ function clearAllNavigation() {
     //下部タップパネル
     const bottomPanel = document.getElementById("map-bottom-panel");
     if (bottomPanel) bottomPanel.style.display = "none";
-        
+
     logMessage("すべての目的地、ピン、経路、および画面表示をリセットしました");
 }
 
