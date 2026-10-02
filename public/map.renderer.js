@@ -508,18 +508,34 @@ function clearAlternativePolylines() {
  * 全てのナビゲーション情報を完全に消去してリセットする
  */
 function clearAllNavigation() {
+    //タイマー・ポリライン・マーカー等のリセット
     appState.resetNavigation();
 
     //入力欄のリセット
     const input = document.getElementById("destinationInput");
     if (input) input.value = "";
 
+    //ナビ案内上部パネルの非表示
     const navPanel = document.getElementById("nav-panel");
     if (navPanel) navPanel.style.display = "none";
 
+    //ステップパネルの非表示と中身クリア
+    const stepsContainer = document.getElementById("routeStepsContainer");
+    const stepsList = document.getElementById("routeStepsList");
+    if (stepsContainer) stepsContainer.style.display = "none";
+    if (stepsList) stepsList.innerHTML = "";
+
+    //状態ラベルのリセット
     const statusLabel = document.getElementById("statusLabel");
-    if (statusLabel) statusLabel.innerText = "状態：待機中";
-    
+    if (statusLabel) {
+        statusLabel.innerText = "状態：待機中";
+        statusLabel.style.color = "#333";
+    }
+
+    //下部タップパネル
+    const bottomPanel = document.getElementById("map-bottom-panel");
+    if (bottomPanel) bottomPanel.style.display = "none";
+        
     logMessage("すべての目的地、ピン、経路、および画面表示をリセットしました");
 }
 
