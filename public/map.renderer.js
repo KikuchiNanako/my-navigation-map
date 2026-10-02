@@ -218,6 +218,7 @@ async function drawMap() {
     }
 
     //過去に描画した線があれば地図から削除してクリア
+    clearFrequentCircle();
     appState.frequentPolylines.forEach(p => p.setMap(null));
     appState.frequentPolylines = [];
 
@@ -232,22 +233,24 @@ async function drawMap() {
 
     logMessage(`よく通る道の線描画を開始します...(データ数: ${appState.frequentPoints.length})`);
 
-    const pathCoodinates = mergedPoints.map(p => ({
-        lat: p.lat_r,
-        lng: p.lon_r
-    }));
+    const offset = 0.00015;
 
-    //一つのポリラインとして一括描画
-    const polyline = new google.maps.Polyline({
-        path: pathCoodinates,
-        map: currentMap, 
-        strokeColor: "#ff0000",
-        strokeOpacity: 0.6,
-        strokeWeight: 5,
-        clickable: false
+    mergedPoints.forEach(p => {
+        const polyline = new google.maps.Polylin({
+            path: [
+                { lat: p.lat_r - offset, lng: p.lon_r - offset },
+                { lat: p.lat_r + offset, lng: p.lon_r + offset }
+            ],
+            map: currentMap,
+            strokeColor: "#ff0000",
+            strokeOpacity: 0.7,
+            strokeWeight: 5,
+            clickable: false
+        });
+
+        appState.frequentPolylines.push(polyline);
+        
     });
-
-    appState.frequentPolylines.push(polyline);
 
     logMessage("よく通る道の線描画が完了しました");
 }  
