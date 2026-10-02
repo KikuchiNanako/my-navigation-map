@@ -2,32 +2,6 @@
  * アプリのメインエントリーポイント＆初期化管理
  */
 
-//グローバル状態管理オブジェクト（必要最小限のグローバル共有）
-/*
-var map = null;
-var directionsService = null;
-var directionsRenderer = null;
-var frequentCircles = [];
-var currentLocationMarker = null;
-var watchId = null;
-var pathLog = [];
-var navigationTimer = null;
-var isUserInteracting = false;
-var interactionTimeout = null;
-var destinationMarker = null;
-var lastHeading = 0;
-var markerAnimationId = null;
-var targetLat = null;
-var targetLng = null;
-var targetHeading = null;
-var currentDisplayedLat = null;
-var currentDisplayedLng = null;
-var currentDisplayedHeading = null;
-var allPoints = [];
-var frequentPoints = [];
-var gpxProcessed = false;
-*/
-
 window.appState = {
     //地図・GoogleAPIインスタンス
     map: null,
@@ -57,6 +31,9 @@ window.appState = {
     interactionTimeout: null,
     navigationTimer: null,
 
+    lastDirectionsResponse: null,
+    selectedRouteIndex: 0,
+
     //ポリライン・データ
     routePolylines: [],
     activeTraveledPolyline: null,
@@ -72,11 +49,55 @@ window.appState = {
     resetNavigation() {
         this.navigationActive = false;
         this.currentStepIndex = 0;
-        this. steps = [];
+        this.steps = [];
         this.isRerouting = false;
+
         if (this.watchId !== null) {
             navigator.geolocation.clearWatch(this.watchId);
             this.watchId = null;
+        }
+
+        if (this.navigationTimer !== null) {
+            clearInterval(this.navigationTimer);
+            this.navigationTimer = null;
+        }
+
+        if (this.tempMarker) {
+            this.tempMarker.setMap(null);
+            this.tempMarker = null;
+        }
+
+        if (this.destinationMarker) {
+            this.destinationMarker.setMap(null);
+            this.destinationMarker = null;
+        }
+
+        //ポリラインのクリア
+        this.clearPolylines();
+
+        if (this.directionsRenderer) {
+            this.directionsRenderer.setDirections({ routes: [] });
+        }
+
+        this.lastDirectionsResponse = null;
+        this.selectedRouteIndex = 0;
+    },
+
+    clearPolylines() {
+        this.routePolylines.forEach(p => p.setMap(null));
+        this.routePolylines = [];
+
+        this.alternativePolylines.forEach(item => item.polyline?.setMap(null));
+        this.alternativePolylines = [];
+
+        if (this.activeTraveledPolyline) {
+            this.activeTraveledPolyline.setMap(null);
+            this.activeTraveledPolyline = null;
+        }
+
+        if (this.activeRemainingPolyline) {
+            this.activeRemainingPolyline.setMap(null);
+            this.activeRemainingPolyline = null;
         }
     }
 };
@@ -151,16 +172,13 @@ window.addEventListener("load", async () => {
             const allSaveData = await getAllPointsFromDB();
 
             if (allSaveData && allSaveData.length > 0) {
-                const points = allSaveData.map(d => ({ lat: d.lat, lon: d.lon, time: d.time }));
-                window.appState.allPoints = points;
-                window.allPoints = points;
-                logMessage(`合計 ${allPoints.length} 地点の過去ログを読み込みました`);
+                appState.allPoints = allSaveData.map(d => ({ lat: d.lat, lon: d.lon, time: d.time }));
+                logMessage(`合計 ${appState.allPoints.length} 地点の過去ログを読み込みました`);
 
                 calculateFrequentPoints();
-                window.appState.gpxProcessed = true;
-                window.gpxProcessed =true;
+                appState.gpxProcessed = true;
 
-                if (typeof drawMap === 'function' && (window.appState.map || window.map)) drawMap();
+                if (typeof drawMap === 'function' && appState.map) drawMap();
             } else {
                 logMessage("保存されたログがありません。新しいGPXファイルを読み込んでください");
             }
@@ -169,49 +187,3 @@ window.addEventListener("load", async () => {
         }
     }, 1500);
 });
-
-/*
-//アプリ全体で共有する単一の状態管理オブジェクト
-window.appState = {
-    //地図・Google APIインスタンス
-    map: null,
-    directionsService: null,
-    directionsRenderer: null,
-
-    //位置・トラッキング関連
-    currentLocationMarker: null,
-    destinationMarker: null,
-    tempMarker: null,
-    watchId: null,
-    lastHeading: 0,
-
-    //ナビゲーション状態
-    NavigationActive: false,
-    currentStepIndex: 0,
-    steps: [],
-    isRerouting: false,
-    isUserInteracting: false,
-
-    routePolyline: [],
-    activeTraveledPolyline: null,
-    activeRemainingPolylinr: null,
-    alternativePolylines: [],
-    frequentPolylines: [],
-    frequentCircles: [],
-
-    allPoints: [],
-    frequentPoints: [],
-    gpxProcessed: false,
-
-    resetNavigation() {
-        this.NavigationActive = false;
-        this.currentStepIndex = 0;
-        this. steps = [],
-        this.isRerouting = false;
-        if (this.watchId !== null) {
-            navigator.geolocation.clearWatch(this.watchId);
-            this.watchId = null;
-        }
-    }
-};
-*/

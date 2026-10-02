@@ -1,6 +1,6 @@
  /**
   * GPXファイルを読み込み、全ポイント処理する
-  */
+  
  async function processFiles() {
     const fileInput = document.getElementById(`gpxFileInput`);
     if (!fileInput) {
@@ -9,7 +9,7 @@
     }
 
     const files = fileInput.files;
-    allPoints = [];
+    appState.allPoints = [];
 
     if (files.length > 0) {
         logMessage(`${files.length}このファイルをインポート中`);
@@ -33,26 +33,28 @@
     }
 
     const allSaveData = await getAllPointsFromDB();
-    allPoints = allSaveData.map(d => ({ lat: d.lat, lon: d.lon, time: d.time }));
+    appState.allPoints = allSaveData.map(d => ({ lat: d.lat, lon: d.lon, time: d.time }));
 
-    if (allPoints.length === 0) {
+    if (appState.allPoints.length === 0) {
         logMessage("有効なポイントがデータベースに見つかりませんでした");
-        gpxProcessed = false;
+        appState.gpxProcessed = false;
         return;
     }
 
-    logMessage(`合計 ${allPoints.length} 地点のログを読み込みました`);
+    logMessage(`合計 ${appState.allPoints.length} 地点のログを読み込みました`);
     calculateFrequentPoints();
     
     if (typeof drawMap === 'function') {
         drawMap();
     } 
 
-    gpxProcessed = true;
+    appState.gpxProcessed = true;
 }
+*/
 
+/*
  function processFilesWrapper() {
-    const fileInput = document.getElementById('gpxFile');
+    const fileInput = document.getElementById('gpxFileInput');
 
     if (fileInput.files.length === 0) {
         logMessage("エラー：GPXファイルを選択してください");
@@ -67,9 +69,10 @@
         logMessage("エラー： processFiles 関数が見つかりません");
     }
  }
+*/
 
  function calculateFrequentPoints () {
-    const processedPoints = allPoints.map(p => {
+    const processedPoints = appState.allPoints.map(p => {
         const lat_r = roundToDecimals(p.lat, ROUND_DECIMALS);
         const lon_r = roundToDecimals(p.lon, ROUND_DECIMALS);
         const month = `${p.time.getFullYear()}-${String(p.time.getMonth() + 1).padStart(2, '0')}`;
@@ -89,7 +92,7 @@
 
     //全データを見て、月ごとの基準を超えた場所をすべて蓄積
     for (const [key, count] of monthlyCountsMap.entries()) {
-        if (count >= 2) {
+        if (count >= 20) {
             const [month, latLonKey] = key.split('_');
             frequentOldPointsKeys.add(latLonKey);
         }
@@ -117,12 +120,12 @@
     frequentOldPointsKeys.forEach(key => frequentPointsSet.add(key));
 
     //地図表示用の配列に変換
-    frequentPoints = Array.from(frequentPointsSet).map(key => {
+    appState.frequentPoints = Array.from(frequentPointsSet).map(key => {
         const [lat_r, lon_r] = key.split(',').map(Number);
         return { lat_r, lon_r };
     });
     
-    logMessage(`よく通る道の点数: ${frequentPoints.length}`);
+    logMessage(`よく通る道の点数: ${appState.frequentPoints.length}`);
  }
 
  /**
@@ -132,14 +135,14 @@
   * @returns {boolean} 経路外か
   */
  function isOutsideRoute(currentLat, currentLon) {
-    if (frequentPoints.length === 0) {
+    if (appState.frequentPoints.length === 0) {
         return true;
     }
 
     let minDist = Infinity;
     let nearestPoint = null;
 
-    for (const point of frequentPoints) {
+    for (const point of appState.frequentPoints) {
         const dist = getDistanceMeters(currentLat, currentLon, point.lat_r, point.lon_r);
         if (dist < minDist) {
             minDist = dist;

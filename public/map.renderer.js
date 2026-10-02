@@ -1,3 +1,5 @@
+const { application } = require("express");
+
  window.googleMapsReady = false;
  
  async function initMap() {
@@ -28,14 +30,11 @@
         titleInteractionEnabled: true
     });
 
-    window.map = mapInstance;
-    if (window.appState) {
-        window.appState.map = mapInstance;
-    }
+    appState.map = mapInstance;
 
     //Directions関連の初期化
-    directionsService = new google.maps.DirectionsService();
-    directionsRenderer = new google.maps.DirectionsRenderer({
+    appState.directionsService = new google.maps.DirectionsService();
+    appState.directionsRenderer = new google.maps.DirectionsRenderer({
         map: mapInstance,
         suppressMarkers: true,
         suppressPolylines: true
@@ -50,17 +49,18 @@
     mapInstance.addListener("click", async (e) => {
         const panel = document.getElementById("map-bottom-panel");
 
-        if (!e.placeId && window.tempMarker) {
-            window.tempMarker.setMap(null);
-            window.tempMarker = null;
+        if (!e.placeId && appState.tempMarker) {
+            appState.tempMarker.setMap(null);
+            appState.tempMarker = null;
 
             if (panel) {
                 panel.style.display = "none";
-            } return;
+            } 
+            return;
         }
 
-        if (window.tempMarker) {
-            window.tempMarker.setMap(null);
+        if (appState.tempMarker) {
+            appState.tempMarker.setMap(null);
         }
         if (window.currentInfoWindow) {
             window.currentInfoWindow.close();
@@ -69,7 +69,7 @@
         const lat = e.latLng.lat();
         const lng = e.latLng.lng();
 
-        window.tempMarker = new google.maps.Marker({
+        appState.tempMarker = new google.maps.Marker({
             position: e.latLng,
             map: mapInstance,
             icon: "http://maps.google.co.jp/mapfiles/ms/icons/red-dot.png"
@@ -104,18 +104,18 @@
 
     //ドラッグ操作のイベントリスナー
     mapInstance.addListener('drag', () => {
-        if (window.appState) window.appState.isUserInteracting = true;
+        appState.isUserInteracting = true;
 
-        if (window.interactionTimeout) {
-            clearTimeout(window.interactionTimeout);
+        if (appState.interactionTimeout) {
+            clearTimeout(appState.interactionTimeout);
         }
     });
 
     mapInstance.addListener('dragend', () => {
-        if (window.interactionTimeout) clearTimeout(window.interactionTimeout);
+        if (appState.interactionTimeout) clearTimeout(appState.interactionTimeout);
 
-        window.interactionTimeout = setTimeout(() => {
-            if (window.appState) window.appState.isUserInteracting = false;
+        appState.interactionTimeout = setTimeout(() => {
+            appState.isUserInteracting = false;
             logMessage("回転を再開します");
         }, 4000);
     });
@@ -135,7 +135,7 @@
     }
 
     //すべての初期化が終わった後にdrawmapを呼び出す
-    const pointsToDraw = window.appState?.frequentPoints || window.frequentPoints;
+    const pointsToDraw = appState.frequentPoints;
     if (pointsToDraw && pointsToDraw.length > 0 && typeof drawMap === 'function') {
         drawMap();
     }
@@ -146,20 +146,20 @@
   * 吹き出しのボタンが押されたときに、正式に目的地としてセットする関数
   */
  function setAsDestination(lat, lng) {
-    if (window.tempMarker) {
-        window.tempMarker.setMap(null);
-        window.tempMarker = null;
+    if (appState.tempMarker) {
+        appState.tempMarker.setMap(null);
+        appState.tempMarker = null;
     }
 
-    if (destinationMarker) {
-        destinationMarker.setMap(null);
+    if (appState.destinationMarker) {
+        appState.destinationMarker.setMap(null);
     }
 
     const latLng = new google.maps.LatLng(lat, lng);
 
-    destinationMarker = new google.maps.Marker({
+    appState.destinationMarker = new google.maps.Marker({
         position: latLng,
-        map: currentMap,
+        map: appState.map,
         icon: "http://maps.google.co.jp/mapfiles/ms/icons/blue-dot.png"
     });
 
@@ -211,10 +211,8 @@
 }
 
 //描画したポリラインを管理する配列（クリア用）
-let frequentPolylines = [];
-
 async function drawMap() {
-    const currentMap = window.appState?.map || window.map;
+    const currentMap = appState.map;
 
     if (!currentMap) {
         logMessage("地図インスタンスが未初期化のため、描画を待機します");
@@ -222,19 +220,19 @@ async function drawMap() {
     }
 
     //過去に描画した線があれば地図から削除してクリア
-    frequentPolylines.forEach(p => p.setMap(null));
-    frequentPolylines = [];
+    appState.frequentPolylines.forEach(p => p.setMap(null));
+    appState.frequentPolylines = [];
 
     //よく通る道のデータがなければ何もしない
-    if (!window.frequentPoints || window.frequentPoints.length === 0) {
+    if (!appState.frequentPoints || appState.frequentPoints.length === 0) {
         logMessage("描画するよく通る道のデータがありません");
         return;
     }
 
-    const rawPoints = window.frequentPoints;
+    const rawPoints = appState.frequentPoints;
     const mergedPoints = mergeNearbyPoints(rawPoints, 20);
 
-    logMessage(`よく通る道の線描画を開始します...(データ数: ${window.frequentPoints.length})`);
+    logMessage(`よく通る道の線描画を開始します...(データ数: ${appState.frequentPoints.length})`);
 
     const key = window.MAPS_API_KEY || (typeof apiKey !== 'undefined' ? apiKey : null);
     if (!key) {
@@ -274,7 +272,7 @@ async function drawMap() {
                     clickable: false
                 });
 
-                frequentPolylines.push(polyline);
+                appState.frequentPolylines.push(polyline);
             });
         }
     } catch (e) {
@@ -285,93 +283,35 @@ async function drawMap() {
 
     logMessage("よく通る道の線描画が完了しました");
 }  
-    /*
-    if (typeof map === 'undefined' || !map) {
-        if (window.map) {
-            map = window.map;
-        } else {
-            logMessage("可視化エラー：地図の初期化を待機中です");
-            setTimeout(drawMap, 1000);
-            return;
-        }
-    }
-
-    const rawPoints = window.frequentPoints || [];
-    const pts = window.allPoints || [];
-    const fpts = mergeNearbyPoints(rawPoints, 20);
-
-    if (pts.length === 0 && fpts.length === 0) {
-        logMessage("可視化エラー：描画するデータがありません");
-        return;
-    }
-
-    const currentpos = await getHybridLocation();
-    if (currentpos) {
-        map.setCenter(currentpos);
-        map.setZoom(15);
-    } else if (pts.length > 0) {
-        const avgLat = pts.reduce((sum, p) => sum + p.lat, 0) / pts.length;
-        const avgLon = pts.reduce((sum, p) => sum + p.lon, 0) / pts.length;
-        map.setCenter({ lat: avgLat, lng: avgLon });
-    }
-  
-
-    if (window.frequentCircles) {
-        window.frequentCircles.forEach(circle => circle.setMap(null));
-    }
-    window.frequentCircles = [];
-
-    if (fpts && fpts.length > 0) {
-        fpts.forEach(p => {
-            const circle = new google.maps.Circle({
-            strokeColor: "#ff0000",
-            strokeOpacity: 0,
-            strokeWeight: 1,
-            fillColor: "#ff0000",
-            fillOpacity: 0.05,
-            map: map,
-            center: { lat: p.lat_r, lng: p.lon_r},
-            radius: THRESHOLD_M,
-            clickable: false,
-        });
-        window.frequentCircles.push(circle);
-    });
-
-    logMessage("地図に描画しました");
- }}
-*/
 
  /**
  * マップ上の頻度ポイントの円をすべてクリアする
  */
 function clearFrequentCircle() {
-    if (typeof frequentCircles !== 'undefined' && frequentCircles.length > 0) {
-        frequentCircles.forEach(circle => circle.setMap(null));
-        frequentCircles = [];
+    if (appState.frequentCircles && appState.frequentCircles.length > 0) {
+        appState.frequentCircles.forEach(circle => circle.setMap(null));
+        appState.frequentCircles = [];
         logMessage("以前の頻度ポイントを地図からクリアしました");
     }
 }
 
-window.alternativePolylines = [];
-window.selectedRouteIndex = 0;
-
 function displayRoute(origin, destination){
+    const currentMap = appState.map;
     clearAlternativePolylines();
 
     if (typeof clearRoutePolylines === 'function') {
         clearRoutePolylines();
     }
 
-    if (typeof navigationActive !== 'undefined') {
-        navigationActive = false;
+    appState.navigationActive = false;
+    
+
+    if (appState.destinationMarker) {
+        appState.destinationMarker.setMap(null);
+        appState.destinationMarker = null;
     }
 
-    if (typeof destinationMarker !== 'undefined' && destinationMarker) {
-        destinationMarker.setMap(null);
-        destinationMarker = null;
-    }
-
-    directionsService.route(
+    appState.directionsService.route(
         {
             origin: origin,
             destination: destination,
@@ -382,10 +322,10 @@ function displayRoute(origin, destination){
             if (status === "OK" && response && response.routes && response.routes.length > 0) {
                 const route = response.routes[0];
 
-                window.lastDirectionsResponse = response;
-                window.selectedRouteIndex = 0;
+                appState.lastDirectionsResponse = response;
+                appState.selectedRouteIndex = 0;
 
-                directionsRenderer.setOptions({
+                appState.directionsRenderer.setOptions({
                     suppressPolylines: true,
                     suppressMarkers: true,
                 });
@@ -404,7 +344,7 @@ function displayRoute(origin, destination){
                         });
                     });
 
-                    const isSelected = (routeIdx === window.selectedRouteIndex);
+                    const isSelected = (routeIdx === appState.selectedRouteIndex);
                     const polyline = new google.maps.Polyline({
                         path: path,
                         map: currentMap,
@@ -418,7 +358,7 @@ function displayRoute(origin, destination){
                         selectRoute(routeIdx);
                     });
 
-                    window.alternativePolylines.push({
+                    appState.alternativePolylines.push({
                         index: routeIdx,
                         polyline: polyline,
                         routeData: route
@@ -432,7 +372,7 @@ function displayRoute(origin, destination){
 
             } else {
                 logMessage(`ルート検索に失敗しました: ${status}`);
-                directionsRenderer.setDirections({ routes: [] });
+                appState.directionsRenderer.setDirections({ routes: [] });
                 clearAlternativePolylines();
 
                 const container = document.getElementById("routeStepsContainer");
@@ -446,10 +386,10 @@ function displayRoute(origin, destination){
  * ユーザーが特定のルートを選択したときの処理
  */
 function selectRoute(index) {
-    if (!window.lastDirectionsResponse) return;
-    window.selectedRouteIndex = index;
+    if (!appState.lastDirectionsResponse) return;
+    appState.selectedRouteIndex = index;
 
-    window.alternativePolylines.forEach(item => {
+    appState.alternativePolylines.forEach(item => {
         const isSelected = (item.index === index);
         item.polyline.setOptions({
             strokeColor: isSelected ? "#4285F4" : "#4285F4",
@@ -471,7 +411,7 @@ function selectRoute(index) {
  * @param {number} routeIndex
  */
 function renderRouteStepsList(routeIndex) {
-    const response = window.lastDirectionsResponse;
+    const response = appState.lastDirectionsResponse;
     if (!response || !response.routes[routeIndex]) return;
 
     const route = response.routes[routeIndex];
@@ -533,7 +473,7 @@ function renderRouteStepsList(routeIndex) {
  * ルート情報をUIに更新する共通処理
  */
 function updateRouteInfoUI(index) {
-    const response = window.lastDirectionsResponse;
+    const response = appState.lastDirectionsResponse;
     if (!response || !response.routes[index]) return;
 
     const route = response.routes[index];
@@ -558,9 +498,9 @@ function updateRouteInfoUI(index) {
  * 複数ルート用のポリラインをクリア
  */
 function clearAlternativePolylines() {
-    if (window.alternativePolylines && window.alternativePolylines.length > 0) {
-        window.alternativePolylines.forEach(item => item.polyline.setMap(null));
-        window.alternativePolylines = [];
+    if (appState.alternativePolylines && appState.alternativePolylines.length > 0) {
+        appState.alternativePolylines.forEach(item => item.polyline.setMap(null));
+        appState.alternativePolylines = [];
     }
 }
 
@@ -568,44 +508,18 @@ function clearAlternativePolylines() {
  * 全てのナビゲーション情報を完全に消去してリセットする
  */
 function clearAllNavigation() {
-    if (appState.tempMarker) {
-        appState.tempMarker.setMap(null);
-        appState.tempMarker = null;
-    }
-
-    if (appState.destinationMarker) {
-        appState.destinationMarker.setMap(null);
-        appState.destinationMarker = null;
-    }
-
-    //ポリラインのクリア
-    if (typeof clearAlternativePolylines === 'function') {
-        clearAlternativePolylines();
-    }
-
-    if (typeof clearRoutePolylines === 'function') clearRoutePolylines();
-
-    if (appState.directionsRenderer) {
-        appState.directionsRenderer.setDirections({ routes: [] });
-    }
+    appState.resetNavigation();
 
     //入力欄のリセット
     const input = document.getElementById("destinationInput");
-    if (input) {
-        input.value = "";
-    }
+    if (input) input.value = "";
 
     const navPanel = document.getElementById("nav-panel");
     if (navPanel) navPanel.style.display = "none";
 
-    //アプリ状態を一括リセット
-    appState.resetNavigation();
-
     const statusLabel = document.getElementById("statusLabel");
-    if (statusLabel) {
-        statusLabel.innerText = "状態：待機中";
-    }
-
+    if (statusLabel) statusLabel.innerText = "状態：待機中";
+    
     logMessage("すべての目的地、ピン、経路、および画面表示をリセットしました");
 }
 

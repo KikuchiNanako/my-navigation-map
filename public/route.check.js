@@ -1,20 +1,3 @@
-//let frequentPoints = [];
-//let allPoints = [];
-//let map;
-//let gpxProcessed = false;
-//let directionsService;
-//let directionsRenderer;
-//let frequentCircles = [];
-//let currentLocationMarker;
-//let watchId = null;
-//let navigationTimer = null;
-
-
-
-
-
-
-
 async function startRouteCheck() {
     if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
         try {
@@ -24,7 +7,7 @@ async function startRouteCheck() {
         }
     }
     
-    if (!gpxProcessed) {
+    if (!appState.gpxProcessed) {
         logMessage("エラー: GPXデータが処理されていません");
         return;
     }
@@ -37,15 +20,15 @@ async function startRouteCheck() {
 
     let currentLatLon = await getApproximateLocation();
     
-    const renderer = window.appState?.directionsRenderer || window.directionsRenderer;
+    const renderer = appState.directionsRenderer;
 
     if(renderer) {
         renderer.setDirections({ routes: [] });
     }
 
-    if (!currentLatLon && allPoints.length > 0) {
+    if (!currentLatLon && appState.allPoints.length > 0) {
         logMessage("現在地の取得に失敗しました");
-        currentLatLon = { lat: allPoints[0].lat, lng: allPoints[0].lon };
+        currentLatLon = { lat: appState.allPoints[0].lat, lng: appState.allPoints[0].lon };
         } else if (!currentLatLon) {
             logMessage("エラー:現在地を取得できませんでした");
             return;
@@ -71,8 +54,8 @@ async function startRouteCheck() {
 
             updateNavDisplay("よく通る道です", "案内を休止しています")
 
-            if (window.appState && window.appState.watchId === null) {
-                window.appState.watchId = navigator.geolocation.watchPosition(
+            if (appState.watchId === null) {
+                appState.watchId = navigator.geolocation.watchPosition(
                     onPositionUpdate,
                     (error) => logMessage(`位置監視エラー: ${error.message}`),
                     {
@@ -88,8 +71,8 @@ async function startRouteCheck() {
 
  function checkCurrentLocation(lat, lon) {
     const outside = isOutsideRoute(lat, lon);
-    const isActive = window.appState?.navigationActive;
-    const stepIdx = Window.appState?.currentStepIndex || 0;
+    const isActive = appState.navigationActive;
+    const stepIdx = appState.currentStepIndex || 0;
 
     if (outside && !isActive) {
         logMessage("知らない道に出ました。ナビを開始します");

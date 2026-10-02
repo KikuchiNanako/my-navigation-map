@@ -1,5 +1,3 @@
-//const { application } = require("express");
-
 /**
   * プレース名から座標を取得する
   * @param {string} PlaceName
@@ -173,7 +171,7 @@ async function getHybridLocation() {
 
         //グローバルに保存されてるDirectionsレスポンスから所要時間と距離を取得して表示
         setTimeout(() => {
-            if (window.lastDirectionsResponse && window.lastDirectionsResponse.routes && window.lastDirectionsResponse.routes.length > 0) {
+            if (appState.lastDirectionsResponse && appState.lastDirectionsResponse.routes && appState.lastDirectionsResponse.routes.length > 0) {
                 if (typeof updateRouteInfoUI === 'function') {
                     updateRouteInfoUI(0);
                 } 
@@ -187,12 +185,12 @@ async function getHybridLocation() {
         }
 
         document.getElementById('routestartButton').style.display = 'block';
-        document.getElementById(`startButton`).style.display = 'none';
+        document.getElementById('startButton').style.display = 'none';
         document.getElementById('stopButton').style.display = 'none';
 
         if (appState.isRerouting) {
             logMessage("自動でナビゲーションを再開します");
-            window.selectedRouteIndex = 0;
+            appState.selectedRouteIndex = 0;
             startNavigation();
         }
     } catch (e) {
@@ -227,13 +225,13 @@ async function startNavigation() {
     }
 
 
-    if (!window.lastDirectionsResponse) {
+    if (!appState.lastDirectionsResponse) {
         logMessage("エラー：事前にルートを描画してください");
         return;
     }
 
-    const response = window.lastDirectionsResponse;
-    const activeRouteIndex = window.selectedRouteIndex || 0;
+    const response = appState.lastDirectionsResponse;
+    const activeRouteIndex = appState.selectedRouteIndex || 0;
 
     if (!response.routes || response.routes.length <= activeRouteIndex) {
         logMessage("エラー：ルート情報がありません");
@@ -314,7 +312,7 @@ function startAutoTracking() {
         (position) => {
             const { latitude, longitude } = position.coords;
 
-            pathLog.push({ lat: latitude, lon: longitude, time: new Date() });
+            appState.allPoints.push({ lat: latitude, lon: longitude, time: new Date() });
 
             checkCurrentLocation(latitude, longitude);
         },
@@ -339,7 +337,7 @@ async function onPositionUpdate(position) {
     //経路外かどうかを判定
     const isOutside = isOutsideRoute(currentLatLon.lat, currentLatLon.lng);
 
-    const statusLabel = document.getElementById(`statusLabel`);
+    const statusLabel = document.getElementById('statusLabel');
     if (statusLabel) {
         if (isOutside) {
             statusLabel.innerText = "状態：【経路外】ルート検索を実行します";
@@ -404,7 +402,7 @@ function animateMarker() {
     if (appState.currentDisplayedLng === null) appState.currentDisplayedLng = appState.targetLng;
 
     if (appState.currentDisplayedHeading === null || typeof appState.currentDisplayedHeading !== 'number' || isNaN(appState.currentDisplayedHeading)) {
-        appState.currentDisplayedHeading = (appState.targetHeading !== null && typeof targetHeading === 'number' && !isNaN(appState.targetHeading)) ? appState.targetHeading : 0;
+        appState.currentDisplayedHeading = (appState.targetHeading !== null && typeof appState.targetHeading === 'number' && !isNaN(appState.targetHeading)) ? appState.targetHeading : 0;
     }
 
     //位置の補完（線形補完: Lerp）
@@ -431,7 +429,7 @@ function animateMarker() {
                 appState.currentLocationMarker.setIcon(icon);
             }       
 
-            if (appState.map && typeof window.map.setHeading === 'function' && appState.navigationActive && !appState.isUserInteracting) {
+            if (appState.map && typeof appState.map.setHeading === 'function' && appState.navigationActive && !appState.isUserInteracting) {
                 appState.map.moveCamera({
                     center: newPos,
                     zoom: 16
@@ -440,7 +438,7 @@ function animateMarker() {
         }
     } else {
         if (appState.map && typeof appState.map.moveCamera === 'function' && appState.navigationActive && !appState.isUserInteracting) {
-            appState.map.setCenter({
+            appState.map.moveCamera({
                 center: newPos,
                 zoom: 16
             });
@@ -457,7 +455,7 @@ function animateMarker() {
   * @param {boolean} isOutside - 経路外かどうか
   */
  function updateCurrentLocationMarker(currentLatLon, heading = 0, isOutside = false) {
-    const currentMap = window.appState?.map || window.map;
+    const currentMap = appState.map;
     if (!currentMap) return;
 
     const validHeading = (heading !== null && typeof heading === 'number' && !isNaN(heading)) ? heading : 0;
@@ -491,29 +489,13 @@ function animateMarker() {
             }
         });
         logMessage("現在地マーカーを作成しました");
-    } //else {
-        //currentLocationMarker.setPosition(currentLatLon);
-
-        //const icon = currentLocationMarker.getIcon();
-        //icon.fillColor = fillColor;
-        //icon.rotation = heading;
-        //currentLocationMarker.setIcon(icon);
+    } 
 
     //アニメーションが動いていなければ起動
     if (!appState.markerAnimationId) {
         appState.markerAnimationId = requestAnimationFrame(animateMarker);
     }    
     
-    /*
-    if (navigationActive && !isUserInteracting) {
-        map.moveCamera({
-            center: currentLatLon,
-            heading: heading,
-            tilt: 0,
-            zoom: 17
-        });
-    }
-    */
  }
 
 /**
@@ -542,8 +524,8 @@ function updateHeadingHandler(event) {
                 appState.currentLocationMarker.setIcon(icon);
             }
 
-            if (window.map && typeof window.map.setHeading === 'function' && appState.navigationActive && !appState.isUserInteracting) {
-                window.map.setHeading(filteredHeading);
+            if (appState.map && typeof appState.map.setHeading === 'function' && appState.navigationActive && !appState.isUserInteracting) {
+                appState.map.setHeading(filteredHeading);
             }
         }
     }

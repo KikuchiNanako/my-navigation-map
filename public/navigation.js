@@ -1,15 +1,3 @@
-//const { version } = require("react");
-
-/*
-let currentStepIndex = 0;
-let steps = [];
-let navigationActive = false;
-let routePolylines = [];
-let activeTraveledPolyline = null;
-let activeRemainingPolyline = null;
-let isRerouting = false;
-*/
-
 /**
  * 経路ナビを開始・再開する
  * @param {object} leg - route.legs[0]
@@ -50,10 +38,11 @@ function startStepNavigation(leg, resume = false) {
         }
     }
 
-    if(window.lastDirectionsResponse && window.lastDirectionsResponse.routes && window.lastDirectionsResponse.routes.length > 0) {
-        const bounds = window.lastDirectionsResponse.routes[0].bounds;
-        const currentMap = appState.map || window.map;
-        if (bounds && currentMap && typeof currentMap.fitBounds === 'function') currentMap.fitBounds(bounds);
+    const bounds = appState.lastDirectionsResponse?.routes?.[0]?.bounds;
+    const currentMap = appState.map;
+    
+    if (bounds && currentMap?.fitBounds ) {
+        currentMap.fitBounds(bounds);
     } else {
         console.warn("DirectionsAPIレスポンスからboundsが取れませんでした");
     }
@@ -79,7 +68,7 @@ function drawAllRouteSteps() {
 
         const polyline = new google.maps.Polyline({
             path: path,
-            map: window.appState?.map,
+            map: appState.map,
             strokeColor: "#0000FF",
             strokeOpacity: 0.7,
             strokeWeight: 6
@@ -101,7 +90,7 @@ function drawAllRouteSteps() {
 function updateFineGrainedRouteColor(currentLocation, currentIdx) {
     if (!appState.routePolylines || appState.routePolylines.length === 0) return;
 
-    const currentMap = appState.map || window.appState?.map || window.map;
+    const currentMap = appState.map;
 
     const ON_ROUTE_THRESHOLD_M = 15;
     let isOffRoute = false;
@@ -205,7 +194,7 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
             if (!appState.activeRemainingPolyline) {
                 appState.activeRemainingPolyline = new google.maps.Polyline({
                     path: remainingCoords,
-                    map: map,
+                    map: currentMap,
                     strokeColor: "#0000ff",
                     strokeOpacity: 0.8,
                     strokeWeight: 6,
@@ -520,9 +509,9 @@ function updateRemainingDistance(currentLocation) {
     if (isFinalStep && remainingMeters <= 20) {
         appState.navigationActive = false;
 
-        if (window.navigationTimer) {
-            clearInterval(window.navigationTimer);
-            window.navigationTimer = null;
+        if (appState.navigationTimer) {
+            clearInterval(appState.navigationTimer);
+            appState.navigationTimer = null;
         }
 
         updateNavDisplay("目的地に到着しました");
