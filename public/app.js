@@ -195,7 +195,7 @@ async function processFiles() {
 
         for (const file of files) {
             const gpxText = await file.text();
-            const points = patseGpx(gpxText);
+            const points = parseGpx(gpxText);
 
             allNewPoints.push(...points);
             logMessage(`${file.name}: ${points.length}地点を読み込みました`);
