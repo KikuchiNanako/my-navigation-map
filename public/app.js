@@ -160,7 +160,7 @@ async function loadGoogleMaps() {
 window.addEventListener("DOMContentLoaded", loadGoogleMaps);
 
 window.addEventListener("load", async () => {
-    setTimeout(async () => {
+    
         try {
             logMessage("保存済みのログを確認しています");
             const allSaveData = await getAllPointsFromDB();
@@ -179,5 +179,4 @@ window.addEventListener("load", async () => {
         } catch (e) {
             console.error("初期読み込みエラー:", e);
         }
-    }, 1500);
 });

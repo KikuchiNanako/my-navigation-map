@@ -369,8 +369,6 @@ function displayRoute(origin, destination){
         },
         (response, status) => {
             if (status === "OK" && response && response.routes && response.routes.length > 0) {
-                const route = response.routes[0];
-
                 appState.lastDirectionsResponse = response;
                 appState.selectedRouteIndex = 0;
 
@@ -539,7 +537,7 @@ function clearAlternativePolylines() {
  * 全てのナビゲーション情報を完全に消去してリセットする
  */
 function clearAllNavigation() {
-    //タイマー・ポリライン・マーカー等のリセット
+    //ポリライン・マーカー等のリセット
     appState.resetNavigation();
 
     //入力欄のリセット
