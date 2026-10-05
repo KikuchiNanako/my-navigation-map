@@ -120,7 +120,7 @@ function calculateFrequentPoints () {
                 }
             }
         }
-        processedPoints = {
+        previousPoint = {
             lat_r,
             lon_r,
             timeMs
