@@ -180,3 +180,53 @@ window.addEventListener("load", async () => {
             console.error("初期読み込みエラー:", e);
     }
 });
+
+async function processFiles() {
+    const fileInput = document.getElementById("gpxFileInput");
+    const files = fileInput.files;
+
+    if (!files || files.length === 0) {
+        logMessage("GPXファイルを選択してください");
+        return;
+    }
+
+    try {
+        let allNewPoints = [];
+
+        for (const file of files) {
+            const gpxText = await file.text();
+            const points = patseGpx(gpxText);
+
+            allNewPoints.push(...points);
+            logMessage(`${file.name}: ${points.length}地点を読み込みました`);
+        }
+        if (allNewPoints.length === 0) {
+            logMessage("有効なGPXデータがありませんでした");
+            return;
+        }
+
+        //IndexDBに保存
+        await bulkSavePoints(allPoints);
+
+        const allSaveData = await getAllPointsFromDB();
+
+        appState.allPoints = allSaveData.map(d => ({
+            lat: d.lat,
+            lon: d.lon,
+            time: d.time
+        }));
+
+        calculateFrequentPoints();
+
+        appState.gpxProcessed = true;
+
+        if (appState.map) {
+            drawMap();
+        }
+
+        logMessage(`GPXファイルの保存完了:${allNewPoints.length}地点を追加しました`);
+    } catch (error) {
+        console.error("GPX処理エラー:", error);
+        logMessage(`GPX処理エラー:${error.message}`);
+    }
+}
