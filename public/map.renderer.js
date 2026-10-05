@@ -438,7 +438,7 @@ function selectRoute(index) {
     appState.alternativePolylines.forEach(item => {
         const isSelected = (item.index === index);
         item.polyline.setOptions({
-            strokeColor: isSelected ? "#4285F4" : "#4285F4",
+            strokeColor: "#4285F4",
             strokeOpacity: isSelected ? 0.8 : 0.4,
             strokeWeight: isSelected ? 6 : 4,
             zIndex: isSelected ? 2 : 1

@@ -127,18 +127,11 @@ async function requestRouteDrawing(forcedOrigin) {
     
         if (!destinationInput) {
             logMessage("致命的エラー:目的地を入力してください");
-            
             appState.isRerouting = false;
             return;
         }
 
         const rawValue = destinationInput.value;
-
-        if (rawValue === undefined || rawValue === null) {
-            logMessage("致命的エラー２");
-            appState.isRerouting = false;
-            return;
-        }
 
         const destinationPlace = String(rawValue).trim();
         if (!destinationPlace) {
