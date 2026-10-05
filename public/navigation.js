@@ -125,7 +125,6 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
                 strokeOpacity: 0.4,
                 strokeWeight: 4,
             });
-            polyline.setMap(currentMap);
         }
         else if (polyline.stepIndex > currentIdx) {
             polyline.setOptions({
@@ -133,7 +132,6 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
                 strokeOpacity: 0.7,
                 strokeWeight: 6,
             });
-            polyline.setMap(currentMap);
         }
         else if (polyline.stepIndex === currentIdx) {
             if (isOffRoute) {
@@ -195,37 +193,6 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
         }
     });
 }
-
-
-/**
- * 現在のステップインデックスに基づいて、それより前の走破済みルートの色を塗り替える
- * @param {number} currentIndex -　現在案内中のs轍鮒番号
- */
-/*
-function updateTraveledRouteColor(currentIdx) {
-    if (!appState.routePolylines || appState.routePolylines.length === 0) return;
-
-    appState.routePolylines.forEach((polyline) => {
-        if (polyline.stepIndex < currentIdx) {
-            polyline.setOptions({
-                strokeColor: "#7F8c8D",
-                strokeOpacity: 0.6,
-                strokeWeight: 5,
-                zIndex: 1
-            });
-        }
-
-        else {
-            polyline.setOptions({
-                strokeColor: "#0000FF",
-                strokeOpacity: 0.7,
-                strokeWeight: 6,
-                zIndex: 2
-            });
-        }
-    });
-}
-/*
 
 /**
  * 現在のステップ情報をマップとログに表示
@@ -457,74 +424,3 @@ function handleRouteForNavigation(route) {
     const leg = route.legs[0];
     startStepNavigation(leg);
 }
-
-
-/**
- * 現在地から現在ステップ終点までの距離を表示更新
- * @param {{lat:number, lng:number}} currentLocation
- */
-/*
-function updateRemainingDistance(currentLocation) {
-    if (!appState.navigationActive) return;
-    if (!appState.steps || appState.currentStepIndex >= appState.steps.length) return;
-
-    const step = appState.steps[appState.currentStepIndex];
-    if (!step || !step.end_location) return;
-
-    const endLat = (typeof step.end_location.lat === 'function') ? step.end_location.lat() : step.end_location.lat;
-    const endLng = (typeof step.end_location.lng === 'function') ? step.end_location.lng() : step.end_location.lng;
-
-    const remainingMeters = getDistanceMeters(
-        currentLocation.lat,
-        currentLocation.lng,
-        endLat,
-        endLng
-    );
-
-    const instruction = step.instructions.replace(/<[^>]*>/g, "");
-
-    let distanceText;
-    if (remainingMeters >= 1000) {
-        distanceText = `${(remainingMeters / 1000).toFixed(1)} km`;
-    } else {
-        distanceText = `${Math.round(remainingMeters)}m`;
-    }
-
-    const isFinalStep = (appState.currentStepIndex === appState.steps.length - 1);
-
-    if (isFinalStep && remainingMeters <= 20) {
-        appState.navigationActive = false;
-
-        if (appState.navigationTimer) {
-            clearInterval(appState.navigationTimer);
-            appState.navigationTimer = null;
-        }
-
-        updateNavDisplay("目的地に到着しました");
-
-        const statusLabel = document.getElementById("statusLabel");
-        if (statusLabel) {
-            statusLabel.innerText = "状態：目的地到着";
-        }
-
-        if (typeof speakText === 'function') {
-            speakText("目的地に到着しました。ナビゲーションを終了します");
-        }
-
-        logMessage("目的地到着。ナビゲーション終了");
-
-        const startBtn = document.getElementById("routestartButton");
-        const stopBtn = document.getElementById("stopButton");
-        const resumeBtn = document.getElementById("startButton");
-        if (startBtn) startBtn.style.display = "block";
-        if (stopBtn) stopBtn.style.display = "none";
-        if (resumeBtn) resumeBtn.style.display = "none";
-    } else {
-        updateNavDisplay(
-        instruction,
-        `あと${distanceText}`,
-        "#333"
-        );
-    }    
-}
-*/
