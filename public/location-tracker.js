@@ -128,7 +128,7 @@ async function requestRouteDrawing(forcedOrigin) {
         if (!destinationInput) {
             logMessage("致命的エラー:目的地を入力してください");
             
-            if (typeof appState.isRerouting !== 'undefined') appState.isRerouting = false;
+            appState.isRerouting = false;
             return;
         }
 
@@ -136,14 +136,14 @@ async function requestRouteDrawing(forcedOrigin) {
 
         if (rawValue === undefined || rawValue === null) {
             logMessage("致命的エラー２");
-            if (typeof appState.isRerouting !== 'undefined') appState.isRerouting = false;
+            appState.isRerouting = false;
             return;
         }
 
         const destinationPlace = String(rawValue).trim();
         if (!destinationPlace) {
             logMessage("エラー：目的地を入力してください");
-            if(typeof appState.isRerouting !== 'undefined') appState.isRerouting = false;
+            appState.isRerouting = false;
             return;        
         }
 
@@ -158,11 +158,9 @@ async function requestRouteDrawing(forcedOrigin) {
 
         if (!originLatLon) {
             logMessage("エラー：現在地を取得できません");
-            if (typeof appState.isRerouting !== 'undefined') appState.isRerouting = false;
+            appState.isRerouting = false;
             return;
         }
-
-        logMessage(`デバッグ：現在地取得成功 - 緯度： ${originLatLon.lat.toFixed(5)}, 経度： ${originLatLon.lng.toFixed(5)}`);
 
         //ルートを計算して描画
         displayRoute(originLatLon, destinationPlace);
@@ -172,18 +170,14 @@ async function requestRouteDrawing(forcedOrigin) {
         //グローバルに保存されてるDirectionsレスポンスから所要時間と距離を取得して表示
         setTimeout(() => {
             if (appState.lastDirectionsResponse && appState.lastDirectionsResponse.routes && appState.lastDirectionsResponse.routes.length > 0) {
-                if (typeof updateRouteInfoUI === 'function') {
-                    updateRouteInfoUI(0);
-                } 
+                updateRouteInfoUI(0);
             } else {
                 console.warn("所要時間表示用のルートデータがまだ準備できていません");
             }
         }, 800);
 
-        if (typeof updateCurrentLocationMarker === 'function') {
-            updateCurrentLocationMarker(originLatLon, 0, false);
-        }
-
+        updateCurrentLocationMarker(originLatLon, 0, false);
+        
         document.getElementById('routestartButton').style.display = 'block';
         document.getElementById('startButton').style.display = 'none';
         document.getElementById('stopButton').style.display = 'none';
@@ -197,7 +191,7 @@ async function requestRouteDrawing(forcedOrigin) {
         logMessage(`**致命的エラー発生(requestRouteDrawing) :** ${e.name}: ${e.message}`);
         console.error("ルート描画中のキャッチされたエラー", e);
 
-        if (typeof appState.isRerouting !== 'undefined') appState.isRerouting = false;
+        appState.isRerouting = false;
     }
     
 }
@@ -346,24 +340,15 @@ async function onPositionUpdate(position) {
     updateCurrentLocationMarker(currentLatLon, 0, isOutside);
 
     if (appState.navigationActive) {
-        if (typeof skipToNearestStep === 'function') {
-            skipToNearestStep(currentLatLon);
-        }
+        skipToNearestStep(currentLatLon);
 
-        if (typeof updateFineGrainedRouteColor === 'function') {
-            updateFineGrainedRouteColor(currentLatLon, appState.currentStepIndex);
-        }
-
+        updateFineGrainedRouteColor(currentLatLon, appState.currentStepIndex);
+        
         if (isOutside) {
             logMessage("ナビゲーション案内実行中：ルート外です");
 
-            if (typeof updateRemainingDistance === 'function') {
-                updateRemainingDistance(currentLatLon);
-            }
+            checkStepProgression(currentLatLon);
 
-            if (typeof checkStepProgression === 'function') {
-                checkStepProgression(currentLatLon);
-            }
         } else {
             logMessage("既知ルート走行中：案内を停止");
         }

@@ -179,7 +179,7 @@ window.addEventListener("load", async () => {
                 calculateFrequentPoints();
                 appState.gpxProcessed = true;
 
-                if (typeof drawMap === 'function' && appState.map) drawMap();
+                if (appState.map) drawMap();
             } else {
                 logMessage("保存されたログがありません。新しいGPXファイルを読み込んでください");
             }

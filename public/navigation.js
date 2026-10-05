@@ -10,18 +10,10 @@ function startStepNavigation(leg, resume = false) {
 
     appState.isRerouting = false;
     appState.steps = leg.steps;
-    appState.currentStepIndex = 0;
+    if (!resume) {
+        appState.currentIdx = 0;
+    }
     appState.navigationActive = true;
-
-    if (appState.activeTraveledPolyline) {
-        appState.activeTraveledPolyline.setMap(null);
-        appState.activeTraveledPolyline = null;
-    }
-
-    if (appState.activeRemainingPolyline) {
-        appState.activeRemainingPolyline.setMap(null);
-        appState.activeRemainingPolyline = null;
-    }
 
     if (typeof clearAlternativePolylines === 'function') {
         clearAlternativePolylines();
@@ -246,7 +238,6 @@ function clearRoutePolylines() {
         appState.activeRemainingPolyline.setMap(null);
         appState.activeRemainingPolyline = null;
     }
-    console.log("ナビゲーション用ポリラインをすべてクリアしました");
 }
 
 /**
@@ -311,7 +302,7 @@ function skipToNearestStep(currentLocation) {
         let minDistance = Infinity;
         const SNAP_THRESHOLD_M = 60;
 
-        for (let i = appState.currentStepIndex; i < appState.steps.length; i++) {
+        for (let i = appState.currentStepIndex + 1; i < appState.steps.length; i++) {
             const step = appState.steps[i];
             let path = step.path || [];
             if (path.length === 0) {

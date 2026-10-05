@@ -1,8 +1,4 @@
-
-window.googleMapsReady = false;
- 
 async function initMap() {
-    window.googleMapsReady = true;
     logMessage("GoogleMaps初期化完了");
 
     let  initialLocation = { lat: 35.681236, lng: 139.767125 };
@@ -40,9 +36,8 @@ async function initMap() {
     });
 
     //現在地マーカーの更新
-    if (typeof updateCurrentLocationMarker === 'function') {
-        updateCurrentLocationMarker(initialLocation, 0, false);
-    }
+    updateCurrentLocationMarker(initialLocation, 0, false);
+    
 
     //マップクリックイベントの設定
     mapInstance.addListener("click", async (e) => {
@@ -134,7 +129,7 @@ async function initMap() {
 
     //すべての初期化が終わった後にdrawmapを呼び出す
     const pointsToDraw = appState.frequentPoints;
-    if (pointsToDraw && pointsToDraw.length > 0 && typeof drawMap === 'function') {
+    if (pointsToDraw && pointsToDraw.length > 0) {
         drawMap();
     }
 }
@@ -269,7 +264,6 @@ async function drawMap() {
     }
 
     //過去に描画した線があれば地図から削除してクリア
-    clearFrequentCircle();
     appState.frequentPolylines.forEach(p => p.setMap(null));
     appState.frequentPolylines = [];
 
@@ -353,9 +347,11 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+
  /**
  * マップ上の頻度ポイントの円をすべてクリアする
  */
+/*
 function clearFrequentCircle() {
     if (appState.frequentCircles && appState.frequentCircles.length > 0) {
         appState.frequentCircles.forEach(circle => circle.setMap(null));
@@ -363,15 +359,13 @@ function clearFrequentCircle() {
         logMessage("以前の頻度ポイントを地図からクリアしました");
     }
 }
+*/
 
 function displayRoute(origin, destination){
     const currentMap = appState.map;
     clearAlternativePolylines();
-
-    if (typeof clearRoutePolylines === 'function') {
-        clearRoutePolylines();
-    }
-
+    clearRoutePolylines();
+    
     appState.navigationActive = false;
     
 
