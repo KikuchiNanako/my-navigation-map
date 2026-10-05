@@ -161,22 +161,22 @@ window.addEventListener("DOMContentLoaded", loadGoogleMaps);
 
 window.addEventListener("load", async () => {
     
-        try {
-            logMessage("保存済みのログを確認しています");
-            const allSaveData = await getAllPointsFromDB();
+    try {
+        logMessage("保存済みのログを確認しています");
+        const allSaveData = await getAllPointsFromDB();
 
-            if (allSaveData && allSaveData.length > 0) {
-                appState.allPoints = allSaveData.map(d => ({ lat: d.lat, lon: d.lon, time: d.time }));
-                logMessage(`合計 ${appState.allPoints.length} 地点の過去ログを読み込みました`);
+        if (allSaveData && allSaveData.length > 0) {
+            appState.allPoints = allSaveData.map(d => ({ lat: d.lat, lon: d.lon, time: d.time }));
+            logMessage(`合計 ${appState.allPoints.length} 地点の過去ログを読み込みました`);
 
-                calculateFrequentPoints();
-                appState.gpxProcessed = true;
+            calculateFrequentPoints();
+            appState.gpxProcessed = true;
 
-                if (appState.map) drawMap();
-            } else {
-                logMessage("保存されたログがありません。新しいGPXファイルを読み込んでください");
-            }
-        } catch (e) {
-            console.error("初期読み込みエラー:", e);
+            if (appState.map) drawMap();
+        } else {
+            logMessage("保存されたログがありません。新しいGPXファイルを読み込んでください");
         }
+    } catch (e) {
+            console.error("初期読み込みエラー:", e);
+    }
 });

@@ -26,34 +26,31 @@ async function startRouteCheck() {
         renderer.setDirections({ routes: [] });
     }
 
-    if (!currentLatLon && appState.allPoints.length > 0) {
+    if (!currentLatLon) {
         logMessage("現在地の取得に失敗しました");
-        currentLatLon = { lat: appState.allPoints[0].lat, lng: appState.allPoints[0].lon };
-        } else if (!currentLatLon) {
-            logMessage("エラー:現在地を取得できませんでした");
-            return;
-        }
+        return;
+    }
 
-        const { lat: currentLat, lng: currentLon } = currentLatLon;
-        const destinationLatLon = await getCoordinatesFromPlace(destinationPlace);
+    const { lat: currentLat, lng: currentLon } = currentLatLon;
+    const destinationLatLon = await getCoordinatesFromPlace(destinationPlace);
 
-        if (!destinationLatLon) {
-            logMessage("\nエラー:目的地の座標を獲得できませんでした");
-            return;
-        }
+    if (!destinationLatLon) {
+        logMessage("\nエラー:目的地の座標を獲得できませんでした");
+        return;
+    }
 
-        drawMap();
+    drawMap();
 
-        if (isOutsideRoute(currentLat, currentLon)) {
-            logMessage("経路外です");
-            displayRoute(currentLatLon, destinationLatLon);
+    if (isOutsideRoute(currentLat, currentLon)) {
+        logMessage("経路外です");
+        displayRoute(currentLatLon, destinationLatLon);
 
-            updateNavDisplay("ルートを確認してください", "開始ボタンを押すと案内を始めます", "#2c3e50");
-        } else {
-            logMessage("経路内です");
+        updateNavDisplay("ルートを確認してください", "開始ボタンを押すと案内を始めます", "#2c3e50");
+    } else {
+        logMessage("経路内です");
         
-            updateNavDisplay("よく通る道です", "案内を休止しています")
+        updateNavDisplay("よく通る道です", "案内を休止しています")
 
-            startLocationTracking();
-        }
- }
+        startLocationTracking();
+    }
+}

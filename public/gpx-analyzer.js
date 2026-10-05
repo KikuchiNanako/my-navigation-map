@@ -178,17 +178,12 @@ function isOutsideRoute(currentLat, currentLon) {
     }
 
     let minDist = Infinity;
-    let nearestPoint = null;
 
     for (const point of appState.frequentPoints) {
         const dist = getDistanceMeters(currentLat, currentLon, point.lat_r, point.lon_r);
         if (dist < minDist) {
             minDist = dist;
-            nearestPoint = point;
         }
     }
-
-    logMessage(`最近傍距離: ${minDist.toFixed(1)}m`);
-
     return minDist > THRESHOLD_M;
 }

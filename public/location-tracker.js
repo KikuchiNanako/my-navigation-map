@@ -322,12 +322,7 @@ async function onPositionUpdate(position) {
         updateFineGrainedRouteColor(currentLatLon, appState.currentStepIndex);
         
         if (isOutside) {
-            logMessage("ナビゲーション案内実行中：ルート外です");
-
             checkStepProgression(currentLatLon);
-
-        } else {
-            logMessage("既知ルート走行中：案内を停止");
         }
     } else {
         if (isOutside) {
@@ -339,7 +334,6 @@ async function onPositionUpdate(position) {
             "#1a261a"
             );
         }
-        logMessage("現在地を追跡中ですがナビゲーションは停止中");
     }
     
 }
