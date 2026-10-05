@@ -1,3 +1,5 @@
+const { response } = require("express");
+
  window.googleMapsReady = false;
  
  async function initMap() {
@@ -223,7 +225,7 @@ async function drawMap() {
     appState.frequentPolylines = [];
 
     //よく通る道のデータがなければ何もしない
-    if (!appState.frequentPoints || appState.frequentPoints.length === 0) {
+    if (!appState.frequentSegments || appState.frequentSegments.length === 0) {
         logMessage("描画するよく通る道のデータがありません");
         return;
     }
@@ -231,12 +233,42 @@ async function drawMap() {
     //const rawPoints = appState.frequentPoints;
     //const mergedPoints = mergeNearbyPoints(rawPoints, 20);
 
-    const points = mergeNearbyPoints(appState.frequentPoints, 15);
-    const CONNECT_DISTANCE_M = 40;
+    //const points = mergeNearbyPoints(appState.frequentPoints, 15);
+    //const CONNECT_DISTANCE_M = 40;
 
-    logMessage(`よく通る道の線描画を開始します...(データ数: ${appState.frequentPoints.length})`);
+    logMessage(`道路に沿った線の描画開始: ${appState.frequentSegments.length})`);
 
-    //const offset = 0.00015;
+    for (const segment of appState.freqentSegments) {
+        try {
+            const result = await requestRoadRoute(
+                segment.start,
+                segment.end
+            );
+            if (!result) { continue };
+
+            const polyline = new google.maps.Polyline({
+                    path: result,
+                    map: currentMap,
+                    strokeColor: "#ff0000",
+                    strokeOpacity: 0.75,
+                    strokeWeight: 5,
+                    clickable: false,
+                    zIndex: 5
+                });
+
+                appState.frequentPolylines.push(polyline);
+
+                await StylePropertyMap(100);
+        } catch (error) {
+            console.error(
+                "頻出道路描画エラー:",
+                error
+            );
+        }
+    }
+    
+    /*
+    const offset = 0.00015;
 
     for (let i = 0; i < points.length; i++) {
         for (let j = i + 1; j < points.length; j++) {
@@ -263,7 +295,7 @@ async function drawMap() {
         }
     }
 
-    /*
+    
     mergedPoints.forEach(p => {
         const polyline = new google.maps.Polyline({
             path: [
@@ -283,7 +315,49 @@ async function drawMap() {
 
     */
     logMessage("よく通る道の線描画が完了しました");
+
 }  
+
+function requestRoadRoute(start, end) {
+    return new Promise((resolve) => {
+        appState.directionsService.route(
+            {
+                origin: start,
+                destination: end,
+                travelMode: google.maps.TravelMode.WALKING,
+                provideRouteAlternatives: false
+            },
+            (response, status) => {
+                if (status !== "OK" || !response.routes || response.routes.length === 0) {
+                    console.warn("道路取得失敗:", status);
+
+                    resolve(null);
+                    return;
+                }
+                const route = response.routes[0];
+                const path = [];
+
+                route.legs.forEach(leg => {
+                    leg.staps.forEach(step => {
+                        step.path.forEach(
+                            latLng => {
+                                path.push({
+                                    lat: latLng.lat(),
+                                    lng:latLng.lng()
+                                });
+                            }
+                        );
+                    });
+                });
+                resolve(path);
+            }
+        );
+    });
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
  /**
  * マップ上の頻度ポイントの円をすべてクリアする

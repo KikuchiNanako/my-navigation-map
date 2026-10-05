@@ -2,13 +2,19 @@
     const processedPoints = appState.allPoints.map(p => {
         const lat_r = roundToDecimals(p.lat, ROUND_DECIMALS);
         const lon_r = roundToDecimals(p.lon, ROUND_DECIMALS);
-        const month = `${p.time.getFullYear()}-${String(p.time.getMonth() + 1).padStart(2, '0')}`;
-        return { lat_r, lon_r, time: p.time, month };
+
+        const time = p.time instanceof Date
+            ? p.time
+            : new Date(p.time);
+
+        const month = `${time.getFullYear()}-${String(time.getMonth() + 1).padStart(2, '0')}`;
+        return { lat_r, lon_r, time, month };
     });
 
     // ===点を丸めてカウント==
 
     const monthlyCountsMap = new Map();
+
     processedPoints.forEach(p => {
         const key = `${p.month}_${p.lat_r},${p.lon_r}`;
         monthlyCountsMap.set(key, (monthlyCountsMap.get(key) || 0) + 1);
@@ -20,7 +26,7 @@
     //全データを見て、月ごとの基準を超えた場所をすべて蓄積
     for (const [key, count] of monthlyCountsMap.entries()) {
         if (count >= 2) {
-            const [month, latLonKey] = key.split('_');
+            const [, latLonKey] = key.split('_');
             frequentOldPointsKeys.add(latLonKey);
         }
     }
@@ -51,8 +57,58 @@
         const [lat_r, lon_r] = key.split(',').map(Number);
         return { lat_r, lon_r };
     });
+
+    const segmentCountMap = new Map();
+
+    //時系列に並べる
+    const sortedPoints = [...processedPoints].sort((a, b) => a.time - b.time);
+
+    for (let i = 0; i < sortedPoints.length - 1; i++) {
+        const a = sortedPoints[i];
+        const b = sortedPoints[i + 1];
+
+        const timeDiff = (b.time - a.time) / 1000;
+
+        if (timeDiff > 600) { continue };
+
+        const distance = getDistanceMeters( a.lat_r, a.lon_r, b.lat_r, b.lon_r );
+
+        //同じ場所すぎる点は無視
+        if (distance < 5 || distance > 200) {
+            continue;
+        }
+
+        const keyA = `${a.lat_r}, ${a.lon_r}`;
+        const keyB = `${b/lat_r}, ${b.lon_r}`;
+
+        const segmentKey = [keyA, keyB].sort().join('|');
+
+        if (!segmentCountMap.has(segmentKey)) {
+            segmentKey,
+            {
+                start: {
+                    lat: a.lat_r,
+                    lng: a.lon_r
+                },
+
+                end: {
+                    lat: b.lat_r,
+                    lng: b.lon_r
+                },
+
+                count: 0
+            }
+        };
+    }
+
+    segmentCountMap.get(segmentKey).count++;
+
+    //頻繁に通る区間だけ残す
+    appState.frequentSegments = Array.from(segmentCountMap.values()).filter(segment => segment.count >= 2);
+    
     
     logMessage(`よく通る道の点数: ${appState.frequentPoints.length}`);
+    logMessage(`よく通る区間： ${appState.frequentSegments.length}`);
  }
 
  /**
