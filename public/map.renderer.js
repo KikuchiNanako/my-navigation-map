@@ -258,7 +258,7 @@ async function drawMap() {
 
                 appState.frequentPolylines.push(polyline);
 
-                await StylePropertyMap(100);
+                await sleep(100);
         } catch (error) {
             console.error(
                 "頻出道路描画エラー:",
@@ -330,26 +330,21 @@ function requestRoadRoute(start, end) {
             (response, status) => {
                 if (status !== "OK" || !response.routes || response.routes.length === 0) {
                     console.warn("道路取得失敗:", status);
-
                     resolve(null);
                     return;
                 }
                 const route = response.routes[0];
-                const path = [];
 
-                route.legs.forEach(leg => {
-                    leg.staps.forEach(step => {
-                        step.path.forEach(
-                            latLng => {
-                                path.push({
-                                    lat: latLng.lat(),
-                                    lng:latLng.lng()
-                                });
-                            }
-                        );
-                    });
-                });
-                resolve(path);
+                if (route.overview_path && route.overview_path.length > 0) {
+                    const path = route.overview_path.map(latLng => ({
+                        lat: latLng.lat(),
+                        lng: latLng.lng()
+                    }));
+                    resolve(path);
+                } else {
+                    console.warn("overview_pathがありません");
+                    resolve(null);
+                }              
             }
         );
     });
