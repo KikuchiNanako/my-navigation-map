@@ -155,7 +155,7 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
             if (!rawPath || rawPath.length === 0) return;
 
             const traveledCoords = [];
-            
+
             for (let i = 0; i <= closestVertexIndex; i++) {
                 traveledCoords.push(rawPath[i]);
             }
@@ -196,10 +196,12 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
     });
 }
 
+
 /**
  * 現在のステップインデックスに基づいて、それより前の走破済みルートの色を塗り替える
  * @param {number} currentIndex -　現在案内中のs轍鮒番号
  */
+/*
 function updateTraveledRouteColor(currentIdx) {
     if (!appState.routePolylines || appState.routePolylines.length === 0) return;
 
@@ -223,6 +225,7 @@ function updateTraveledRouteColor(currentIdx) {
         }
     });
 }
+/*
 
 /**
  * 現在のステップ情報をマップとログに表示
@@ -286,10 +289,7 @@ function clearRoutePolylines() {
  */
 function skipToNearestStep(currentLocation) {
     try {
-        logMessage(`[デバッグ]skipToNearestStepが呼び出されました！ lat: ${currentLocation.lat.toFixed(4)}`);
-
         if (!appState.steps || appState.steps.length === 0 || !appState.navigationActive) {
-            logMessage(`[デバッグ]案内中のステップがない、又はナビ停止中のため中断。active: ${appState.navigationActive}`);
             return;
         } 
 
@@ -379,7 +379,6 @@ function skipToNearestStep(currentLocation) {
             } 
 
         }
-        logMessage(`[デバッグ]skipToNearestStepの最後まで正常に通過`);
     } catch (error) {
         logMessage(`[致命的エラー]skipToNearestStep内でクラッシュ: ${error.message}`);
     }
@@ -431,10 +430,6 @@ function checkStepProgression(currentLocation) {
 
     const NEXT_STEP_THRESHOLD_M = 20;
 
-    if (distanceToEnd > NEXT_STEP_THRESHOLD_M || appState.currentStepIndex % 5 === 0) {
-        logMessage(`[ナビ中]ステップ ${appState.currentStepIndex + 1} の終点まで：　${distanceToEnd.toFixed(1)} m`);
-    }
-
     if (distanceToEnd < NEXT_STEP_THRESHOLD_M) {
         logMessage(`== 次のステップへ（終点まで ${distanceToEnd.toFixed(1)} m） ==`);
         nextStep();
@@ -463,10 +458,12 @@ function handleRouteForNavigation(route) {
     startStepNavigation(leg);
 }
 
+
 /**
  * 現在地から現在ステップ終点までの距離を表示更新
  * @param {{lat:number, lng:number}} currentLocation
  */
+/*
 function updateRemainingDistance(currentLocation) {
     if (!appState.navigationActive) return;
     if (!appState.steps || appState.currentStepIndex >= appState.steps.length) return;
@@ -530,3 +527,4 @@ function updateRemainingDistance(currentLocation) {
         );
     }    
 }
+*/
