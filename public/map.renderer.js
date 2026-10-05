@@ -248,8 +248,8 @@ async function drawMap() {
             if (dist <= CONNECT_DISTANCE_M) {
                 const polyline = new google.maps.Polyline({
                     path: [
-                        { lat: p.lat_r - offset, lng: p.lon_r - offset },
-                        { lat: p.lat_r + offset, lng: p.lon_r + offset }
+                        { lat: points[i].lat_r, lng: points[i].lon_r },
+                        { lat: points[j].lat_r, lng: points[j].lon_r }
                     ],
                     map: currentMap,
                     strokeColor: "#ff0000",
