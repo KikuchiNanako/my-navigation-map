@@ -79,29 +79,31 @@
         }
 
         const keyA = `${a.lat_r}, ${a.lon_r}`;
-        const keyB = `${b/lat_r}, ${b.lon_r}`;
+        const keyB = `${b.lat_r}, ${b.lon_r}`;
 
         const segmentKey = [keyA, keyB].sort().join('|');
 
         if (!segmentCountMap.has(segmentKey)) {
-            segmentKey,
-            {
-                start: {
-                    lat: a.lat_r,
-                    lng: a.lon_r
-                },
+            segmentCountMap.set(
+                segmentKey,
+                {
+                    start: {
+                        lat: a.lat_r,
+                        lng: a.lon_r
+                    },
 
-                end: {
-                    lat: b.lat_r,
-                    lng: b.lon_r
-                },
+                    end: {
+                        lat: b.lat_r,
+                        lng: b.lon_r
+                    },
 
-                count: 0
-            }
-        };
+                    count: 0
+                }
+            );
+        }
+
+        segmentCountMap.get(segmentKey).count++;
     }
-
-    segmentCountMap.get(segmentKey).count++;
 
     //頻繁に通る区間だけ残す
     appState.frequentSegments = Array.from(segmentCountMap.values()).filter(segment => segment.count >= 2);
