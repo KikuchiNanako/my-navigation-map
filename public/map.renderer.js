@@ -252,6 +252,7 @@ async function drawMap() {
         
     });
 
+
     logMessage("よく通る道の線描画が完了しました");
 }  
 
