@@ -8,16 +8,28 @@ const ROUND_DECIMALS = 5;
  *@param {string} message
  */
  function logMessage(message) {
-    const logDiv = document.getElementById('log');
-    if(!logDiv) {
-        console.error("ログ要素 #log が見つかりません:", message);
-        return;
-    }
-    logDiv.innerHTML += `<div>${new Date().toLocaleTimeString()} - ${message}</div>`;
-    logDiv.scrollTop = logDiv.scrollHeight;
- }
+   const logDiv = document.getElementById('log');
 
- /**
+   if(!logDiv) {
+      console.error("ログ要素 #log が見つかりません:", message);
+      return;
+   }
+   const line = document.createElement("div");
+
+   line.textContent = `${new Date().toLocaleTimeString()} - ${message}`;
+   
+   logDiv.appendChild(line);
+
+   //古すぎるログは削除
+   while (logDiv.children.length > 200) {
+      logDiv.firstElementChild.remove();
+   }
+
+   logDiv.scrollTop = logDiv.scrollHeight;
+   
+}
+
+/**
   * ハバーサインの公式を使って二点間の距離をメートルで計算する
   * @param {number} lat1
   * @param {number} lon1
@@ -54,18 +66,42 @@ const ROUND_DECIMALS = 5;
  const DB_NAME = "CatNaviLogDB";
  const STORE_NAME = "locationLogs";
 
+ let dbPromise = null;
+
  function openDB() {
-   return new Promise((resolve, reject) => {
+   if (dbPromise) {
+      return dbPromise;
+   }
+
+   dbPromise = new Promise((resolve, reject) => {
       const request = indexedDB.open(DB_NAME, 1);
+
       request.onupgradeneeded = (e) => {
          const db = e.target.result;
+
          if (!db.objectStoreNames.contains(STORE_NAME)) {
-            db.createObjectStore(STORE_NAME, { autoIncrement: true });
+            db.createObjectStore(
+               STORE_NAME,
+               { autoIncrement: true }
+            );
          }
       };
-      request.onsuccess = (e) => resolve(e.target.result);
-      request.onerror = (e) => reject(e.target.error);
+
+      request.onsuccess = (e) => {
+         const db = e.target.result;
+
+         db.onversionchange = () => {
+            db.close();
+            dbPromise = null;
+         };
+         resolve(db);
+      };
+      request.onerror = (e) => {
+         dbPromise = null;
+         reject(e.target.error);
+      };
    });
+   return dbPromise;
  }
 
 let lastSavePos = null;
@@ -76,10 +112,21 @@ async function savePointToDB(lat, lon) {
    }
 
    const db = await openDB();
-   const tx = db.transaction(STORE_NAME, "readwrite");
-   const store = tx.objectStore(STORE_NAME);
-   store.put({ lat, lon, time: new Date() });
-   lastSavePos = { lat, lon };
+   return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, "readwrite");
+      const store = tx.objectStore(STORE_NAME);
+
+      store.put({ lat, lon, time: new Date() });
+
+      tx.oncomplete = () => {
+         lastSavePos = { lat, lon };
+         resolve();
+      };
+
+      tx.onerror = () => {
+         reject(tx.error);
+      };
+   });
 }
 
 async function bulkSavePoints(points) {
