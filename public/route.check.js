@@ -54,41 +54,6 @@ async function startRouteCheck() {
 
             updateNavDisplay("よく通る道です", "案内を休止しています")
 
-            if (appState.watchId === null) {
-                appState.watchId = navigator.geolocation.watchPosition(
-                    onPositionUpdate,
-                    (error) => logMessage(`位置監視エラー: ${error.message}`),
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 5000,
-                        maximumAge: 0
-                    }
-                );
-                logMessage("現在地の保存を開始しました");
-            }
+            startLocationTracking();
         }
  }
-
-/*
- function checkCurrentLocation(lat, lon) {
-    const outside = isOutsideRoute(lat, lon);
-    const isActive = appState.navigationActive;
-    const stepIdx = appState.currentStepIndex || 0;
-
-    if (outside && !isActive) {
-        logMessage("知らない道に出ました。ナビを開始します");
-        startRouteCheck();
-    } else if (!outside) {
-        logMessage("経路内を走行中");
-    }
- 
-    if (isActive) {
-        const currentLocation = { lat, lng: lon };
-        if (typeof checkStepProgression === 'function') checkStepProgression(currentLocation);  
-        if (typeof updateFineGrainedRouteColor === 'function') updateFineGrainedRouteColor(currentLocation, stepIdx);
-        if (typeof updateRemainingDistance === 'function') updateRemainingDistance(currentLocation);
-    }
- }
-*/
-
-

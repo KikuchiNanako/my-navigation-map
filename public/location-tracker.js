@@ -3,7 +3,7 @@
   * @param {string} PlaceName
   * @returns {Promise<{lat: number, lng: number} | null>}
   */
- function getCoordinatesFromPlace(placeName) {
+function getCoordinatesFromPlace(placeName) {
     return new Promise((resolve) => {
         const geocoder = new google.maps.Geocoder();
         geocoder.geocode({ address: placeName }, (results, status) => {
@@ -18,13 +18,13 @@
             } 
         });
     });
- }
+}
 
- /**
+/**
   * ブラウザのGoolocationAPIで現在地を取得
   * @returns {Promise<{lat: number, lng: number} | null>}
   */
- function getApproximateLocation() {
+function getApproximateLocation() {
     return new Promise((resolve) => {
         if (!navigator.geolocation) {
             logMessage("ブラウザがGeolocationをサポートしてません");
@@ -49,9 +49,9 @@
             }
         );
     });
- }
+}
 
- /**
+/**
   * Google Geolocation APIを使って位置を取得する
   * @returns {promise<{lat: number, lng: number} | null>}
   */
@@ -116,10 +116,10 @@ async function getHybridLocation() {
     return null;
 }
 
- /**
+/**
   * 現在地と目的地からルートを計算し、地図に描画する
   */
- async function requestRouteDrawing(forcedOrigin) {
+async function requestRouteDrawing(forcedOrigin) {
     logMessage("ルート描画を開始します");
 
     try {
@@ -200,13 +200,43 @@ async function getHybridLocation() {
         if (typeof appState.isRerouting !== 'undefined') appState.isRerouting = false;
     }
     
- }
+}
 
- /**
+/**
+  * 現在地の監視を開始する
+  * 既に監視中なら何もしない
+  */
+function startLocationTracking() {
+    if (!navigator.geolocation) {
+        logMessage("このブラウザでは位置情報を利用できません");
+        return;
+    }
+
+    if (appState.watchId !== null) {
+        return;
+    }
+
+    appState.watchId = nevigator.geolocation.watchPosition(
+        onPositionUpdate,
+
+        (error) => {
+            logMessage(`位置情報監視エラー: ${error.message}`);
+        },
+        
+        {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0
+        }
+    );
+    logMessage("現在地の監視を開始しました");
+}
+
+/**
  * 現在地監視を開始し、ナビゲーションのコアロジックを駆動する
  */
 async function startNavigation() {
-    if ( typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
         try {
             const permission = await DeviceOrientationEvent.requestPermission();
             if (permission === 'granted') {
@@ -252,20 +282,7 @@ async function startNavigation() {
 
     startStepNavigation(route.legs[0], isResuming);
 
-    if (appState.watchId === null) {
-        appState.watchId = navigator.geolocation.watchPosition(
-            onPositionUpdate,
-            (error) => logMessage(`Geolocation監視エラー: ${error.message}`),
-            {
-                enableHighAccuracy: true,
-                timeout: 5000,
-                maximumAge: 0
-            }
-        );
-        logMessage("ブラウザによるナビゲーション監視を開始します");
-    } else {
-        logMessage("ナビゲーション監視はすでに開始されています");
-    }
+    startLocationTracking();
         
     document.getElementById('routestartButton').style.display = 'none';
     document.getElementById('startButton').style.display = 'none';
@@ -298,30 +315,6 @@ function stopNavigation() {
     document.getElementById('startButton').style.display = 'block';
     document.getElementById('stopButton').style.display = 'none';
 }
-
-/*
-function startAutoTracking() {
-    if (!navigator.geolocation) return;
-
-    const options = {
-        enableHighAccuracy: true,
-        maximumAge: 0,
-        timeout: 27000
-    };
-
-    appState.watchId = navigator.geolocation.watchPosition(
-        (position) => {
-            const { latitude, longitude } = position.coords;
-
-            appState.allPoints.push({ lat: latitude, lon: longitude, time: new Date() });
-
-            checkCurrentLocation(latitude, longitude);
-        },
-        (error) => console.error(error),
-        options
-    );
-}
-/*
 
 /**
  * 位置情報が更新されるたびに実行されるナビゲーションのコアロジック
@@ -449,13 +442,13 @@ function animateMarker() {
     appState.markerAnimationId = requestAnimationFrame(animateMarker);
 }
 
- /**
+/**
   * 現在地マーカーを更新し、向きを反映させる
   * @param {object} currentLatLon -{lat, lng}
   * @param {number} heading -向き （０～３６０度）
   * @param {boolean} isOutside - 経路外かどうか
   */
- function updateCurrentLocationMarker(currentLatLon, heading = 0, isOutside = false) {
+function updateCurrentLocationMarker(currentLatLon, heading = 0, isOutside = false) {
     const currentMap = appState.map;
     if (!currentMap) return;
 
@@ -497,7 +490,7 @@ function animateMarker() {
         appState.markerAnimationId = requestAnimationFrame(animateMarker);
     }    
     
- }
+}
 
 /**
  * 実際にマーカーを回転させる処理
