@@ -158,7 +158,7 @@ function calculateFrequentPoints () {
     });
 
     //====頻出区間====
-    appState.frequentSegments = Array.from(segmentCountMap,values()).filter(segment => segment.count >= 3);
+    appState.frequentSegments = Array.from(segmentCountMap.values()).filter(segment => segment.count >= 3);
 
     logMessage(`よく通る道の点数: ${appState.frequentPoints.length}`);
     logMessage(`よく通る区間： ${appState.frequentSegments.length}`);
