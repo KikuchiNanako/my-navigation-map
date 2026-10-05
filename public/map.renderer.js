@@ -236,7 +236,7 @@ async function drawMap() {
     const offset = 0.00015;
 
     mergedPoints.forEach(p => {
-        const polyline = new google.maps.Polylin({
+        const polyline = new google.maps.Polyline({
             path: [
                 { lat: p.lat_r - offset, lng: p.lon_r - offset },
                 { lat: p.lat_r + offset, lng: p.lon_r + offset }
