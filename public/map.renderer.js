@@ -466,12 +466,7 @@ function renderRouteStepsList(routeIndex) {
     const leg = route.legs[0];
     if (!leg) return;
 
-    let steps = [];
-    if (typeof leg.getSteps === 'function') {
-        steps = leg.getSteps();
-    } else if (leg.steps) {
-        steps = leg.steps;
-    }
+    const steps = leg.steps || [];
 
     const listElement = document.getElementById("routeStepsList");
     const containerElement = document.getElementById("routeStepsContainer");
