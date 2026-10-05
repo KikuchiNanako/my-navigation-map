@@ -206,7 +206,7 @@ async function processFiles() {
         }
 
         //IndexDBに保存
-        await bulkSavePoints(allPoints);
+        await bulkSavePoints(appState.allPoints);
 
         const allSaveData = await getAllPointsFromDB();
 
