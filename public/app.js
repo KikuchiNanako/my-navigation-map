@@ -29,7 +29,6 @@ window.appState = {
     isRerouting: false,
     isUserInteracting: false,
     interactionTimeout: null,
-    navigationTimer: null,
 
     lastDirectionsResponse: null,
     selectedRouteIndex: 0,
@@ -55,11 +54,6 @@ window.appState = {
         if (this.watchId !== null) {
             navigator.geolocation.clearWatch(this.watchId);
             this.watchId = null;
-        }
-
-        if (this.navigationTimer !== null) {
-            clearInterval(this.navigationTimer);
-            this.navigationTimer = null;
         }
 
         if (this.tempMarker) {
