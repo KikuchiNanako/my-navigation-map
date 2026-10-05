@@ -1,5 +1,5 @@
 function calculateFrequentPoints () {
-    const processedPoints = appState.allPoints;
+    const points = appState.allPoints;
     
     if (!points || points.length === 0) {
         appState.frequentPoints = [];
