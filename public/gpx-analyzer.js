@@ -112,9 +112,6 @@
 
         segmentCountMap.get(segmentKey).count++;
     }
-
-    console.log("区間カウント:", Array.from(segmentCountMap.values()).sort((a,b) => b.count - a.count));
-
     //頻繁に通る区間だけ残す
     appState.frequentSegments = Array.from(segmentCountMap.values()).filter(segment => segment.count >= 3);
     

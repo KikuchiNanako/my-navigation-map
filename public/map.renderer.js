@@ -1,8 +1,7 @@
-//const { response } = require("express");
 
- window.googleMapsReady = false;
+window.googleMapsReady = false;
  
- async function initMap() {
+async function initMap() {
     window.googleMapsReady = true;
     logMessage("GoogleMaps初期化完了");
 
@@ -129,7 +128,6 @@
         });
 
         autocomplete.addListener("place_changed", () => {
-            const place = autocomplete.getPlace();
             logMessage("目的地が選択されました");
         });
     }
@@ -139,13 +137,13 @@
     if (pointsToDraw && pointsToDraw.length > 0 && typeof drawMap === 'function') {
         drawMap();
     }
- }
+}
 
- 
- /**
+
+/**
   * 吹き出しのボタンが押されたときに、正式に目的地としてセットする関数
   */
- function setAsDestination(lat, lng) {
+function setAsDestination(lat, lng) {
     if (appState.tempMarker) {
         appState.tempMarker.setMap(null);
         appState.tempMarker = null;
@@ -176,38 +174,6 @@
         }
     });
         
-}
-
- /**
-  * 近い頻出点を統合する
-  * @param {Array} points
-  * @param {number} threshold 距離(m)
-  * @returns {Array}
-  */
- function mergeNearbyPoints(points, threshold = 20) {
-    const merged = [];
-
-    points.forEach(p => {
-        const existing = merged.find(m => {
-            const dist = getDistanceMeters(
-                p.lat_r,
-                p.lon_r,
-                m.lat_r,
-                m.lon_r
-            );
-
-            return dist < threshold;
-        });
-
-        if (!existing) {
-            merged.push({
-                lat_r: p.lat_r,
-                lon_r: p.lon_r
-            });
-        }
-    });
-
-    return merged;
 }
 
 //近くでつながってる頻出区間をまとめる
@@ -312,12 +278,6 @@ async function drawMap() {
         logMessage("描画するよく通る道のデータがありません");
         return;
     }
-
-    //const rawPoints = appState.frequentPoints;
-    //const mergedPoints = mergeNearbyPoints(rawPoints, 20);
-
-    //const points = mergeNearbyPoints(appState.frequentPoints, 15);
-    //const CONNECT_DISTANCE_M = 40;
     const mergedSegments = mergeConnectedSegments(
         appState.frequentSegments,
         25
@@ -353,54 +313,6 @@ async function drawMap() {
             );
         }
     }
-    
-    /*
-    const offset = 0.00015;
-
-    for (let i = 0; i < points.length; i++) {
-        for (let j = i + 1; j < points.length; j++) {
-            const dist = getDistanceMeters(
-                points[i].lat_r, points[i].lon_r,
-                points[j].lat_r, points[j].lon_r
-            );
-
-            if (dist <= CONNECT_DISTANCE_M) {
-                const polyline = new google.maps.Polyline({
-                    path: [
-                        { lat: points[i].lat_r, lng: points[i].lon_r },
-                        { lat: points[j].lat_r, lng: points[j].lon_r }
-                    ],
-                    map: currentMap,
-                    strokeColor: "#ff0000",
-                    strokeOpacity: 0.7,
-                    strokeWeight: 5,
-                    clickable: false
-                });
-
-                appState.frequentPolylines.push(polyline);
-            }
-        }
-    }
-
-    
-    mergedPoints.forEach(p => {
-        const polyline = new google.maps.Polyline({
-            path: [
-                { lat: p.lat_r - offset, lng: p.lon_r - offset },
-                { lat: p.lat_r + offset, lng: p.lon_r + offset }
-            ],
-            map: currentMap,
-            strokeColor: "#ff0000",
-            strokeOpacity: 0.7,
-            strokeWeight: 5,
-            clickable: false
-        });
-
-        appState.frequentPolylines.push(polyline);
-        
-    });
-
-    */
     logMessage("よく通る道の線描画が完了しました");
 
 }  
