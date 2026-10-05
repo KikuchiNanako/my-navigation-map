@@ -238,7 +238,7 @@ async function drawMap() {
 
     logMessage(`道路に沿った線の描画開始: ${appState.frequentSegments.length})`);
 
-    for (const segment of appState.freqentSegments) {
+    for (const segment of appState.frequentSegments) {
         try {
             const result = await requestRoadRoute(
                 segment.start,
