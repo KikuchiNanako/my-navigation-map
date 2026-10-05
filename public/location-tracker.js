@@ -131,9 +131,7 @@ async function requestRouteDrawing(forcedOrigin) {
             return;
         }
 
-        const rawValue = destinationInput.value;
-
-        const destinationPlace = String(rawValue).trim();
+        const destinationPlace = destinationInput.value.trim();
         if (!destinationPlace) {
             logMessage("エラー：目的地を入力してください");
             appState.isRerouting = false;
@@ -144,7 +142,6 @@ async function requestRouteDrawing(forcedOrigin) {
 
         if (forcedOrigin && typeof forcedOrigin.lat === 'number' && typeof forcedOrigin.lng === 'number') {
             originLatLon = forcedOrigin;
-            logMessage("引数の現在地座標を利用して経路を再計算します");
         } else {
             originLatLon = await getHybridLocation();
         }
@@ -159,15 +156,6 @@ async function requestRouteDrawing(forcedOrigin) {
         displayRoute(originLatLon, destinationPlace);
 
         logMessage("ルート描画が完了しました");
-
-        //グローバルに保存されてるDirectionsレスポンスから所要時間と距離を取得して表示
-        setTimeout(() => {
-            if (appState.lastDirectionsResponse && appState.lastDirectionsResponse.routes && appState.lastDirectionsResponse.routes.length > 0) {
-                updateRouteInfoUI(0);
-            } else {
-                console.warn("所要時間表示用のルートデータがまだ準備できていません");
-            }
-        }, 800);
 
         updateCurrentLocationMarker(originLatLon, 0, false);
         
