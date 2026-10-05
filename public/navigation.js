@@ -23,7 +23,6 @@ function startStepNavigation(leg, resume = false) {
         appState.activeRemainingPolyline = null;
     }
 
-    clearRoutePolylines();
     if (typeof clearAlternativePolylines === 'function') {
         clearAlternativePolylines();
     }
