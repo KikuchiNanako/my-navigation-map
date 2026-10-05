@@ -299,6 +299,7 @@ function stopNavigation() {
     document.getElementById('stopButton').style.display = 'none';
 }
 
+/*
 function startAutoTracking() {
     if (!navigator.geolocation) return;
 
@@ -320,7 +321,7 @@ function startAutoTracking() {
         options
     );
 }
-
+/*
 
 /**
  * 位置情報が更新されるたびに実行されるナビゲーションのコアロジック

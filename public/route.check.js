@@ -69,6 +69,7 @@ async function startRouteCheck() {
         }
  }
 
+/*
  function checkCurrentLocation(lat, lon) {
     const outside = isOutsideRoute(lat, lon);
     const isActive = appState.navigationActive;
@@ -88,5 +89,6 @@ async function startRouteCheck() {
         if (typeof updateRemainingDistance === 'function') updateRemainingDistance(currentLocation);
     }
  }
+*/
 
 
