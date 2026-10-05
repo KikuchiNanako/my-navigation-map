@@ -40,7 +40,6 @@ window.appState = {
     activeRemainingPolyline: null,
     alternativePolylines: [],
     frequentPolylines: [],
-    frequentCircles: [],
 
     allPoints: [],
     frequentPoints: [],

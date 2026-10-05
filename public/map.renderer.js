@@ -347,20 +347,6 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-
- /**
- * マップ上の頻度ポイントの円をすべてクリアする
- */
-/*
-function clearFrequentCircle() {
-    if (appState.frequentCircles && appState.frequentCircles.length > 0) {
-        appState.frequentCircles.forEach(circle => circle.setMap(null));
-        appState.frequentCircles = [];
-        logMessage("以前の頻度ポイントを地図からクリアしました");
-    }
-}
-*/
-
 function displayRoute(origin, destination){
     const currentMap = appState.map;
     clearAlternativePolylines();
@@ -392,9 +378,6 @@ function displayRoute(origin, destination){
                     suppressPolylines: true,
                     suppressMarkers: true,
                 });
-
-                console.log("===ルート確認用===");
-                console.log(response);
 
                 response.routes.forEach((route, routeIdx) => {
 
@@ -480,13 +463,6 @@ function renderRouteStepsList(routeIndex) {
     const route = response.routes[routeIndex];
     if (!route) return;
 
-    let legs = [];
-    if (typeof route.getLegs === 'function'){
-        legs = route.getLegs();
-    } else if (route.legs) {
-        legs = route.legs;
-    }
-
     const leg = route.legs[0];
     if (!leg) return;
 
@@ -502,8 +478,6 @@ function renderRouteStepsList(routeIndex) {
 
     if (listElement && containerElement) {
         listElement.innerHTML = "";
-
-        console.log(`---ルートの全ステップ詳細---`, steps);
 
         if (!steps || steps.length === 0) {
             listElement.innerHTML = "<li>ステップ情報が取得できませんでした。</li>";
