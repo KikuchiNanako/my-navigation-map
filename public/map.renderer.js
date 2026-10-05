@@ -228,13 +228,42 @@ async function drawMap() {
         return;
     }
 
-    const rawPoints = appState.frequentPoints;
-    const mergedPoints = mergeNearbyPoints(rawPoints, 20);
+    //const rawPoints = appState.frequentPoints;
+    //const mergedPoints = mergeNearbyPoints(rawPoints, 20);
+
+    const points = mergeNearbyPoints(appState.frequentPoints, 15);
+    const CONNECT_DISTANCE_M = 40;
 
     logMessage(`よく通る道の線描画を開始します...(データ数: ${appState.frequentPoints.length})`);
 
-    const offset = 0.00015;
+    //const offset = 0.00015;
 
+    for (let i = 0; i < points.length; i++) {
+        for (let j = i + 1; j < points.length; j++) {
+            const dist = getDistanceMeters(
+                points[i].lat_r, points[i].lon_r,
+                points[j].lat_r, points[j].lon_r
+            );
+
+            if (dist <= CONNECT_DISTANCE_M) {
+                const polyline = new google.maps.Polyline({
+                    path: [
+                        { lat: p.lat_r - offset, lng: p.lon_r - offset },
+                        { lat: p.lat_r + offset, lng: p.lon_r + offset }
+                    ],
+                    map: currentMap,
+                    strokeColor: "#ff0000",
+                    strokeOpacity: 0.7,
+                    strokeWeight: 5,
+                    clickable: false
+                });
+
+                appState.frequentPolylines.push(polyline);
+            }
+        }
+    }
+
+    /*
     mergedPoints.forEach(p => {
         const polyline = new google.maps.Polyline({
             path: [
@@ -252,7 +281,7 @@ async function drawMap() {
         
     });
 
-
+    */
     logMessage("よく通る道の線描画が完了しました");
 }  
 
