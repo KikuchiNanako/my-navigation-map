@@ -92,23 +92,30 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
     const currentMap = appState.map;
 
     const ON_ROUTE_THRESHOLD_M = 15;
+
     let isOffRoute = false;
+    let closestVertexIndex = 0;
+    let minDistance = Infinity;
 
     const currentPolyline = appState.routePolylines.find(p => p.stepIndex === currentIdx);
+
     if (currentPolyline && currentPolyline.rawPath && currentPolyline.rawPath.length > 0) {
-        let minDistanceToLine = Infinity;
-        currentPolyline.rawPath.forEach((vertex) => {
+        const rawPath = currentPolyline.rawPath;
+
+        for (let i = 0; i < rawPath.length; i++) {
+            const vertex = rawPath[i];
+
             const vLat = (typeof vertex.lat === 'function') ? vertex.lat() : vertex.lat;
             const vLng = (typeof vertex.lng === 'function') ? vertex.lng() : vertex.lng;
             const dist = getDistanceMeters(currentLocation.lat, currentLocation.lng, vLat, vLng);
-            if (dist < minDistanceToLine) {
-                minDistanceToLine = dist;
-            }
-        });
 
-        if (minDistanceToLine >= ON_ROUTE_THRESHOLD_M) {
-            isOffRoute = true;
+            if (dist < minDistance) {
+                minDistance = dist;
+                closestVertexIndex = i;
+            }
         }
+
+        isOffRoute = minDistance >= ON_ROUTE_THRESHOLD_M;
     }
 
     appState.routePolylines.forEach((polyline) => {
@@ -147,23 +154,8 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
             const rawPath = polyline.rawPath;
             if (!rawPath || rawPath.length === 0) return;
 
-            let closestVertexIndex = 0;
-            let minDistance = Infinity;
-
-            for (let i = 0; i < rawPath.length; i++) {
-                const vertex = rawPath[i];
-
-                const vLat = (typeof vertex.lat === 'function') ? vertex.lat() : vertex.lat;
-                const vLng = (typeof vertex.lng === 'function') ? vertex.lng() : vertex.lng; 
-
-                const dist = getDistanceMeters(currentLocation.lat, currentLocation.lng, vLat, vLng);
-                if (dist < minDistance) {
-                    minDistance = dist;
-                    closestVertexIndex = i;
-                }
-            }
-
             const traveledCoords = [];
+            
             for (let i = 0; i <= closestVertexIndex; i++) {
                 traveledCoords.push(rawPath[i]);
             }
