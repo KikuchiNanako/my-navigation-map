@@ -210,6 +210,89 @@
     return merged;
 }
 
+//近くでつながってる頻出区間をまとめる
+function mergeConnectedSegments(segments, threshold = 25) {
+    const remaining = [...segments];
+    const merged = [];
+
+    while (remaining.length > 0) {
+
+        const first = remaining.shift();
+
+        const current = {
+            start: { ...first.start },
+            end: { ...first.end },
+            count: first.count
+        };
+        let connected = true;
+
+        //つながる区間がなくなるまで探す
+        while (connected) {
+            connected = false;
+
+            for (let i = 0; i < remaining.length; i++) {
+                const segment = remaining[i];
+
+                const endToStart = getDistanceMeters(
+                    current.end.lat,
+                    current.end.lng,
+                    segment.start.lat,
+                    segment.start.lng
+                );
+
+                const endToEnd = getDistanceMeters(
+                    current.end.lat,
+                    current.end.lng,
+                    segment.end.lat,
+                    segment.end.lng
+                );
+
+                const startToEnd = getDistanceMeters(
+                    current.start.lat,
+                    current.start.lng,
+                    segment.end.lat,
+                    segment.end.lng
+                );
+
+                const startToStart = getDistanceMeters(
+                    current.start.lat,
+                    current.start.lng,
+                    segment.start.lat,
+                    segment.start.lng
+                );
+
+                //後ろに繋げる
+                if (endToStart <= threshold) {
+                    current.end = { ...segment.end };
+                    current.count = Math.max(current.count, segment.count);
+                } else if (endToEnd <= threshold) {
+                    current.end = { ...segment.start };
+                    current.count = Math.max(current.count, segment.count);
+                }
+
+                //前に繋げる
+                else if (startToEnd <= threshold) {
+                    current.start = { ...segment.start };
+                    current.count = Math.max(current.count, segment.count);
+                } else if (startToStart <= threshold) {
+                    current.start = { ...segment.end};
+                    current.count = Math.max(current.count, segment.count);
+                } else {
+                    continue;
+                }
+
+                //使った区間を削除
+                remaining.slice(i, 1);
+                connected = true;
+
+                break;
+            }
+        }
+        merged.push(current);
+    }
+    return merged;
+}
+
 //描画したポリラインを管理する配列（クリア用）
 async function drawMap() {
     const currentMap = appState.map;
@@ -235,10 +318,14 @@ async function drawMap() {
 
     //const points = mergeNearbyPoints(appState.frequentPoints, 15);
     //const CONNECT_DISTANCE_M = 40;
+    const mergedSegments = mergeConnectedSegments(
+        appState.frequentSegments,
+        25
+    );
+    logMessage(`頻出区間を ${appState.frequentSegments.length} → ${mergedSegments.length}本に統一`);
+    logMessage(`道路に沿った線の描画開始: ${mergedSegments.length})`);
 
-    logMessage(`道路に沿った線の描画開始: ${appState.frequentSegments.length})`);
-
-    for (const segment of appState.frequentSegments) {
+    for (const segment of mergedSegments) {
         try {
             const result = await requestRoadRoute(
                 segment.start,
