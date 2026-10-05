@@ -282,7 +282,7 @@ function mergeConnectedSegments(segments, threshold = 25) {
                 }
 
                 //使った区間を削除
-                remaining.slice(i, 1);
+                remaining.splice(i, 1);
                 connected = true;
 
                 break;
