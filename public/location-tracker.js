@@ -216,7 +216,7 @@ function startLocationTracking() {
         return;
     }
 
-    appState.watchId = nevigator.geolocation.watchPosition(
+    appState.watchId = navigator.geolocation.watchPosition(
         onPositionUpdate,
 
         (error) => {
