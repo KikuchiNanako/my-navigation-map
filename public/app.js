@@ -152,10 +152,10 @@ async function loadGoogleMaps() {
         await google.maps.importLibrary("routes");
         await google.maps.importLibrary("places");
 
-        if (typeof initMap === "function"){
-            initMap();
-            logMessage("Google Maps ロード完了");
-        }        
+    
+        await initMap();
+        logMessage("Google Maps ロード完了");
+            
     } catch (error) {
         logMessage(`APIキーのロードエラー： ${error.message}`);
         console.error("APIキーロードエラー", error);

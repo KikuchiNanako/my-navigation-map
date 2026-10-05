@@ -461,7 +461,6 @@ function renderRouteStepsList(routeIndex) {
     if (!response || !response.routes[routeIndex]) return;
 
     const route = response.routes[routeIndex];
-    if (!route) return;
 
     const leg = route.legs[0];
     if (!leg) return;
@@ -474,7 +473,7 @@ function renderRouteStepsList(routeIndex) {
     if (listElement && containerElement) {
         listElement.innerHTML = "";
 
-        if (!steps || steps.length === 0) {
+        if (steps.length === 0) {
             listElement.innerHTML = "<li>ステップ情報が取得できませんでした。</li>";
             return;
         }
@@ -517,14 +516,14 @@ function updateRouteInfoUI(index) {
     const distanceText = leg.distance.text;
     const durationText = leg.duration.text;
 
-    if ( typeof updateNavDisplay === 'function') {
-        updateNavDisplay(
-            `<span style="font-size: 22px; color: #ffffff; font-weight: bold; display: block; margin-bottom: 5px;"> 目的地： ${destinationPlace}</span>`,
-            `<span style="font-size: 18px; color: #ffffff; font-weight: bold; display: block;">総距離 ${distanceText} / 所要時間 ${durationText}</span>`,
-            "#2c3e50"
-        );
-    }
+    
+    updateNavDisplay(
+        `<span style="font-size: 22px; color: #ffffff; font-weight: bold; display: block; margin-bottom: 5px;"> 目的地： ${destinationPlace}</span>`,
+        `<span style="font-size: 18px; color: #ffffff; font-weight: bold; display: block;">総距離 ${distanceText} / 所要時間 ${durationText}</span>`,
+        "#2c3e50"
+    );
 }
+
 
 /**
  * 複数ルート用のポリラインをクリア

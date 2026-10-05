@@ -288,12 +288,6 @@ async function startNavigation() {
  * Geolocation 監視を停止し、ナビゲーション状態をリセットする
  */
 function stopNavigation() {
-    if (appState.navigationTimer !== null) {
-        clearInterval(appState.navigationTimer);
-        appState.navigationTimer = null;
-        logMessage("ナビゲーションを停止しました");
-    }
-
     if (appState.watchId !== null) {
         navigator.geolocation.clearWatch(appState.watchId);
         appState.watchId = null;
