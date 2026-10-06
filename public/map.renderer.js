@@ -43,19 +43,12 @@ async function initMap() {
     mapInstance.addListener("click", async (e) => {
         const panel = document.getElementById("map-bottom-panel");
 
-        if (!e.placeId && appState.tempMarker) {
-            appState.tempMarker.setMap(null);
-            appState.tempMarker = null;
-
-            if (panel) {
-                panel.style.display = "none";
-            } 
-            return;
-        }
-
+        //前回の仮マーカーを削除
         if (appState.tempMarker) {
             appState.tempMarker.setMap(null);
+            appState.tempMarker = null;
         }
+
         if (window.currentInfoWindow) {
             window.currentInfoWindow.close();
         }

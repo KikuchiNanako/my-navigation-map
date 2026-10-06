@@ -10,7 +10,7 @@
     <body>
         <h1>GPXデータ解析と経路判定</h1>
 
-        <!-- 1. GPXインポートエリア -->
+        <!--GPXインポートエリア -->
         <div class="card-panel">
             <p style="margin-top: 0; font-weight:bold;">過去のログを読み込む</p>
             <input type="file" id="gpxFileInput" multiple accept=".gpx">
@@ -20,7 +20,7 @@
 
         </div>
 
-        <!-- 2. 検索・ナビ操作エリア -->
+        <!--検索・ナビ操作エリア -->
         <div class="card-panel">
             <div class="search-box">
                 <div class="search-input-wrapper">
@@ -55,22 +55,31 @@
             </div>
         </div>
 
-        <!-- 3. ナビ案内パネル -->
+        <!--ナビ案内パネル -->
         <div id="nav-panel" style="display: none;">
             <div id="nav-instruction"></div>
             <div id="nav-distance"></div>    
         </div>
 
-        <!-- 4. メインマップ -->
+        <!--メインマップ -->
         <div id="map"></div>
 
-        <!-- 5. ステップ表示 -->
+        <!-- 地図タップ時の目的地確認パネル-->
+        <div id="map-bottom-panel" style="display:none;">
+            <div id="bottom-panel-address"></div>
+
+            <botton id="bottom-panel-btn" class="btn btn-primary">
+                ここを目的地にする
+            </botton>
+        </div>
+
+        <!--ステップ表示 -->
         <div id="routeStepsContainer" class="card-panel" style="display: none;">
             <h3>選択中の経路</h3>
             <ol id="routeStepsList"></ol>
         </div>
 
-        <!-- 6. デバッグログ（開閉トグル付き） -->
+        <!--デバッグログ（開閉トグル付き） -->
         <div id="logPanel" class="card-panel">
             <div id="logPanelHeader" onclick="toggleLogDisplay()">
                 <span style="font-size: 0.85em; color: #666;">動作ログ</span>
