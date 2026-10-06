@@ -179,7 +179,7 @@ function isOutsideRoute(currentLat, currentLon) {
 
     let minDist = Infinity;
 
-    for (const segment of appState.frequentPoints) {
+    for (const segment of appState.frequentSegments) {
         const dist = getDistanceToSegmentMeters(currentLat, currentLon, segment.start.lat, segment.start.lng,segment.end.lat, segment.end.lng);
         if (dist < minDist) {
             minDist = dist;
