@@ -131,13 +131,38 @@ async function savePointToDB(lat, lon) {
 
 async function bulkSavePoints(points) {
    const db = await openDB();
-   const tx = db.transaction(STORE_NAME, "readwrite");
-   const store = tx.objectStore(STORE_NAME);
 
-   points.forEach(p => {
-      store.put(p);
-   });
-   return new Promise(resolve => tx.oncomplete = resolve);
+   //スマホでも安定するように分割して保存
+   const BATCH_SIZE = 200;
+
+   for (let i = 0; i < points.length; i+=BATCH_SIZE) {
+      const batch = points.slice(i, i + BATCH_SIZE);
+
+      await new Promise((resolve, reject) => {
+         const tx = db.transaction(STORE_NAME, "readwrite");
+         const store = tx.objectStore(STORE_NAME);
+
+         for (const p of batch) {
+            store.put({
+               lat: p.lat,
+               lon: p.lon,
+               time: p.time
+            });
+         }
+         tx.oncomplete = () => resolve();
+
+         tx.onerror = () => {
+            reject(tx.error || new Error("IndexDB保存エラー"));
+         };
+
+         tx.onabort = () => {
+            reject(tx.error || new Error("IndexDB保存が中断されました"));
+         };
+      });
+
+      logMessage(`保存中：${Math.min(i + BATCH_SIZE, points.length)} / ${points.length}地点`);
+   }
+   logMessage(`${points.length}地点のDB保存が完了しました`);
 }
 
 async function getAllPointsFromDB() {
