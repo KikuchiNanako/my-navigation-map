@@ -128,8 +128,8 @@ async function initMap() {
     }
 
     //すべての初期化が終わった後にdrawmapを呼び出す
-    const pointsToDraw = appState.frequentPoints;
-    if (pointsToDraw && pointsToDraw.length > 0) {
+    const segmentsToDraw = appState.frequentSegments;
+    if (segmentsToDraw && segmentsToDraw.length > 0) {
         drawMap();
     }
 }

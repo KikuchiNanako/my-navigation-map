@@ -1,18 +1,12 @@
-function calculateFrequentPoints () {
+function calculateFrequentSegments () {
     const points = appState.allPoints;
     
     if (!points || points.length === 0) {
-        appState.frequentPoints = [];
         appState.frequentSegments = [];
         return;
     }
 
-    const monthlyCountsMap = new Map();
-    const recentPointsMap = new Map();
     const segmentCountMap = new Map();
-
-    const now = Date.now();
-    const cutoffTime = now - (30 * 24 * 60 * 60 * 1000);
 
     //元データを直接時系列順にする  
     const sortedPoints = [...points].sort(
@@ -36,26 +30,6 @@ function calculateFrequentPoints () {
 
         const lat_r = roundToDecimals(p.lat, ROUND_DECIMALS);
         const lon_r = roundToDecimals(p.lon, ROUND_DECIMALS);
-
-        const pointKey = `${lat_r}, ${lon_r}`;
-
-        //====月ごとの地点カウント====
-        const month = `${time.getFullYear()}-${String(time.getMonth() + 1).padStart(2, "0")}`;
-
-        const monthlyKey = `${month}_${pointKey}`;
-
-        monthlyCountsMap.set(
-            monthlyKey,
-            (monthlyCountsMap.get(monthlyKey) || 0) + 1
-        );
-
-        //====直近３０日の地点カウント====
-        if (timeMs >= cutoffTime) {
-            recentPointsMap.set(
-                pointKey,
-                (recentPointsMap.get(pointKey) || 0) + 1
-            );
-        }
 
         //====頻出区間のカウント ====
         if (previousPoint) {
@@ -127,44 +101,11 @@ function calculateFrequentPoints () {
         };
     }
 
-    //====頻出地点を作る====
-    const frequentPointsSet = new Set();
-
-    //過去のいずれかの月で２回以上
-    for (const [key, count] of monthlyCountsMap) {
-        if (count >= 2) {
-            const separatorIndex = key.indexOf("_");
-
-            if (separatorIndex !== -1) {
-                frequentPointsSet.add(
-                    key.slice(separatorIndex + 1)
-                );
-            }
-        }
-    }
-
-    //直近３０日で２０回以上
-    for (const [key, count] of recentPointsMap) {
-        if (count >= 20) {
-            frequentPointsSet.add(key);
-        }
-    }
-
-    appState.frequentPoints = Array.from(frequentPointsSet, key => {
-        const [lat_r, lon_r] = key.split(",").map(Number);
-        return{
-            lat_r, lon_r
-        };
-    });
-
     //====頻出区間====
     appState.frequentSegments = Array.from(segmentCountMap.values()).filter(segment => segment.count >= 3);
 
-    logMessage(`よく通る道の点数: ${appState.frequentPoints.length}`);
     logMessage(`よく通る区間： ${appState.frequentSegments.length}`);
 }
-
-    
 
 /**
   * 現在地が経路外か判定

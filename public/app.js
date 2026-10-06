@@ -41,7 +41,6 @@ window.appState = {
     frequentPolylines: [],
 
     allPoints: [],
-    frequentPoints: [],
     frequentSegments: [],
     gpxProcessed: false,
 
@@ -169,7 +168,7 @@ window.addEventListener("load", async () => {
             appState.allPoints = allSaveData.map(d => ({ lat: d.lat, lon: d.lon, time: d.time }));
             logMessage(`合計 ${appState.allPoints.length} 地点の過去ログを読み込みました`);
 
-            calculateFrequentPoints();
+            calculateFrequentSegments();
             appState.gpxProcessed = true;
 
             if (appState.map) drawMap();
@@ -218,7 +217,7 @@ async function processFiles() {
             time: d.time
         }));
 
-        calculateFrequentPoints();
+        calculateFrequentSegments();
 
         appState.gpxProcessed = true;
 
