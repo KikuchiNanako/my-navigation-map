@@ -7,7 +7,7 @@ const ROUND_DECIMALS = 5;
  * ログメッセージをDOMに追加
  *@param {string} message
  */
- function logMessage(message) {
+function logMessage(message) {
    const logDiv = document.getElementById('log');
 
    if(!logDiv) {
@@ -37,9 +37,9 @@ const ROUND_DECIMALS = 5;
   * @param {number} lon2
   * @returns {number} 距離（メートル）
   */
- function getDistanceMeters(lat1, lon1, lat2, lon2) {
-    const R = 6371000;
-    const φ1 = lat1 * Math.PI / 180;
+function getDistanceMeters(lat1, lon1, lat2, lon2) {
+   const R = 6371000;
+   const φ1 = lat1 * Math.PI / 180;
     const φ2 = lat2 * Math.PI / 180;
     const Δφ = (lat2 - lat1) * Math.PI / 180;
     const Δλ = (lon2 - lon1) * Math.PI / 180;
@@ -50,25 +50,65 @@ const ROUND_DECIMALS = 5;
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
     return R * c; // メートル
- }
+}
 
- /**
+/**
+ * 点Pから線分ABまでの最短距離をメートルで求める
+ * @param {number} pLat 現在地の緯度
+ * @param {number} pLon 現在地の経度
+ * @param {number} aLat 線分の始点の緯度
+ * @param {number} aLon 線分の始点の経度
+ * @param {number} bLat 線分の終点の緯度
+ * @param {number} bLon 線分の終点の経度
+ * @returns {number} 線分までの距離（メートル）
+ */
+function getDistanceToSegmentMeters(pLat, pLon, aLat, aLon, bLat, bLon) {
+   const latScale = 111320;
+   const lonScale = 111320 * Math.cos(pLat * Math.PI / 180);
+
+   const ax = (aLon - pLon) * lonScale;
+   const ay = (aLat - pLat) * latScale;
+
+   const bx = (bLon - pLon) * lonScale;
+   const by = (bLat - pLat) * latScale;
+
+   const abx = bx - ax;
+   const aby = by - ay;
+
+   const abLengthSquared = abx * abx + aby * aby;
+
+   if (abLengthSquared === 0) {
+      return Math.sqrt(ax * ax + ay * ay);
+   }
+
+   let t = -(ax * abx + ay * aby) / abLengthSquared;
+
+   t = Math.max(0, Math.min(1, t));
+
+   const closestX = ax + t * abx;
+   const closestY = ay + t * aby;
+
+   return Math.sqrt(closestX * closestX + closestY * closestY);
+
+}
+
+/**
   * 緯度経度を指定桁数で丸める
  * @param {number} num
  * @parm {number} decimals
  * @returns {number} 丸められた数値
  */
- function roundToDecimals(num, decimals) {
-    const factor = Math.pow(10, decimals);
+function roundToDecimals(num, decimals) {
+   const factor = Math.pow(10, decimals);
     return Math.round(num * factor) / factor;
- }
+}
 
- const DB_NAME = "CatNaviLogDB";
- const STORE_NAME = "locationLogs";
+const DB_NAME = "CatNaviLogDB";
+const STORE_NAME = "locationLogs";
 
- let dbPromise = null;
+let dbPromise = null;
 
- function openDB() {
+function openDB() {
    if (dbPromise) {
       return dbPromise;
    }
@@ -102,7 +142,7 @@ const ROUND_DECIMALS = 5;
       };
    });
    return dbPromise;
- }
+}
 
 let lastSavePos = null;
 async function savePointToDB(lat, lon) {
@@ -174,7 +214,7 @@ async function getAllPointsFromDB() {
       request.onsuccess = () => resolve(request.result);
    });
 }
- 
+
 /**
  * ナビ専用パネルの表示を更新する
  * @param {string} instruction 案内文（「右折です」など）

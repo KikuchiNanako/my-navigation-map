@@ -173,14 +173,14 @@ function calculateFrequentPoints () {
   * @returns {boolean} 経路外か
   */
 function isOutsideRoute(currentLat, currentLon) {
-    if (appState.frequentPoints.length === 0) {
+    if (appState.frequentSegments.length === 0) {
         return true;
     }
 
     let minDist = Infinity;
 
-    for (const point of appState.frequentPoints) {
-        const dist = getDistanceMeters(currentLat, currentLon, point.lat_r, point.lon_r);
+    for (const segment of appState.frequentPoints) {
+        const dist = getDistanceToSegmentMeters(currentLat, currentLon, segment.start.lat, segment.start.lng,segment.end.lat, segment.end.lng);
         if (dist < minDist) {
             minDist = dist;
         }
