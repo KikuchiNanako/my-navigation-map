@@ -55,6 +55,7 @@ function getApproximateLocation() {
   * Google Geolocation APIを使って位置を取得する
   * @returns {promise<{lat: number, lng: number} | null>}
   */
+ 
 async function getGoogleGeolocation() {
 
     const apiKey = window.MAPS_API_KEY;
