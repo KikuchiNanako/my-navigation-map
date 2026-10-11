@@ -146,6 +146,11 @@ function calculateFrequentSegments () {
     appState.frequentSegments = Array.from(segmentCountMap.values()).filter(segment => segment.count >= 3);
 
     logMessage(`よく通る区間： ${appState.frequentSegments.length}`);
+    logMessage(
+        `分析結果：全${points.length}地点、` +
+        `${trackGroups.seize}移動グループ、` +
+        `${segmentCountMap.size}種類の区間`
+    );
 }
 
 /**
