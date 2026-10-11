@@ -38,98 +38,108 @@ function calculateFrequentSegments () {
     }
 
     const segmentCountMap = new Map();
+    const trackGroups = new Map();
+    
+    //10分以上の記録の余白は別の移動区間として扱う
+    const MAX_TIME_GAP_MS = 10 * 60 * 1000;
+    
+    //走行IDがない古いデータも保持する
+    const legacyPoints = [];
 
-    //元データを直接時系列順にする  
-    const sortedPoints = [...points].sort(
-        (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime()
-    );
+    //古いデータを連続した移動ごとに分割する
+    let legacyGroup = [];
+    let legacyIndex = 0;
 
-    let previousPoint = null;
+    for (const point of legacyPoints) {
+        if (legacyGroup.length > 0) {
+            const prev = legacyGroup[legacyGroup.length - 1];
+            const timeDiff = point.timeMs - prev.timeMs;
 
-    //====全地点を１回のループで処理====
-    for (const p of sortedPoints) {
-        const time = p.time instanceof Date
-            ? p.time
-            : new Date(p.time);
-        
-        const timeMs = time.getTime();
-
-        //不正な日時は無視
-        if (Number.isNaN(timeMs)) {
-            continue;
-        }
-
-        const lat_r = roundToDecimals(p.lat, ROUND_DECIMALS);
-        const lon_r = roundToDecimals(p.lon, ROUND_DECIMALS);
-
-        //====頻出区間のカウント ====
-        if (previousPoint) {
-            const timeDiff = (timeMs - previousPoint.timeMs) / 1000;
-
-            if(timeDiff <= 600) {
-                const distance = getDistanceMeters(
-                    previousPoint.lat_r,
-                    previousPoint.lon_r,
-                    lat_r,
-                    lon_r
+            if (timeDiff > MAX_TIME_GAP_MS) {
+                trackGroups.set(
+                    `legacy-${legacyIndex++}`,
+                    legacyGroup
                 );
-
-                if (distance >= 5 && distance <= 200) {
-                    const SEGMENT_DECIMALS = 4;
-
-                    const aLat = roundToDecimals(
-                        previousPoint.lat_r,
-                        SEGMENT_DECIMALS
-                    );
-
-                    const aLon = roundToDecimals(
-                        previousPoint.lon_r,
-                        SEGMENT_DECIMALS
-                    )
-
-                    const bLat = roundToDecimals(
-                        lat_r,
-                        SEGMENT_DECIMALS
-                    );
-
-                    const bLon = roundToDecimals(
-                        lon_r,
-                        SEGMENT_DECIMALS
-                    );
-
-                    const keyA = `${aLat},${aLon}`;
-                    const keyB = `${bLat},${bLon}`;
-
-                    const segmentKey = 
-                        keyA < keyB
-                            ? `${keyA}|${keyB}`
-                            : `${keyB}|${keyA}`;
-
-                    const existing = segmentCountMap.get(segmentKey);
-
-                    if (existing) {
-                        existing.count++;
-                    } else {
-                        segmentCountMap.set(segmentKey, {
-                            start: {
-                                lat: previousPoint.lat_r,
-                                lng: previousPoint.lon_r
-                            },
-                            end: {
-                                lat: lat_r,
-                                lng: lon_r
-                            },
-                            count: 1
-                        });
-                    }
-                }
+                legacyGroup = [];
             }
         }
-        previousPoint = {
-            lat_r,
-            lon_r,
-            timeMs
-        };
+        legacyGroup.push(point);
+    }
+
+    if (legacyGroup.length > 0) {
+            trackGroups.set(
+                `legacy-${legacyIndex++}`,
+                legacyGroup
+            );
+    }
+
+    //====走行ごとに区間を分析====
+    for (const trackPoints of trackGroups.values()) {
+        trackPoints.sort((a, b) => a.timeMs - b.timeMs);
+
+        //同じ走行で同一区間を重複カウントしない
+        const visitedSegments = new set();
+
+        for (let i = 1; i < trackPoints.length; i++) {
+            const p1 = trackPoints[i - 1];
+            const p2 = trackPoints[i];
+
+            const timeDiff = p2.timeMs - p1.timeMs;
+
+            if (timeMs > MAX_TIME_GAP_MS) {
+                continue;
+            }
+
+            const distance = getDistanceMeters(
+                p1.lat,
+                p1.lon,
+                p2.lat,
+                p2.lon
+            );
+
+            if (distance < 5 || distance > 200) {
+                continue;
+            }
+
+            const SEGMENT_DECIMALS = 4;
+                    
+            const aLat = roundToDecimals(p1.lat,SEGMENT_DECIMALS);
+            const aLon = roundToDecimals(p1.lon,SEGMENT_DECIMALS);
+            const bLat = roundToDecimals(p2.lat,SEGMENT_DECIMALS);
+            const bLon = roundToDecimals(p2.lon,SEGMENT_DECIMALS);
+
+            const keyA = `${aLat},${aLon}`;
+            const keyB = `${bLat},${bLon}`;
+
+            const segmentKey = 
+                keyA < keyB
+                    ? `${keyA}|${keyB}`
+                    : `${keyB}|${keyA}`;
+            
+            if (visitedSegments.has(segmentKey)) {
+                continue;
+            }
+
+            visitedSegments.add(segmentKey);
+
+            const existing = segmentCountMap.get(segmentKey);
+
+            if (existing) {
+                existing.count++;
+            } else {
+                segmentCountMap.set(segmentKey, {
+                    start: {
+                        lat: p1.lar,
+                        lng: p1.lon
+                    },
+                    end: {
+                        lat: p2.lat,
+                        lng: p2.lon
+                    },
+                    count: 1
+                });
+            }
+        }
     }
 
     //====頻出区間====

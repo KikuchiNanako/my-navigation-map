@@ -145,7 +145,7 @@ function openDB() {
 }
 
 let lastSavePos = null;
-async function savePointToDB(lat, lon) {
+async function savePointToDB(lat, lon, trackId) {
    if (lastSavePos) {
       const dist = getDistanceMeters(lat, lon, lastSavePos.lat, lastSavePos.lon);
       if (dist < 5) return;
@@ -156,7 +156,7 @@ async function savePointToDB(lat, lon) {
       const tx = db.transaction(STORE_NAME, "readwrite");
       const store = tx.objectStore(STORE_NAME);
 
-      store.put({ lat, lon, time: new Date() });
+      store.put({ lat, lon, time: new Date(), trackId });
 
       tx.oncomplete = () => {
          lastSavePos = { lat, lon };

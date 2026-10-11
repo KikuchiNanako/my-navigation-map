@@ -253,6 +253,12 @@ async function startNavigation() {
     const isResuming = (appState.currentStepIndex > 0);
     logMessage(isResuming ? "ナビゲーションを再開します" : "ナビゲーションを開始します");
 
+    //走行IDがまだない場合だけ新しく作る
+    if (!appState.currentTrackId) {
+        appState.currentTrackId = crypto.randomUUID();
+        logMessage(`新しい走行IDを発効しました： ${appState.currentTrackId}`);
+    }
+
     appState.navigationActive = true;
     //logMessage("ナビゲーションを開始します")
 
@@ -296,8 +302,8 @@ async function onPositionUpdate(position) {
         lng: position.coords.longitude
     };
 
-    if (appState.navigationActive) {
-        await savePointToDB(currentLatLon.lat, currentLatLon.lng);
+    if (appState.navigationActive && appState.currentTrackId) {
+        await savePointToDB(currentLatLon.lat, currentLatLon.lng, appState.currentTrackId);
     }
 
     //GPSの位置から一時的な判定を取得
