@@ -300,7 +300,7 @@ async function onPositionUpdate(position) {
         await savePointToDB(currentLatLon.lat, currentLatLon.lng);
     }
 
-    //GPXの位置から一時的な判定を取得
+    //GPSの位置から一時的な判定を取得
     const rawIsOutside = isOutsideRoute(
         currentLatLon.lat,
         currentLatLon.lng
