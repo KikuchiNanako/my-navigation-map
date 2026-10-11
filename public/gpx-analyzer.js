@@ -1,3 +1,34 @@
+//GPX判定の安定化
+let stableOutside = null;
+let outsideCount = 0;
+let insideCount = 0;
+
+const REQUIRED_CONSECUTIVE = 3;
+
+function getStableRouteStatus(isOutside) {
+    if (stableOutside === null) {
+        stableOutside = isOutside;
+        return stableOutside;
+    }
+
+    if (isOutside) {
+        outsideCount++;
+        insideCount = 0;
+
+        if (outsideCount >= REQUIRED_CONSECUTIVE) {
+            stableOutside = true;
+        }
+    } else {
+        insideCount++;
+        outsideCount = 0;
+
+        if (insideCount >= REQUIRED_CONSECUTIVE) {
+            stableOutside = false;
+        }
+    }
+    return stableOutside;
+}
+
 function calculateFrequentSegments () {
     const points = appState.allPoints;
     

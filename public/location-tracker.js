@@ -300,8 +300,14 @@ async function onPositionUpdate(position) {
         await savePointToDB(currentLatLon.lat, currentLatLon.lng);
     }
 
+    //GPXの位置から一時的な判定を取得
+    const rawIsOutside = isOutsideRoute(
+        currentLatLon.lat,
+        currentLatLon.lng
+    );
+
     //経路外かどうかを判定
-    const isOutside = isOutsideRoute(currentLatLon.lat, currentLatLon.lng);
+    const isOutside = getStableRouteStatus(rawIsOutside);
 
     const statusLabel = document.getElementById('statusLabel');
     if (statusLabel) {
@@ -322,7 +328,7 @@ async function onPositionUpdate(position) {
 
         updateFineGrainedRouteColor(currentLatLon, appState.currentStepIndex);
         
-        if (isOutside) {
+        if (!appState.isRerouting) {
             checkStepProgression(currentLatLon);
         }
     } else {

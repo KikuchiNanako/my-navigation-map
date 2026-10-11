@@ -11,7 +11,7 @@ function startStepNavigation(leg, resume = false) {
     appState.isRerouting = false;
     appState.steps = leg.steps;
     if (!resume) {
-        appState.currentIdx = 0;
+        appState.currentStepIndex = 0;
     }
     appState.navigationActive = true;
 
