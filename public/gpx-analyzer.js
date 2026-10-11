@@ -48,7 +48,7 @@ function calculateFrequentSegments () {
 
     //データを走行IDごとに分類
     for (const p of points) {
-        const timeMs = new Data(p.time).getTime();
+        const timeMs = new Date(p.time).getTime();
 
         if (
             !Number.isFinite(timeMs) || !Number.isFinite(p.lat) || !Number.isFinite(p.lon)
