@@ -186,7 +186,8 @@ async function bulkSavePoints(points) {
             store.put({
                lat: p.lat,
                lon: p.lon,
-               time: p.time
+               time: p.time,
+               trackId: p.trackId
             });
          }
          tx.oncomplete = () => resolve();
@@ -256,4 +257,36 @@ function speakText (text) {
    uttr.pitch = 1.0;
 
    window.speechSynthesis.speak(uttr);
+}
+
+async function exportLocationLogs() {
+   try {
+      const points = await getAllPointsFromDB();
+
+      if (points.length === 0) {
+         logMessage("バックアップするデータがありません");
+         return;
+      }
+      const json = JSON.stringify(points, null, 2);
+      const blob = new Blob([json], {
+         type: "application/json"
+      });
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+
+      a.href = url;
+      a.download = `gps-backup-${new Date().toISOString().slice(0, 10)}.json`;
+
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+      logMessage(`${points.length}地点のバックアップを作成しました`);
+   } catch (error) {
+      console.error("バックアップエラー：", error);
+      logMessage(`バックアップ失敗: ${error.message}`);
+   }
 }

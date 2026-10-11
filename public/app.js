@@ -165,7 +165,7 @@ window.addEventListener("load", async () => {
         const allSaveData = await getAllPointsFromDB();
 
         if (allSaveData && allSaveData.length > 0) {
-            appState.allPoints = allSaveData.map(d => ({ lat: d.lat, lon: d.lon, time: d.time }));
+            appState.allPoints = allSaveData.map(d => ({ ...d }));
             logMessage(`合計 ${appState.allPoints.length} 地点の過去ログを読み込みました`);
 
             calculateFrequentSegments();
@@ -196,7 +196,16 @@ async function processFiles() {
             const gpxText = await file.text();
             const points = parseGpx(gpxText);
 
-            allNewPoints.push(...points);
+            //GPXファイルごとに固有の移動履歴IDを作成
+            const trackId = crypto.randomUUID();
+
+            //各GPS地点に移動履歴IDを付与
+            const pointsWithTrackId = points.map(p => ({
+                ...p,
+                trackId: trackId
+            }));
+            
+            allNewPoints.push(...pointsWithTrackId);
             logMessage(`${file.name}: ${points.length}地点を読み込みました`);
         }
         if (allNewPoints.length === 0) {
@@ -212,9 +221,7 @@ async function processFiles() {
         const allSaveData = await getAllPointsFromDB();
 
         appState.allPoints = allSaveData.map(d => ({
-            lat: d.lat,
-            lon: d.lon,
-            time: d.time
+            ...d
         }));
 
         calculateFrequentSegments();
