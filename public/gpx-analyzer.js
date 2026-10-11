@@ -46,6 +46,33 @@ function calculateFrequentSegments () {
     //走行IDがない古いデータも保持する
     const legacyPoints = [];
 
+    //データを走行IDごとに分類
+    for (const p of points) {
+        const timeMs = new DataTransfer(p.time).getTime();
+
+        if (
+            !Number.isFinite(timeMs) || !Number.isFinite(p.lat) || !Number.isFinite(p.lon)
+        ) {
+            continue;
+        }
+
+        const point = {
+            lat: p.lat,
+            lon: p.lon,
+            timeMs
+        };
+
+        if (p.trackId) {
+            if (!trackGroups.has(p.trackId)) {
+                trackGroups.set(p.trackId, []);
+            }
+
+            trackGroups.get(p.trackId).push(point);
+        } else {
+            legacyPoints.push(point);
+        }
+    }
+
     //古いデータを連続した移動ごとに分割する
     let legacyGroup = [];
     let legacyIndex = 0;
@@ -78,7 +105,7 @@ function calculateFrequentSegments () {
         trackPoints.sort((a, b) => a.timeMs - b.timeMs);
 
         //同じ走行で同一区間を重複カウントしない
-        const visitedSegments = new set();
+        const visitedSegments = new Set();
 
         for (let i = 1; i < trackPoints.length; i++) {
             const p1 = trackPoints[i - 1];
@@ -86,7 +113,7 @@ function calculateFrequentSegments () {
 
             const timeDiff = p2.timeMs - p1.timeMs;
 
-            if (timeMs > MAX_TIME_GAP_MS) {
+            if (timeDiff > MAX_TIME_GAP_MS) {
                 continue;
             }
 
@@ -129,7 +156,7 @@ function calculateFrequentSegments () {
             } else {
                 segmentCountMap.set(segmentKey, {
                     start: {
-                        lat: p1.lar,
+                        lat: p1.lat,
                         lng: p1.lon
                     },
                     end: {
@@ -148,7 +175,7 @@ function calculateFrequentSegments () {
     logMessage(`よく通る区間： ${appState.frequentSegments.length}`);
     logMessage(
         `分析結果：全${points.length}地点、` +
-        `${trackGroups.seize}移動グループ、` +
+        `${trackGroups.size}移動グループ、` +
         `${segmentCountMap.size}種類の区間`
     );
 }
