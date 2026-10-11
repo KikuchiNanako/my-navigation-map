@@ -533,6 +533,9 @@ function clearAllNavigation() {
     //ポリライン・マーカー等のリセット
     appState.resetNavigation();
 
+    //現在の走行IDを終了
+    appState.currentTrackId = null;
+
     //入力欄のリセット
     const input = document.getElementById("destinationInput");
     if (input) input.value = "";
