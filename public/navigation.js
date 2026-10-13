@@ -202,6 +202,7 @@ function showCurrentStep() {
     const duration = step.duration.text;
 
     logMessage(`次の案内： ${instruction} (${distance}, ${duration})`);
+    updateNavDisplay(instruction, `${distance}・${duration}`);
 
     let startLoc = toLatLngObj(step.start_location);
     if (startLoc) {
