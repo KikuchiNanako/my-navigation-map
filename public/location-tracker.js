@@ -153,7 +153,14 @@ async function requestRouteDrawing(forcedOrigin) {
             return;
         }
 
-        //ルートを計算して描画
+        //ルートを計算して描画し、完了を待つ
+        const routeSuccess = await displayRoute(originLatLon, destinationPlace);
+
+        if (!routeSuccess) {
+            logMessage("ルート検索に失敗したため、ナビを再開しません");
+            appState.isRerouting = false;
+            return;
+        }
         displayRoute(originLatLon, destinationPlace);
 
         logMessage("ルート描画が完了しました");
@@ -315,10 +322,38 @@ async function onPositionUpdate(position) {
     //経路外かどうかを判定
     const isOutside = getStableRouteStatus(rawIsOutside);
 
+    //よく通る区間に応じてナビ案内を切り替える
+    if (appState.navigationActive) {
+        if (!isOutside && !appState.guidancePaused) {
+            appState.guidancePaused = true;
+
+            //再生中の音声も停止する
+            if (`speechSynthesis` in window) {
+                window.speechSynthesis.cancel();
+            }
+
+            logMessage("よく通る区間に入りました。ナビ案内を一時停止します");
+        } else if (isOutside && appState.guidancePaused) {
+            appState.guidancePaused = false;
+            logMessage("よく通る区間を外れました。ナビ案内を再開します");
+
+            //現在のステップの案内を読み上げる
+            const currentStep = appState.steps?.[appState.currentStepIndex];
+
+            if (currentStep && typeof speakText === 'function') {
+                const instruction = (currentStep.instructions || "").replace(/<[^>]*>/g, "");
+
+                if (instruction) {
+                    speakText(`ナビ案内を再開します。${instruction}`);
+                }
+            }            
+        }
+    }
+
     const statusLabel = document.getElementById('statusLabel');
     if (statusLabel) {
         if (isOutside) {
-            statusLabel.innerText = "状態：【経路外】ルート検索を実行します";
+            statusLabel.innerText = "状態：【経路外】ナビ案内を開始します";
             statusLabel.style.color = "red";
         } else {
             statusLabel.innerText = "状態:【経路内】";

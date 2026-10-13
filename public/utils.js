@@ -244,6 +244,11 @@ function updateNavDisplay(instruction, distance = "", bgColor = "#333") {
  * @param {string} text 読み上げるテキスト
  */
 function speakText (text) {
+   //よく通る区間では音声案内をしない
+   if (appState.guidancePaused) {
+      return;
+   }
+   
    if (!('speechSynthesis' in window)) {
       console.warn("このブラウザは音声合成をサポートしてません");
       return;

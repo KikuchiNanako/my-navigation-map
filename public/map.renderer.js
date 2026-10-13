@@ -340,7 +340,7 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function displayRoute(origin, destination){
+async function displayRoute(origin, destination){
     const currentMap = appState.map;
     clearAlternativePolylines();
     clearRoutePolylines();
@@ -353,72 +353,77 @@ function displayRoute(origin, destination){
         appState.destinationMarker = null;
     }
 
-    appState.directionsService.route(
-        {
-            origin: origin,
-            destination: destination,
-            travelMode: google.maps.TravelMode.DRIVING,
-            provideRouteAlternatives: true
-        },
-        (response, status) => {
-            if (status === "OK" && response && response.routes && response.routes.length > 0) {
-                appState.lastDirectionsResponse = response;
-                appState.selectedRouteIndex = 0;
+    await new Promise((resolve, reject) => {
+        appState.directionsService.route(
+            {
+                origin: origin,
+                destination: destination,
+                travelMode: google.maps.TravelMode.DRIVING,
+                provideRouteAlternatives: true
+            },
+            (response, status) => {
+                if (status === "OK" && response && response.routes && response.routes.length > 0) {
+                    appState.lastDirectionsResponse = response;
+                    appState.selectedRouteIndex = 0;
 
-                appState.directionsRenderer.setOptions({
-                    suppressPolylines: true,
-                    suppressMarkers: true,
-                });
+                    appState.directionsRenderer.setOptions({
+                        suppressPolylines: true,
+                        suppressMarkers: true,
+                    });
 
-                response.routes.forEach((route, routeIdx) => {
+                    response.routes.forEach((route, routeIdx) => {
+                        const path = [];
 
-                    const path = [];
-                    route.legs.forEach(leg => {
-                        leg.steps.forEach(step => {
-                            step.path.forEach(latLng => {
-                                path.push(latLng);
+                        route.legs.forEach(leg => {
+                            leg.steps.forEach(step => {
+                                step.path.forEach(latLng => {
+                                    path.push(latLng);
+                                });
                             });
+                        });
+
+                        const isSelected = (routeIdx === appState.selectedRouteIndex);
+                        const polyline = new google.maps.Polyline({
+                            path: path,
+                            map: currentMap,
+                            strokeColor: isSelected ? "#4285F4" : "#4254F4",
+                            strokeOpacity: isSelected ? 0.8 : 0.4,
+                            strokeWeight: isSelected ? 6 : 4,
+                            zIndex: isSelected ? 2 : 1
+                        });
+
+                        polyline.addListener('click', () => {
+                            selectRoute(routeIdx);
+                        });
+
+                        appState.alternativePolylines.push({
+                            index: routeIdx,
+                            polyline: polyline,
+                            routeData: route
                         });
                     });
 
-                    const isSelected = (routeIdx === appState.selectedRouteIndex);
-                    const polyline = new google.maps.Polyline({
-                        path: path,
-                        map: currentMap,
-                        strokeColor: isSelected ? "#4285F4" : "#4254F4",
-                        strokeOpacity: isSelected ? 0.8 : 0.4,
-                        strokeWeight: isSelected ? 6 : 4,
-                        zIndex: isSelected ? 2 : 1
-                    });
+                    updateRouteInfoUI(0);
+                    renderRouteStepsList(0);
 
-                    polyline.addListener('click', () => {
-                        selectRoute(routeIdx);
-                    });
+                    logMessage(`Google Maps 複数のルート (${response.routes.length}件)を表示しました`);
 
-                    appState.alternativePolylines.push({
-                        index: routeIdx,
-                        polyline: polyline,
-                        routeData: route
-                    });
-                });
+                    resolve(true);
+                } else {
+                    logMessage(`ルート検索に失敗しました: ${status}`);
+                    appState.directionsRenderer.setDirections({ routes: [] });
+                    clearAlternativePolylines();
 
-                updateRouteInfoUI(0);
-                renderRouteStepsList(0);
+                    const container = document.getElementById("routeStepsContainer");
+                    if (container) {container.style.display = "none"};
 
-                logMessage(`Google Maps 複数のルート (${response.routes.length}件)を表示しました`);
-
-            } else {
-                logMessage(`ルート検索に失敗しました: ${status}`);
-                appState.directionsRenderer.setDirections({ routes: [] });
-                clearAlternativePolylines();
-
-                const container = document.getElementById("routeStepsContainer");
-                if (container) container.style.display = "none";
+                    resolve(false);
+                }
             }
-        }
-    );
+        );
+    });
 }
-
+    
 /**
  * ユーザーが特定のルートを選択したときの処理
  */

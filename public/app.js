@@ -24,6 +24,7 @@ window.appState = {
 
     //ナビゲーション状態
     navigationActive: false,
+    guidancePaused: false,
     currentTrackId: null,
     currentStepIndex: 0,
     steps: [],
