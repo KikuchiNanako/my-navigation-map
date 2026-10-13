@@ -353,7 +353,7 @@ async function displayRoute(origin, destination){
         appState.destinationMarker = null;
     }
 
-    await new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         appState.directionsService.route(
             {
                 origin: origin,
