@@ -161,7 +161,6 @@ async function requestRouteDrawing(forcedOrigin) {
             appState.isRerouting = false;
             return;
         }
-        displayRoute(originLatLon, destinationPlace);
 
         logMessage("ルート描画が完了しました");
 
