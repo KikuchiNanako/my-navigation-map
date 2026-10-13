@@ -108,6 +108,7 @@ function updateFineGrainedRouteColor(currentLocation, currentIdx) {
         }
 
         isOffRoute = minDistance >= ON_ROUTE_THRESHOLD_M;
+        console.log("色変更チェック",{ minDistance, isOffRoute, currentIdx, closestVertexIndex });
     }
 
     appState.routePolylines.forEach((polyline) => {
