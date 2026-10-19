@@ -170,7 +170,7 @@ function calculateFrequentSegments () {
     }
 
     //====頻出区間====
-    appState.frequentSegments = Array.from(segmentCountMap.values()).filter(segment => segment.count >= 3);
+    appState.frequentSegments = Array.from(segmentCountMap.values()).filter(segment => segment.count >= 5);
 
     logMessage(`よく通る区間： ${appState.frequentSegments.length}`);
     logMessage(
