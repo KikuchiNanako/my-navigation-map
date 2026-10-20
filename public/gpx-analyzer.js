@@ -149,6 +149,10 @@ function calculateFrequentSegments () {
             const keyA = `${aLat},${aLon}`;
             const keyB = `${bLat},${bLon}`;
 
+            //支店と終点から区間を識別するキーを作成
+            //逆方向に通った場合も同じ区間として扱う
+            const segmentKey = keyA < keyB ? `${keyA}|${keyB}` : `${keyB}|${keyA}`;
+
             //区間を通過した日時
             const timestamp = p2.timeMs;
 
@@ -228,7 +232,7 @@ function calculateFrequentSegments () {
 
     //====頻出区間====
     appState.frequentSegments = Array.from(segmentCountMap.values()).filter(segment => 
-        segment.count >= 5 ||
+        segment.recentCount >= 5 ||
         Object.values(segment.monthlyCounts).some(count => count >= 20)
     );
 
