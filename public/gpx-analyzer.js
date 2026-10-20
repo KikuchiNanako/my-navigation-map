@@ -155,7 +155,7 @@ function calculateFrequentSegments () {
             if (timestamp > nowMs) continue;
 
             const date = new Date(timestamp);
-            const monthKey = `${DataTransfer.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 
             //区間データを取得、なければ作成
             let segment = segmentCountMap.get(segmentKey);
