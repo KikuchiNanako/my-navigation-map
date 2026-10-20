@@ -39,6 +39,14 @@ function calculateFrequentSegments () {
 
     const segmentCountMap = new Map();
     const trackGroups = new Map();
+
+    //直近１か月の期間を設定
+    const now = new Date();
+    const oneMonthAgo = new Date(now);
+    oneMonthAgo.setMonth(oneMonthAgo,getMonth() - 1);
+
+    const recentStartMs = oneMonthAgo.getTime();
+    const nowMs = now.getTime();
     
     //10分以上の記録の余白は別の移動区間として扱う
     const MAX_TIME_GAP_MS = 10 * 60 * 1000;
@@ -106,6 +114,8 @@ function calculateFrequentSegments () {
 
         //同じ走行で同一区間を重複カウントしない
         const visitedSegments = new Set();
+        const visitedRecentSegments = new Set();
+        const visitedMonthlySegments = new Set();
 
         for (let i = 1; i < trackPoints.length; i++) {
             const p1 = trackPoints[i - 1];
@@ -138,6 +148,50 @@ function calculateFrequentSegments () {
             const keyA = `${aLat},${aLon}`;
             const keyB = `${bLat},${bLon}`;
 
+            //区間を通過した日時
+            const timestamp = p2.timeMs;
+
+            if (timestamp > nowMs) continue;
+
+            const date = new Date(timestamp);
+            const monthKey = `${DataTransfer.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+
+            //区間データを取得、なければ作成
+            let segment = segmentCountMap.get(segmentKey);
+
+            if (!segment) {
+                segment = {
+                    start: { lat: p1.lat, lng: p1.lon },
+                    end: { lat: p2.lat, lng: p2.lon },
+                    count: 0,
+                    recentCount: 0,
+                    monthlyCounts: {}
+                };
+                segmentCountMap.set(segmentKey, segment);
+            }
+
+            //これまでの総走行回数
+            if (!visitedSegments.has(segmentKey)) {
+                segment.count++;
+                visitedSegments.add(segmentKey);
+            }
+
+            //直近１か月の走行回数
+            if (timestamp >= recentStartMs && !visitedRecentSegments.has(segmentKey)) {
+                segment.recentCount++;
+                visitedRecentSegments.add(segmentKey);
+            }
+
+            //各暦月の走行回数
+            const monthSegmentKey = `${monthKey}|${segmentKey}`;
+
+            if (!visitedMonthlySegments.has(monthSegmentKey)) {
+                segment.monthlyCounts[monthKey] = (segment.monthlyCounts[monthKey] || 0) + 1;
+
+                visitedMonthlySegments.add(monthSegmentKey);
+            }
+
+            /*
             const segmentKey = 
                 keyA < keyB
                     ? `${keyA}|${keyB}`
@@ -166,11 +220,16 @@ function calculateFrequentSegments () {
                     count: 1
                 });
             }
+            */
         }
     }
+    
 
     //====頻出区間====
-    appState.frequentSegments = Array.from(segmentCountMap.values()).filter(segment => segment.count >= 5);
+    appState.frequentSegments = Array.from(segmentCountMap.values()).filter(segment => 
+        segment.count >= 5 ||
+        Object.values(segment.monthlyCounts).some(count => count >= 20)
+    );
 
     logMessage(`よく通る区間： ${appState.frequentSegments.length}`);
     logMessage(
