@@ -43,7 +43,8 @@ function calculateFrequentSegments () {
     //直近１か月の期間を設定
     const now = new Date();
     const oneMonthAgo = new Date(now);
-    oneMonthAgo.setMonth(oneMonthAgo,getMonth() - 1);
+
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
     const recentStartMs = oneMonthAgo.getTime();
     const nowMs = now.getTime();
