@@ -265,3 +265,67 @@ function isOutsideRoute(currentLat, currentLon) {
     }
     return minDist > THRESHOLD_M;
 }
+
+/**
+ * ルートと過去の走行履歴の一致率を計算する
+ * @param {object} route Google Mapsの経路データ
+ * @return {number} 一致率（０～１００）
+ */
+function calculateRouteFamiliarity(route) {
+    const segments = appState.frequentSegments;
+
+    if(!route || !route.legs || !segments || segments.length === 0) {
+        return 0;
+    }
+
+    const SAMPLE_INTERVAL_M = 10;
+    const MATCH_THRESHOLD_M = 30;
+
+    let totalDistance = 0;
+    let familiarDistance = 0;
+
+    for (const leg of route.legs) {
+        for (const step of leg.steps) {
+            const path = step.path || [];
+
+            for (let i = 1; i < path.length; i++) {
+                const p1 = toLatLngObj(path[i - 1]);
+                const p2 = toLatLngObj(path[i]);
+
+                if (!p1 || !p2) continue;
+
+                const distance = getDistanceMeters(p1.lat, p1.lng, p2.lat, p2.lng);
+
+                if(distance <= 0) continue;
+
+                const sampleCount = Math.ceil( distance / SAMPLE_INTERVAL_M );
+
+                const sampleDistance = distance / sampleCount;
+
+                for (let j = 0; j < sampleCount; j++) {
+                    const t = (j + 0.5) / sampleCount;
+
+                    const lat = p1.lat + (p2.lat - p1.lat) * t;
+                    const lng = p1.lng + (p2.lng - p1.lng) * t;
+
+                    totalDistance += sampleDistance;
+
+                    const isFamiliar = segments.some(segment => {
+                        const dist = getDistanceToSegmentMeters(lat, lng, segment.start.lat, segment.start.lng, segment.end.lat, segment.end.lng );
+
+                        return dist <= MATCH_THRESHOLD_M;
+                    });
+
+                    if (isFamiliar) {
+                        familiarDistance += sampleDistance;
+                    }
+                } 
+            }
+        }
+    }
+    if (totalDistance === 0) return 0;
+
+    return Math.round(
+        (familiarDistance / totalDistance) * 100
+    );
+}

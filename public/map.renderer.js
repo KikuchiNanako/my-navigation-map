@@ -366,6 +366,16 @@ async function displayRoute(origin, destination){
                     appState.lastDirectionsResponse = response;
                     appState.selectedRouteIndex = 0;
 
+                    const familiarityScores = response.routes.map((route, index) => {
+                        const score = calculateRouteFamiliarity(route);
+
+                        logMessage(`ルート${index + 1}:走行履歴との一致率${score}%`);
+
+                        return score;
+                    });
+
+                    appState.routeFamiliarityScores = familiarityScores;
+
                     appState.directionsRenderer.setOptions({
                         suppressPolylines: true,
                         suppressMarkers: true,
