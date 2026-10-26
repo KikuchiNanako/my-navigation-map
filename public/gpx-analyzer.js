@@ -245,7 +245,7 @@ function calculateFrequentSegments () {
             first.timeMs,
             last.timeMs,
             first.lat.toFixed(5),
-            first.lon.toFixes(5),
+            first.lon.toFixed(5),
             last.lat.toFixed(5),
             last.lon.toFixed(5)
         ].join("|");
