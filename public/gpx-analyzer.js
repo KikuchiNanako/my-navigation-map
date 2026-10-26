@@ -195,37 +195,6 @@ function calculateFrequentSegments () {
 
                 visitedMonthlySegments.add(monthSegmentKey);
             }
-
-            /*
-            const segmentKey = 
-                keyA < keyB
-                    ? `${keyA}|${keyB}`
-                    : `${keyB}|${keyA}`;
-            
-            if (visitedSegments.has(segmentKey)) {
-                continue;
-            }
-
-            visitedSegments.add(segmentKey);
-
-            const existing = segmentCountMap.get(segmentKey);
-
-            if (existing) {
-                existing.count++;
-            } else {
-                segmentCountMap.set(segmentKey, {
-                    start: {
-                        lat: p1.lat,
-                        lng: p1.lon
-                    },
-                    end: {
-                        lat: p2.lat,
-                        lng: p2.lon
-                    },
-                    count: 1
-                });
-            }
-            */
         }
     }
     
@@ -235,6 +204,23 @@ function calculateFrequentSegments () {
         segment.recentCount >= 5 ||
         Object.values(segment.monthlyCounts).some(count => count >= 20)
     );
+
+    const allSegments = Array.from(segmentCountMap.values());
+
+    const maxCount = Math.max(0, ...allSegments.map(s => s.count));
+
+    const maxRecentCount = Math.max(0, ...allSegments.map(s => s.recentCount));
+
+    const countDistribution = {
+        once: allSegments.filter(s => s.count === 1).length,
+        twice: allSegments.filter(s => s.count === 2).length,
+        threeOrMore: allSegments.filter(s => s.count >= 3).length,
+        fiveOrMore: allSegments.filter(s => s.count >= 5).length
+    };
+
+    logMessage(`区間の最大通過回数：${maxCount}`);
+    logMessage(`直近１か月の最大通過回数：${maxRecentCount}`);
+    logMessage(`区間の通過回数分布：${JSON.stringify(countDistribution)}`);
 
     logMessage(`よく通る区間： ${appState.frequentSegments.length}`);
     logMessage(
