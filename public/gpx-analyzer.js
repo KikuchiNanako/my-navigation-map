@@ -228,6 +228,33 @@ function calculateFrequentSegments () {
         `${trackGroups.size}移動グループ、` +
         `${segmentCountMap.size}種類の区間`
     );
+
+    const trackSignatures = new Map();
+    let duplicateTrackCount = 0;
+
+    for (const [trackId, trackPoints] of trackGroups) {
+        if (trackPoints.length === 0) continue;
+
+        const sorted = [...trackPoints].sort((a, b) => a.timeMs - b.timeMs);
+
+        const first = sorted[0];
+        const last = sorted[sorted.length - 1];
+
+        const signature = [
+            sorted.length,
+            first.timeMs,
+            last.timeMs,
+            first.lat.toFixed(5),
+            first.lon.toFixes(5),
+            last.lat.toFixed(5),
+            last.lon.toFixed(5)
+        ].join("|");
+
+        if (trackSignatures.has(signature)) {
+            duplicateTrackCount++
+        } else { trackSignatures.set(signature, trackId)};
+    }
+    logMessage(`重複している可能性がある走行グループ：${duplicateTrackCount}`);
 }
 
 /**
