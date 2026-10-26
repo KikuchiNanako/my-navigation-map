@@ -109,8 +109,39 @@ function calculateFrequentSegments () {
             );
     }
 
+    const uniqueTrackGroups = new Map();
+    const seenSignatures = new Set();
+    let skipiedDuplicates = 0;
+
+    for (const [trackId, trackPoints] of trackGroups) {
+        if ( trackPoints.length === 0) continue;
+
+        const sorted = [...trackPoints].sort((a, b) => a.timeMs - b.timeMs);
+
+        const first = sorted[0];
+        const last = sorted[sorted.length - 1];
+
+        const signature = [
+            sorted.length,
+            first.timeMs,
+            last.timeMs,
+            first.lat.toFixed(5),
+            first.lon.toFixed(5),
+            last.lat.toFixed(5),
+            last.lon.toFixed(5)
+        ].join("|");
+
+        if(seenSignatures.has(signature)) {
+            skipiedDuplicates++
+            continue;
+        }
+        seenSignatures.add(signature);
+        uniqueTrackGroups.set(trackId, trackPoints);
+    }
+    logMessage(`分析から除外した重複走行：${skipiedDuplicates}`);
+
     //====走行ごとに区間を分析====
-    for (const trackPoints of trackGroups.values()) {
+    for (const trackPoints of uniqueTrackGroups.values()) {
         trackPoints.sort((a, b) => a.timeMs - b.timeMs);
 
         //同じ走行で同一区間を重複カウントしない
