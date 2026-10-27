@@ -140,6 +140,11 @@ function calculateFrequentSegments () {
     }
     logMessage(`分析から除外した重複走行：${skipiedDuplicates}`);
 
+    //===円方式による習熟地点の分析===
+    appState.frequentPoints = calculateFrequentPoints( uniqueTrackGroups );
+
+    logMessage(`円方式の習熟地点：${appState.frequentPoints.length}`);
+
     //====走行ごとに区間を分析====
     for (const trackPoints of uniqueTrackGroups.values()) {
         trackPoints.sort((a, b) => a.timeMs - b.timeMs);
@@ -372,4 +377,44 @@ function calculateRouteFamiliarity(route) {
     return Math.round(
         (familiarDistance / totalDistance) * 100
     );
+}
+
+/**
+ * 円方式で習熟地点を判定する
+ * 同じ走行で同じメッシュを通っても1回として数える
+ */
+function calculateFrequentPoints(trackGroups) {
+    const GRID_SIZE_M = 20;
+    const MIN_VISIT = 3;
+
+    const gridMap = new Map();
+
+    for (const trackPoints of trackGroups.values()) {
+        const visitedCells = new Set();
+
+        for (const point of trackPoints) {
+            const lat = point.lat;
+            const lon = point.lon;
+
+            const latGrid = Math.floor(
+                (lat * 111320) / GRID_SIZE_M
+            );
+
+            const lonGrid = Math.floor(
+                (lon * 111320 * Math.cos(lat + Math.PI / 180)) / GRID_SIZE_M
+            );
+
+            const key = `${latGrid}, ${lonGrid}`;
+
+            if (visitedCells.has(key)) continue;
+
+            visitedCells.add(key);
+
+            if (!gridMap.has(key)) {
+                gridMap.set(key, { lat,lng: lon, count: 0});
+            }
+            gridMap.get(key).count++;
+        }
+    }
+    return Array.from(gridMap.values()).filter(point => points.count >= MIN_VISIT);
 }
