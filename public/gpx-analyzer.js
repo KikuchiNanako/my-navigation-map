@@ -385,7 +385,7 @@ function calculateRouteFamiliarity(route) {
  */
 function calculateFrequentPoints(trackGroups) {
     const GRID_SIZE_M = 20;
-    const MIN_VISIT = 3;
+    const MIN_VISITS = 3;
 
     const gridMap = new Map();
 
@@ -416,5 +416,5 @@ function calculateFrequentPoints(trackGroups) {
             gridMap.get(key).count++;
         }
     }
-    return Array.from(gridMap.values()).filter(point => points.count >= MIN_VISIT);
+    return Array.from(gridMap.values()).filter(point => point.count >= MIN_VISITS);
 }
