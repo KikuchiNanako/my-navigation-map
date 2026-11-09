@@ -280,7 +280,14 @@ function calculateFrequentSegments () {
         }
     }
     
+    //全期間で3回以上通過した区間を習熟区間とする
+    const MIN_VISITS = 3;
 
+    appState.frequentSegments = Array.from(
+        segmentCountMap.values()
+    ).filter(segment => segment.count >= MIN_VISITS);
+
+    /*
     //====頻出区間====
     appState.frequentSegments = Array.from(segmentCountMap.values()).filter(segment => 
         segment.recentCount >= 5 ||
@@ -289,7 +296,7 @@ function calculateFrequentSegments () {
 
     appState.bridgeSegments = [];
 
-    /*
+    
     //円方式と線分方式を組み合わせて短い隙間を補完する
     appState.bridgeSegments = buildFamiliarBridges(
         appState.frequentSegments,
