@@ -256,49 +256,72 @@ async function drawMap() {
         return;
     }
 
-    //過去に描画した線があれば地図から削除してクリア
-    appState.frequentPolylines.forEach(p => p.setMap(null));
-    appState.frequentPolylines = [];
+    //以前の描画処理が残っていれば中断する
+    appState.frequentDrawVersion = (appState.frequentDrawVersion || 0) + 1;
+    const drawVersion = appState.frequentDrawVersion;
 
-    //よく通る道のデータがなければ何もしない
-    if (!appState.frequentSegments || appState.frequentSegments.length === 0) {
-        logMessage("描画するよく通る道のデータがありません");
+    //既存の赤い線を削除
+    if (!appState.frequentPolylines) {
+        appState.frequentPolylines.forEach(polyline => {
+            polyline.setMap(null);
+        });
+    }
+
+    appState.frequentPolylines = [];
+    
+    const segments = appState.frequentSegments || [];
+
+    if (segments.length === 0) {
+        logMessage("描画する習熟区間がありません");
         return;
     }
-    const mergedSegments = appState.frequentSegments;
-    logMessage(`頻出区間を ${appState.frequentSegments.length} → ${mergedSegments.length}本に統一`);
-    logMessage(`道路に沿った線の描画開始: ${mergedSegments.length}`);
 
-    for (const segment of mergedSegments) {
-        try {
-            const result = await requestRoadRoute(
-                segment.start,
-                segment.end
-            );
-            if (!result) { continue };
+    const startTime = performance.now();
+    const BATCH_SIZE = 150;
+
+    let drawCount = 0;
+
+    logMessage(`習熟区間の描画開始：${segments.length}本`);
+
+    for (let i = 0; i < segments.length; i += BATCH_SIZE) {
+        //別の描画が開始された場合は中断
+        if (drawVersion !== appState.frequentDrawVersion) {
+            return;
+        }
+        const batch = segments.slice(i, i + BATCH_SIZE);
+
+        for (const segment of batch) {
+            if (!segment.start || !segment.end) {
+                continue;
+            }
+
+            const path = [
+                {lat: segment.start.lat, lng: segment.start.lng},
+                {lat: segment.end.lat, lng: segment.end.lng}
+            ];
 
             const polyline = new google.maps.Polyline({
-                    path: result,
-                    map: currentMap,
-                    strokeColor: "#ff0000",
-                    strokeOpacity: 0.75,
-                    strokeWeight: 5,
-                    clickable: false,
-                    zIndex: 5
-                });
+                path: result,
+                map: currentMap,
+                strokeColor: "#ff0000",
+                strokeOpacity: 0.75,
+                strokeWeight: 5,
+                clickable: false,
+                zIndex: 5
+            });
 
-                appState.frequentPolylines.push(polyline);
-
-                await sleep(100);
-        } catch (error) {
-            console.error(
-                "頻出道路描画エラー:",
-                error
-            );
+            appState.frequentPolylines.push(polyline);
+            drawCount++;
         }
+        //ブラウザに画面更新の機会を与える
+        await new Promise(resolve => setTimeout(resolve, 0));
     }
-    logMessage("よく通る道の線描画が完了しました");
 
+    const elapsed = (
+        (performance.now() - startTime) / 1000
+    ).toFixed(2);
+
+    logMessage(`習熟区間の描画完了：${drawCount}本、${elapsed}秒`);
 }  
 
 function requestRoadRoute(start, end) {
