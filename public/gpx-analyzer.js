@@ -295,9 +295,11 @@ function calculateFrequentSegments () {
     );
 
     appState.bridgeSegments = [];
-
+    */
     
     //円方式と線分方式を組み合わせて短い隙間を補完する
+    const bridgeStartTime = performance.now();
+
     appState.bridgeSegments = buildFamiliarBridges(
         appState.frequentSegments,
         appState.frequentPoints
@@ -307,7 +309,7 @@ function calculateFrequentSegments () {
     appState.frequentSegments.push(...appState.bridgeSegments);
 
     logMessage(`補完した習熟区間：${appState.bridgeSegments.length}本`);
-    */
+    
 
     const allSegments = Array.from(segmentCountMap.values());
 
@@ -498,137 +500,198 @@ function buildFamiliarBridges(segments, frequentPoints) {
     const MAX_ANGLE_DEG = 25;
     const MAX_LATERAL_M = 7;
     const CIRCLE_RADIUS_M = 20;
+    const CELL_SIZE_M = 40;
 
     const bridges = [];
+
     if (!segments?.length || !frequentPoints?.length) {
         return bridges;
     }
 
+    const refLat = segments[0].start.lat;
+    const lonScale = 111320 * Math.cos(refLat * Math.PI / 180);
+
+    const toXY = p => ({
+        x: p.lng * lonScale,
+        y: p.lat * 111320
+    });
+
+    const cellKey = (x, y) =>  `${Math.floor(x / CELL_SIZE_M)},${Math.floor(y / CELL_SIZE_M)}`;
+
+    const subtract = (a, b) => ({
+        x: a.x - b.x,
+        y: a.y - b.y
+    });
+
+    const length = v => Math.hypot(v.x, v.y);
+
+    const angle = (a, b) => {
+        const la = length(a);
+        const lb = length(b);
+
+        if (la < 1 || lb < 1) return 180;
+
+        const cosine = Math.max(-1, Math.min(
+            1,
+            (a.x * b.x + a.y * b.y) / (la * lb)
+        ));
+        return Math.acos(cosine) * 180 / Math.PI;
+    };
+
+    const lateralDistance = (a, b) => {
+        const lb = length(b);
+        if (lb < 1) return Infinity;
+
+        return Math.abs(
+            a.x * b.y - a.y * b.x
+        ) / lb;
+    };
+
+    //円方式の習熟地点を空間メッシュに登録
+    const circleIndex = new Map();
+
+    for (const point of frequentPoints) {
+        const xy = toXY(point);
+        const key = cellKey(xy.x, xy.y);
+
+        if (!circleIndex.has(key)) {
+            circleIndex.set(key, []);
+        }
+
+        circleIndex.get(key).push(xy);
+    }
+
+    //指定位置が円方式の習熟範囲内か
+    function insideFamiliarCircle(x, y) {
+        const cx = Math.floor(x / CELL_SIZE_M);
+        const cy = Math.floor(y / CELL_SIZE_M);
+        
+        for (let ix = cx - 1; ix <= cx + 1; ix++) {
+            for (let iy = cy - 1; iy <= cy + 1; iy++) {
+                const nearby = circleIndex.get(`${ix},${iy}`) || [];
+                for (const p of nearby) {
+                    if (Math.hypot(p.x - x, p.y - y) <= CIRCLE_RADIUS_M) {
+                        return true;
+                    }
+                }
+            }   
+        }
+
+        return false;
+    }
+
     //各線分の両端を取得
     const ends = [];
+    const endIndex = new Map();
 
     for (let i = 0; i < segments.length; i++) {
-        const s = segments[i];
+        const segment = segments[i];
 
-        ends.push({
-            point: s.start,
-            inner: s.end,
-            segmentIndex: i
-        });
-
-        ends.push({
-            point: s.end,
-            inner: s.start,
-            segmentIndex: i
-        });
-    }
-    const used = new Set();
-    const candidates = [];
-
-    //緯度経度をメートル単位のベクトルに変換
-    const vector = (from, to) => {
-        const scale = Math.cos(
-            ((from.lat + to.lat) / 2) * Math.PI / 180
-        );
-
-        return [
-            (to.lng - from.lng) * 111320 * scale,
-            (to.lat - from.lat) * 111320
-        ];
-    };
-    
-    //２つのベクトルの角度を計算
-    const angle = (u, v) => {
-        const nu = Math.hypot(...u);
-        const nv = Math.hypot(...v);
-
-        if (nu < 1 || nv < 1) return 180;
-
-        const cos = Math.max( -1, Math.min(1, (u[0] * v[0] + u[1] * v[1]) / (nu * nv)));
-
-        return Math.acos(cos) * 180 / Math.PI;
-    };
-
-    //swン分同士の接続候補を探す
-    for (let i = 0; i < ends.length; i++) {
-
-        const a = ends[i];
-
-        for (let j = i + 1; j < ends.length; j++) {
-            const b = ends[j];
-
-            //同じ線分の端点同士は対象外
-            if (a.segmentIndex === b.segmentIndex) {
-                continue;
-            }
-            const gap = getDistanceMeters(
-                a.point.lat,
-                a.point.lng,
-                b.point.lat,
-                b.point.lng
-            );
-
-            //隙間の距離を確認
-            if (gap < MIN_GAP_M || gap > MAX_GAP_M) {
-                continue;
-            }
-
-            const ab = vector(a.point, b.point);
-            const outA = vector(a.inner, a.point);
-            const outB = vector(b.point, b.inner);
-
-            //前後の線分がほぼ同じ方向か確認
-            if (angle(outA, ab) > MAX_ANGLE_DEG || angle(outB, ab) > MAX_ANGLE_DEG) {
-                continue;
-            }
-
-            //横方向のずれを計算
-            const crossDistance = (v, w) => {
-                return Math.abs(
-                    v[0] * w[1] - v[1] * w[0]
-                ) / Math.hypot(...w);
+        for (const [point, inner] of [
+            [segment.start, segment.end],
+            [segment.end, segment.start]
+        ]) {
+            const endpoint = {
+                id: ends.length,
+                segmentIndex: i,
+                point, 
+                xy: toXY(point),
+                innerXY: toXY(inner)
             };
 
-            if (crossDistance(outA, ab) > MAX_LATERAL_M || crossDistance(outB, ab) > MAX_LATERAL_M) {
-                continue;
+            ends.push(endpoint);
+
+            const key = cellKey(endpoint.xy.x, endpoint.xy.y);
+
+            if (!endIndex.has(key)) {
+                endIndex.set(key, []);
             }
 
-            //隙間を５ｍ感覚で調べる
-            const samples = Math.max(2, Math.ceil(gap / 5));
+            endIndex.get(key).push(endpoint);
+        }
+    }
+    const candidates = [];
 
-            let covered = true;
+    //近くの端点だけを比較
+    for (const a of ends) {
+        const cx = Math.floor(a.xy.x / CELL_SIZE_M);
+        const cy = Math.floor(a.xy.y / CELL_SIZE_M);
 
-            for (let k = 0; k <= samples; k++) {
-                const t = k / samples;
+        for (let ix = cx - 1; ix <= cx + 1; ix++) {
+            for (let iy = cy - 1; iy <= cy + 1; iy++) {
+                const nearby = endIndex.get(`${ix},${iy}`) || [];
 
-                const lat = a.point.lat + (b.point.lat - a.point.lat) * t;
-                const lng = a.point.lng + (b.point.lng - a.point.lng) * t;
+                for (const b of nearby) {
+                    if (b.id <= a.id) continue;
 
-                //円方式の習熟範囲に入ってるか
-                const insideCircle = frequentPoints.some(p => getDistanceMeters(lat, lng, p.lat, p.lng) <= CIRCLE_RADIUS_M);
+                    if (a.segmentIndex === b.segmentIndex) {
+                        continue;
+                    }
 
-                if (!insideCircle) {
-                    covered = false;
-                    break;
+                    const ab = subtract(b.xy, a.xy);
+                    const gap = length(ab);
+
+                    if (gap <MIN_GAP_M || gap > MAX_GAP_M) { continue; }
+
+                    //a側から隙間へ進む方向
+                    const directionA = subtract(a.xy, a.innerXY);
+
+                    //隙間からｂ側へ進む方向
+                    const directionB = subtract(b.innerXY, b.xy);
+
+                    //接続方向を確認
+                    if (angle(directionA, ab) > MAX_ANGLE_DEG || angle(directionB, ab) > MAX_ANGLE_DEG) {
+                        continue;
+                    }
+
+                    //横方向のずれを確認
+                    if ( lateralDistance(directionA, ab) > MAX_LATERAL_M || lateralDistance(directionB, ab) > MAX_LATERAL_M) {
+                        continue;
+                    }
+
+                    //隙間全体が円方式の習熟範囲内か
+                    const sampleCount = Math.max(
+                        2, Math.ceil(gap / 5)
+                    );
+
+                    let covered = true;
+
+                    for (let k = 0; k <= sampleCount; k++) {
+                        const t = k / sampleCount;
+
+                        const x = a.xy.x + ab.x * t;
+                        const y = a.xy.y + ab.y * t;
+
+                        if (!insideFamiliarCircle(x, y)) {
+                            covered = false;
+                            break;
+                        }
+                    }
+
+                    if (!covered) continue;
+
+                    candidates.push({ a, b, gap });
                 }
-            }
-            if (covered) { candidates.push({i, j, gap, a,b});
             }
         }
     }
+
     //距離が近い候補を優先
     candidates.sort((a, b) => a.gap - b.gap);
 
-    for (const c of candidates) {
-        //同じ端点を複数回使用しない
-        if (used.has(c.i) || used.has(c.j)) { continue; }
+    const usedEnds = new Set();
 
-        used.add(c.i);
-        used.add(c.j);
+    for (const candidates of candidates) {
+        const { a, b } = candidates;
+
+        if (usedEnds.has(a.id) || usedEnds.has(b.id)) { continue; }
+
+        usedEnds.add(a.id);
+        usedEnds.add(b.id);
 
         bridges.push({
-            start: {...c.a.point},
-            end:{...c.b.point},
+            start: {...a.point},
+            end:{...b.point},
             count: 0,
             recentCount: 0,
             monthlyCounts: {},
