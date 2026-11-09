@@ -301,7 +301,7 @@ async function drawMap() {
             ];
 
             const polyline = new google.maps.Polyline({
-                path: result,
+                path: path,
                 map: currentMap,
                 strokeColor: "#ff0000",
                 strokeOpacity: 0.75,
