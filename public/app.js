@@ -44,6 +44,8 @@ window.appState = {
 
     allPoints: [],
     frequentSegments: [],
+    frequentPoints: [],
+    bridgeSegments: [],
     gpxProcessed: false,
 
     resetNavigation() {

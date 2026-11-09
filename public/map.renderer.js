@@ -265,10 +265,7 @@ async function drawMap() {
         logMessage("描画するよく通る道のデータがありません");
         return;
     }
-    const mergedSegments = mergeConnectedSegments(
-        appState.frequentSegments,
-        25
-    );
+    const mergedSegments = appState.frequentSegments;
     logMessage(`頻出区間を ${appState.frequentSegments.length} → ${mergedSegments.length}本に統一`);
     logMessage(`道路に沿った線の描画開始: ${mergedSegments.length}`);
 
