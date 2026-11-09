@@ -434,7 +434,7 @@ function calculateFrequentPoints(trackGroups) {
  * 円方式と線分方式を組み合わせて、
  * 短い途切れを習熟区間として補完する
  */
-function buildFamiliarBridges(segmets, frequentPoints) {
+function buildFamiliarBridges(segments, frequentPoints) {
     //補完条件
     const MAX_GAP_M = 35;
     const MIN_GAP_M = 5;
@@ -451,7 +451,7 @@ function buildFamiliarBridges(segmets, frequentPoints) {
     const ends = [];
 
     for (let i = 0; i < segments.length; i++) {
-        const s = segmets[i];
+        const s = segments[i];
 
         ends.push({
             point: s.start,
