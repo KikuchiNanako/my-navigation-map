@@ -681,8 +681,8 @@ function buildFamiliarBridges(segments, frequentPoints) {
 
     const usedEnds = new Set();
 
-    for (const candidates of candidates) {
-        const { a, b } = candidates;
+    for (const candidate of candidates) {
+        const { a, b } = candidate;
 
         if (usedEnds.has(a.id) || usedEnds.has(b.id)) { continue; }
 
