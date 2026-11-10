@@ -407,7 +407,7 @@ function calculateFrequentSegments () {
         delete segment.sampleTotal;
     }
     
-    logMessage(`前後地点による方向補正:${smoothedSDirectionCount}区間`);
+    logMessage(`前後地点による方向補正:${smoothedDirectionCount}区間`);
     logMessage(`元の方向を使用:${originalDirectionCount}区間`);
 
     //習熟区間の抽出
