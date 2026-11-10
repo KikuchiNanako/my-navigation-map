@@ -306,7 +306,7 @@ function calculateFrequentSegments () {
     );
 
     //補完した区間を習熟区間に追加
-    appState.frequentSegments.push(...appState.bridgeSegments);
+    //appState.frequentSegments.push(...appState.bridgeSegments);
 
     logMessage(`補完した習熟区間：${appState.bridgeSegments.length}本`);
     
