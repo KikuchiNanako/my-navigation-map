@@ -411,7 +411,7 @@ function calculateFrequentSegments () {
     logMessage(`元の方向を使用:${originalDirectionCount}区間`);
 
     //習熟区間の抽出
-    const MIN_VISITS = 3;
+    const MIN_VISITS =5;
 
     const allSegments = Array.from(segmentCountMap.values());
 
