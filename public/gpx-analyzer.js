@@ -34,6 +34,8 @@ function calculateFrequentSegments () {
     
     if (!points || points.length === 0) {
         appState.frequentSegments = [];
+        appState.frequentPoints = [];
+        appState.bridgeSegments = [];
         return;
     }
 
@@ -43,7 +45,6 @@ function calculateFrequentSegments () {
     //直近１か月の期間を設定
     const now = new Date();
     const oneMonthAgo = new Date(now);
-
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
     const recentStartMs = oneMonthAgo.getTime();
@@ -83,6 +84,7 @@ function calculateFrequentSegments () {
     }
 
     //古いデータを連続した移動ごとに分割する
+    legacyPoints.sort((a, b) => a.timeMs - b.timeMs);
     let legacyGroup = [];
     let legacyIndex = 0;
 
@@ -111,7 +113,7 @@ function calculateFrequentSegments () {
 
     const uniqueTrackGroups = new Map();
     const seenSignatures = new Set();
-    let skipiedDuplicates = 0;
+    let skippedDuplicates = 0;
 
     for (const [trackId, trackPoints] of trackGroups) {
         if ( trackPoints.length === 0) continue;
@@ -132,13 +134,13 @@ function calculateFrequentSegments () {
         ].join("|");
 
         if(seenSignatures.has(signature)) {
-            skipiedDuplicates++
+            skippedDuplicates++;
             continue;
         }
         seenSignatures.add(signature);
         uniqueTrackGroups.set(trackId, trackPoints);
     }
-    logMessage(`分析から除外した重複走行：${skipiedDuplicates}`);
+    logMessage(`分析から除外した重複走行：${skippedDuplicates}`);
 
     //===円方式による習熟地点の分析===
     appState.frequentPoints = calculateFrequentPoints( uniqueTrackGroups );
@@ -153,6 +155,10 @@ function calculateFrequentSegments () {
     const MIN_SEGMENT_M = 5;
     const MAX_SEGMENT_M = 200;
 
+    //方向推定に使う前後の距離
+    const MAX_NEIGHBOR_M = 45;
+    const MAX_TURN_DEG = 35;
+
     //経度の距離感さんは分析対象の代表経度を使用
     const referenceLat = points[0].lat;
     const lonScale = 111320 * Math.cos(referenceLat * Math.PI / 180);
@@ -163,22 +169,43 @@ function calculateFrequentSegments () {
         y: lat * 111320
     });
 
+    const toLatLng = (x, y) => ({
+        lat: y / 111320,
+        lng: x / lonScale
+    });
+
     //線分の方向を０～１８０度に正規化
     //逆方向の走行も同じ方向として扱う
     const getDirectionBin = (dx, dy) => {
         let deg = Math.atan2(dy, dx) * 180 / Math.PI;
         deg = ((deg % 180) + 180) % 180;
 
-        return Math.floor(deg / DIRECTION_STEP_DEG);
+        return Math.min(5, Math.floor(deg / DIRECTION_STEP_DEG));
     };
 
-    for (const trackPoints of uniqueTrackGroups.values()) {
-        trackPoints.sort((a, b) => a.timeMs - b.timeMs);
+    const vectorAngle = (ax, ay, bx, by) => {
+        const la = Math.hypot(ax, ay);
+        const lb = Math.hypot(bx, by);
+        
+        if (la < 0.001 || lb < 0.001) return 180;
 
-        //同じ走行で同一区間を重複カウントしない
+        const cosine = Math.max(-1, Math.min(1, (ax * bx + ay * by) / (la * lb)));
+
+        return Math.acos(cosine) * 180 / Math.PI;
+    };
+
+
+    let smoothedDirectionCount = 0;
+    let originalDirectionCount = 0;
+
+    for (const trackPoints of uniqueTrackGroups.values()) {
         const visitedSegments = new Set();
         const visitedRecentSegments = new Set();
         const visitedMonthlySegments = new Set();
+
+        const xyPoints = trackPoints.map(p => 
+            toXY(p.lat, p.lon)
+        );
 
         for (let i = 1; i < trackPoints.length; i++) {
             const p1 = trackPoints[i - 1];
@@ -198,27 +225,89 @@ function calculateFrequentSegments () {
                 continue;
             }
 
-            const xy1 = toXY(p1.lat, p1.lon);
-            const xy2 = toXY(p2.lat, p2.lon);
+            const xy1 = xyPoints[i - 1];
+            const xy2 = xyPoints[i];
 
             const dx = xy2.x - xy1.x;
             const dy = xy2.y - xy1.y;
+            const vectorLength = Math.hypot(dx, dy);
 
-            const directionBin = getDirectionBin(dx, dy);
+            if (vectorLength < 0.01) continue;
+
+            let directionX = dx;
+            let directionY = dy;
+            let usedSmoothing = false;
+
+            //前後の地点を探す
+            if (i >= 2 && i + 1 < trackPoints.length) {
+                const prev = xyPoints[i - 2];
+                const next = xyPoints[i + 1];
+
+                const prevTimeGap = p1.timeMs - trackPoints[i - 2].timeMs;
+
+                const nextTimeGap = trackPoints[i + 1].timeMs - p2.timeMs;
+
+                const prevDx = xy1.x - prev.x;
+                const prevDy = xy1.y - prev.y;
+                const nextDx = next.x - xy2.x;
+                const nextDy = next.y - xy2.y;
+
+                const prevDist = Math.hypot(prevDx, prevDy);
+                const nextDist = Math.hypot(nextDx, nextDy);
+
+                const validNeighbors = 
+                    prevTimeGap > 0 &&
+                    nextTimeGap > 0 &&
+                    prevTimeGap <= MAX_TIME_GAP_MS && 
+                    nextTimeGap <= MAX_TIME_GAP_MS &&
+                    prevDist >= MIN_SEGMENT_M &&
+                    nextDist >= MIN_SEGMENT_M &&
+                    prevDist <= MAX_NEIGHBOR_M &&
+                    nextDist <= MAX_NEIGHBOR_M &&
+                    distance <= MAX_NEIGHBOR_M;
+                
+                if (validNeighbors) {
+                    const angleBefore = vectorAngle(
+                        prevDx, prevDy, dx,dy
+                    );
+
+                    const angleAfter = vectorAngle(
+                        dx, dy, nextDx, nextDy
+                    );
+
+                    //交差点などの急な方向転換では平滑化しない
+                    if (angleBefore <= MAX_TURN_DEG && angleAfter <= MAX_TURN_DEG) {
+                        const smoothDx = next.x - prev.x;
+                        const smoothDy = next.y - prev.y;
+
+                        if (Math.hypot(smoothDx, smoothDy) > 0.001) {
+                            directionX = smoothDx;
+                            directionY = smoothDy;
+                            usedSmoothing = true;
+                        }
+                    }
+                }
+            }
+            if (usedSmoothing) {
+                smoothedDirectionCount++;
+            } else { 
+                originalDirectionCount++;
+            }
+
+            const directionLength = Math.hypot(directionX, directionY);
+            const ux = directionX / directionLength;
+            const uy = directionY / directionLength;
+
+            const directionBin = getDirectionBin(directionX, directionY);
 
             //GPS線分を約１０ｍ感覚でサンプリング
-            const sampleCount = Math.max( 1, Math.ceil(distance / SAMPLE_INTERVAL_M));
+            const sampleCount = Math.max(1, Math.ceil(distance / SAMPLE_INTERVAL_M));
 
             const timestamp = p2.timeMs;
             if (timestamp > nowMs) continue;
 
             const date = new Date(timestamp);
             const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-
-            //方向ベクトルを正規化
-            const vectorLength = Math.hypot(dx, dy);
-            const ux = dx / vectorLength;
-            const uy = dy / vectorLength;
 
             for (let j = 0; j < sampleCount; j++) {
                 const t = (j + 0.5) / sampleCount;
@@ -234,85 +323,103 @@ function calculateFrequentSegments () {
                 let segment = segmentCountMap.get(segmentKey);
 
                 if (!segment) {
-                    //サンプル位置を中心に２０ｍの代表線分を作る
-                    const halfLength = GRID_SIZE_M / 2;
-    
-                    const startX = x - ux * halfLength;
-                    const startY = y - uy * halfLength;
-                    const endX = x + ux * halfLength;
-                    const endY = y + uy * halfLength;
-
                     segment = {
-                        start: {
-                            lat: startY / 111320,
-                            lng: startX / lonScale
-                    },
-                    end: {
-                        lat: endY / 111320,
-                        lng: endX / lonScale
-                    },
-                    count: 0,
-                    recentCount: 0,
-                    monthlyCounts: {}
-                };
-                segmentCountMap.set(segmentKey, segment);
+                        start: toLatLng(x - ux * 10, y - uy * 10),
+                        end: toLatLng(x + ux * 10, y + uy * 10),
+                        count: 0,
+                        recentCount: 0,
+                        monthlyCounts: {},
+                        sumX: 0, 
+                        sumY: 0,
+                        sumUx: 0,
+                        sumUy: 0,
+                        sampleTotal: 0
+                    };
+                    segmentCountMap.set(segmentKey, segment);
+                }
+
+                //方向を１８０度の範囲に揃えて平均する
+                const alignedUx = ux < 0 || (ux === 0 && uy < 0) ? -ux : ux;
+                const alignedUy = ux < 0 || (ux === 0 && uy < 0) ? -uy : uy;
+
+                segment.sumX += x;
+                segment.sumY += y;
+                segment.sumUx += alignedUx;
+                segment.sumUy += alignedUy;
+                segment.sampleTotal++;
+
+                if (!visitedSegments.has(segmentKey)) {
+                    segment.count++;
+                    visitedSegments.add(segmentKey);
+                }
+
+                if (timestamp >= recentStartMs && !visitedRecentSegments.has(segmentKey)) {
+                    segment.recentCount++;
+                    visitedRecentSegments.add(segmentKey);
+                }
+
+                const monthSegmentKey = `${monthKey}|${segmentKey}`;
+
+                if (!visitedMonthlySegments.has(monthSegmentKey)) {
+                    segment.monthlyCounts[monthKey]  = (segment.monthlyCounts[monthKey] || 0) + 1;
+                    visitedMonthlySegments.add(monthSegmentKey);
+                } 
             }
-
-            if (!visitedSegments.has(segmentKey)) {
-                segment.count++;
-                visitedSegments.add(segmentKey);
-            }
-
-            if (timestamp >= recentStartMs && !visitedRecentSegments.has(segmentKey)) {
-                segment.recentCount++;
-                visitedRecentSegments.add(segmentKey);
-            }
-
-            const monthSegmentKey = `${monthKey}|${segmentKey}`;
-
-            if (!visitedMonthlySegments.has(monthSegmentKey)) {
-                segment.monthlyCounts[monthKey] = (segment.monthlyCounts[monthKey] || 0) + 1;
-
-                visitedMonthlySegments.add(monthSegmentKey);
-            }
-
-        } 
         }
     }
+
+    //======================================
+    //代表線分の位置と方向を平均化
+    //======================================
+    for (const segment of segmentCountMap.values()) {
+        const n = segment.sampleTotal;
+
+        if (!n) continue;
+
+        const centerX = segment.sumX / n;
+        const centerY = segment.sumY / n;
+
+        const avgUx = segment.sumUx / n;
+        const avgUy = segment.sumUy / n;
+
+        const len = Math.hypot(avgUx, avgUy);
+
+        if (len > 0.001) {
+            const ux = avgUx / len;
+            const uy = avgUy / len;
+
+            segment.start = toLatLng(
+                centerX - ux * 10,
+                centerY - uy * 10
+            );
+
+            segment.end = toLatLng(
+                centerX + ux * 10,
+                centerY + uy * 10
+            );
+        }
+
+        //集計用の一次データを削除
+        delete segment.sumX;
+        delete segment.sumY;
+        delete segment.sumUx;
+        delete segment.sumUy;
+        delete segment.sampleTotal;
+    }
     
-    //全期間で3回以上通過した区間を習熟区間とする
+    logMessage(`前後地点による方向補正:${smoothedSDirectionCount}区間`);
+    logMessage(`元の方向を使用:${originalDirectionCount}区間`);
+
+    //習熟区間の抽出
     const MIN_VISITS = 3;
-
-    appState.frequentSegments = Array.from(
-        segmentCountMap.values()
-    ).filter(segment => segment.count >= MIN_VISITS);
-
-    /*
-    //====頻出区間====
-    appState.frequentSegments = Array.from(segmentCountMap.values()).filter(segment => 
-        segment.recentCount >= 5 ||
-        Object.values(segment.monthlyCounts).some(count => count >= 20)
-    );
-
-    appState.bridgeSegments = [];
-    */
-    
-    //円方式と線分方式を組み合わせて短い隙間を補完する
-    const bridgeStartTime = performance.now();
-
-    appState.bridgeSegments = buildFamiliarBridges(
-        appState.frequentSegments,
-        appState.frequentPoints
-    );
-
-    //補完した区間を習熟区間に追加
-    //appState.frequentSegments.push(...appState.bridgeSegments);
-
-    logMessage(`補完した習熟区間：${appState.bridgeSegments.length}本`);
-    
 
     const allSegments = Array.from(segmentCountMap.values());
 
+    appState.frequentSegments = allSegments.filter(segment => segment.count >= MIN_VISITS);
+
+    appState.bridgeSegments = [];
+
+    //分析結果のログ
     const maxCount = Math.max(0, ...allSegments.map(s => s.count));
 
     const maxRecentCount = Math.max(0, ...allSegments.map(s => s.recentCount));
@@ -334,33 +441,7 @@ function calculateFrequentSegments () {
         `${trackGroups.size}移動グループ、` +
         `${segmentCountMap.size}種類の区間`
     );
-
-    const trackSignatures = new Map();
-    let duplicateTrackCount = 0;
-
-    for (const [trackId, trackPoints] of trackGroups) {
-        if (trackPoints.length === 0) continue;
-
-        const sorted = [...trackPoints].sort((a, b) => a.timeMs - b.timeMs);
-
-        const first = sorted[0];
-        const last = sorted[sorted.length - 1];
-
-        const signature = [
-            sorted.length,
-            first.timeMs,
-            last.timeMs,
-            first.lat.toFixed(5),
-            first.lon.toFixed(5),
-            last.lat.toFixed(5),
-            last.lon.toFixed(5)
-        ].join("|");
-
-        if (trackSignatures.has(signature)) {
-            duplicateTrackCount++
-        } else { trackSignatures.set(signature, trackId)};
-    }
-    logMessage(`重複している可能性がある走行グループ：${duplicateTrackCount}`);
+    logMessage(`重複している可能性がある走行グループ：${skippedDuplicates}`);
 }
 
 /**
