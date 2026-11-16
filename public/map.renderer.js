@@ -261,7 +261,7 @@ async function drawMap() {
     const drawVersion = appState.frequentDrawVersion;
 
     //既存の赤い線を削除
-    if (!appState.frequentPolylines) {
+    if (appState.frequentPolylines) {
         appState.frequentPolylines.forEach(polyline => {
             polyline.setMap(null);
         });
@@ -269,7 +269,7 @@ async function drawMap() {
 
     appState.frequentPolylines = [];
     
-    const segments = appState.frequentSegments || [];
+    const segments = getEffectiveFamiliarSegments();
 
     if (segments.length === 0) {
         logMessage("描画する習熟区間がありません");
@@ -281,7 +281,7 @@ async function drawMap() {
 
     let drawCount = 0;
 
-    logMessage(`習熟区間の描画開始：${segments.length}本`);
+    logMessage(`習熟区間の描画開始：通常${appState.frequentSegments.length}本、補完${appState.bridgeSegments.length}本`);
 
     for (let i = 0; i < segments.length; i += BATCH_SIZE) {
         //別の描画が開始された場合は中断
@@ -303,9 +303,9 @@ async function drawMap() {
             const polyline = new google.maps.Polyline({
                 path: path,
                 map: currentMap,
-                strokeColor: "#ff0000",
-                strokeOpacity: 0.75,
-                strokeWeight: 5,
+                strokeColor: segment.inferred ? "#00a86b" : "#ff0000",
+                strokeOpacity: segment.inferred ? 0.95 : 0.75,
+                strokeWeight: segment.inferred ? 6 : 5,
                 clickable: false,
                 zIndex: 5
             });

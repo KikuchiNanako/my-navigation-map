@@ -417,6 +417,15 @@ function calculateFrequentSegments () {
 
     appState.frequentSegments = allSegments.filter(segment => segment.count >= MIN_VISITS);
 
+    //円方式で習熟している短い途切れだけを補完する
+    //元の習熟線分は変更しない
+    appState.bridgeSegments = buildFamiliarBridges(
+        appState.frequentSegments,
+        appState.frequentPoints
+    );
+
+    logMessage(`円方式による補完区間：${appState.bridgeSegments.length}`);
+
     appState.bridgeSegments = [];
 
     //分析結果のログ
@@ -445,19 +454,34 @@ function calculateFrequentSegments () {
 }
 
 /**
+ * 通常の習熟線分と円方式による補完線分を統合する
+ * 補完線分はinferred:trueで区別する
+ */
+function getEffectiveFamiliarSegments() {
+    return [
+        ...(appState.frequentSegments || []),
+        ...(appState.bridgeSegments || [])
+    ];
+}
+
+
+/**
   * 現在地が経路外か判定
   * @param {number} currentLat
   * @param {number} currentLon
   * @returns {boolean} 経路外か
   */
 function isOutsideRoute(currentLat, currentLon) {
-    if (appState.frequentSegments.length === 0) {
+    //通常線分と補完線分を取得
+    const segments = getEffectiveFamiliarSegments();
+
+    if (segments.length === 0) {
         return true;
     }
 
     let minDist = Infinity;
 
-    for (const segment of appState.frequentSegments) {
+    for (const segment of segments) {
         const dist = getDistanceToSegmentMeters(currentLat, currentLon, segment.start.lat, segment.start.lng,segment.end.lat, segment.end.lng);
         if (dist < minDist) {
             minDist = dist;
@@ -472,7 +496,7 @@ function isOutsideRoute(currentLat, currentLon) {
  * @return {number} 一致率（０～１００）
  */
 function calculateRouteFamiliarity(route) {
-    const segments = appState.frequentSegments;
+    const segments = getEffectiveFamiliarSegments();
 
     if(!route || !route.legs || !segments || segments.length === 0) {
         return 0;
