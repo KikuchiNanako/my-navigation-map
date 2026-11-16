@@ -121,9 +121,15 @@ async function initMap() {
     }
 
     //すべての初期化が終わった後にdrawmapを呼び出す
-    const segmentsToDraw = appState.frequentSegments;
-    if (segmentsToDraw && segmentsToDraw.length > 0) {
-        drawMap();
+    const segmentsToDraw = getEffectiveFamiliarSegments();
+
+    logMessage(
+        `[地図初期加地]通常=${appState.frequentSegments.length}本` +
+        `補完=${appState.bridgeSegments.length}本`
+    );
+
+    if (segmentsToDraw.length > 0) {
+        await drawMap();
     }
 }
 
@@ -249,7 +255,13 @@ function mergeConnectedSegments(segments, threshold = 25) {
 
 //描画したポリラインを管理する配列（クリア用）
 async function drawMap() {
+    logMessage(
+        `[drawMap開始]通常=${appState.frequentSegments.length}本` +
+        `補完=${appState.bridgeSegments.length}本`
+    );
+
     const currentMap = appState.map;
+
 
     if (!currentMap) {
         logMessage("地図インスタンスが未初期化のため、描画を待機します");

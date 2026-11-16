@@ -173,6 +173,12 @@ window.addEventListener("load", async () => {
             logMessage(`合計 ${appState.allPoints.length} 地点の過去ログを読み込みました`);
 
             calculateFrequentSegments();
+
+            logMessage(
+                `[分析直後]通常=${appState.frequentSegments.length}本、` +
+                `補完=${appState.bridgeSegments.length}本`
+            );
+
             appState.gpxProcessed = true;
 
             if (appState.map) drawMap();
@@ -229,6 +235,11 @@ async function processFiles() {
         }));
 
         calculateFrequentSegments();
+
+        logMessage(
+            `[分析直後]通常=${appState.frequentSegments.length}本、` +
+            `補完=${appState.bridgeSegments.length}本`
+        );
 
         appState.gpxProcessed = true;
 
