@@ -426,8 +426,6 @@ function calculateFrequentSegments () {
 
     logMessage(`[v3保存確認]補完：${appState.bridgeSegments.length}`);
 
-    appState.bridgeSegments = [];
-
     //分析結果のログ
     const maxCount = Math.max(0, ...allSegments.map(s => s.count));
 
