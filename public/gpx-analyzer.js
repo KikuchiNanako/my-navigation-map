@@ -424,7 +424,7 @@ function calculateFrequentSegments () {
         appState.frequentPoints
     );
 
-    logMessage(`円方式による補完区間：${appState.bridgeSegments.length}`);
+    logMessage(`[v3保存確認]補完：${appState.bridgeSegments.length}`);
 
     appState.bridgeSegments = [];
 
