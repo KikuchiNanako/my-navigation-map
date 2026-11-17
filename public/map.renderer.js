@@ -651,12 +651,12 @@ async function testRoadMatching(points) {
         }
 
         //前回のテスト戦を削除
-        if (appState.testRpadPolyline) {
+        if (appState.testRoadPolyline) {
             appState.testRoadPolyline.setMap(null);
         }
 
         //道路形状を紫色で描画
-        appState.testRoadPolyline = new google.map.Polyline({
+        appState.testRoadPolyline = new google.maps.Polyline({
             path: data.points,
             map: appState.map,
             strokeColor: "#8b5cf6",
