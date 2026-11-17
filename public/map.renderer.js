@@ -623,3 +623,59 @@ function clearDestinationInputOnly() {
     logMessage("目的地の文字入力をクリアしました");
 
 }
+
+async function testRoadMatching(points) {
+    if (!appState.map) {
+        console.error("地図が初期化されてません");
+        return;
+    }
+
+    try {
+        const response = await fetch("/api/snap-roads", {
+            method: "POST",
+            headers: {
+                "Content-Type" : "application/json"
+            },
+            body: JSON.stringify({ points })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Roads API error");
+        }
+
+        if (!data.points || data.points.length < 2) {
+            console.error("道路上の地点が取得できませんでした");
+            return;
+        }
+
+        //前回のテスト戦を削除
+        if (appState.testRpadPolyline) {
+            appState.testRoadPolyline.setMap(null);
+        }
+
+        //道路形状を紫色で描画
+        appState.testRoadPolyline = new google.map.Polyline({
+            path: data.points,
+            map: appState.map,
+            strokeColor: "#8b5cf6",
+            strokeOpacity: 1,
+            strokeWeight: 7,
+            zIndex: 20
+        });
+
+        ///描画した道路が見える位置へ移動
+        const bounds = new google.maps.LatLngBounds();
+
+        data.points.forEach(point => {
+            bounds.extend(point);
+        });
+
+        appState.map.fitBounds(bounds);
+
+        console.log(`道路マッチング成功：${data.points.length}地点`);
+    } catch (error) {
+        console.error("道路マッチング失敗：", error);
+    }
+}
