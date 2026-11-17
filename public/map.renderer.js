@@ -679,3 +679,131 @@ async function testRoadMatching(points) {
         console.error("道路マッチング失敗：", error);
     }
 }
+
+async function testColorRoadMatching(points) {
+    if (!appState.map) {
+        console.error("地図が初期化されてません");
+        return;
+    }
+
+    const segment = getEffectiveFamiliarSegments();
+
+    if (segment.length === 0) {
+        console.error("習熟線分がありません");
+        return;
+    }
+
+    try {
+        const response = await fetch ("/api/snap-roads", {
+            method: "POST",
+            headers: {
+                "Contsnt-Type": "applocation/json"
+            },
+            body: JSON.stringify({ points })
+        });
+        
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Roads API error");
+        }
+
+        if (!data.points || data.points.length < 2) {
+            console.error("道路形状が取得できませんでした");
+            return;
+        }
+
+        //前回の色分けテスト戦を削除
+        if (appState.testColorRoadPolyline) {
+            appState.testColorRoadPolyline.forEach(
+                line => line.setMap(null)
+            );
+        }
+        appState.testColorRoadPolyline = [];
+
+        const MATCH_THRESHOLD_M = 8;
+        const MAX_LINK_M = 60;
+
+        const counts = {
+            red: 0,
+            green: 0,
+            purple: 0
+        };
+
+        for (let i = 1; i < data.points.length; i++) {
+            const p1 = data.points[i - 1];
+            const p2 = data.points[i];
+
+            const length = getDistanceMeters(
+                p1.lat, p1.lng, p2.lat, p2.lng
+            );
+
+            //長いと美区間は結ばない
+            if (length > MAX_LINK_M) continue;
+
+            const midLat = (p1.lat + p2.lat) / 2;
+            const midLng = (p1.lng + p2.lng) / 2;
+
+            let nearestNormal = Infinity;
+            let nearestBridge = Infinity;
+
+            for (const segment of segments) {
+                const dist = getDistanceMeters(
+                    midLat,
+                    midLng,
+                    segment.start.lat,
+                    segment.start.lng,
+                    segment.end.lat,
+                    segment.end.lng
+                );
+
+                if (segment.inferred) {
+                    nearestBridge = Math.min(
+                        nearestBridge, dist
+                    );
+                } else {
+                    nearestNormal = Math.min(
+                        nearestNormal, dist
+                    );
+                }
+            }
+            let color = "#8b5cf6";
+            let type = "purple";
+
+            if (nearestNormal <= MATCH_THRESHOLD_M && nearestNormal <= nearestBridge) {
+                color = "#ff0000";
+                type = "red";
+            } else if (nearestBridge <= MATCH_THRESHOLD_M) {
+                color = "#00a86b";
+                type = "green";
+            }
+            const line = new google.maps.polyline({
+                path: [p1, p2],
+                map: appState.map,
+                strokeColor: color,
+                strokeOpacity: 1,
+                strokeWeight: 7,
+                zIndex: 25,
+                clickable: false
+            });
+
+            appState.testColorRoadPolyline.push(line);
+            counts[type]++;
+        }
+
+        //以前の紫色のテスト戦を非表示
+        if (appState.testRoadMatching) {
+            appState.testRoadPolyline.setMap(null);
+            appState.testRoadPolyline = null;
+        }
+
+        const bounds = new google.maps.LatLngBounds();
+        data.points.forEach(p => bounds.extend(p));
+        appState.map.fitBounds(bounds);
+
+        console.log("道路マッチング色分け結果:", counts);
+        console.log("描画線分数", appState.testColorRoadPolyline.length);
+    } catch (error) {
+        console.error("色分けテスト失敗:", error);
+    }
+}
