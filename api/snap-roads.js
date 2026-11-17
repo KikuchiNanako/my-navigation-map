@@ -50,6 +50,10 @@ module.exports = async function handler(req, res) {
 
   const data = await response.json();
 
+  console.log("Roads API HTTP:", response.status);
+  console.log("Roads API response:", JSON.stringify(data));
+  console.log("Roads API points:", data.snappedPoints?.length ?? 0);
+
   if (!response.ok || data.error) {
     console.error("RoadsAPI error:", data.error);
 
