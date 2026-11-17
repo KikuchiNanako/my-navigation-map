@@ -686,7 +686,7 @@ async function testColorRoadMatching(points) {
         return;
     }
 
-    const segment = getEffectiveFamiliarSegments();
+    const segments = getEffectiveFamiliarSegments();
 
     if (segment.length === 0) {
         console.error("習熟線分がありません");
@@ -697,7 +697,7 @@ async function testColorRoadMatching(points) {
         const response = await fetch ("/api/snap-roads", {
             method: "POST",
             headers: {
-                "Contsnt-Type": "applocation/json"
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({ points })
         });
@@ -748,7 +748,7 @@ async function testColorRoadMatching(points) {
             let nearestBridge = Infinity;
 
             for (const segment of segments) {
-                const dist = getDistanceMeters(
+                const dist = getDistanceToSegmentMeters(
                     midLat,
                     midLng,
                     segment.start.lat,
@@ -777,7 +777,7 @@ async function testColorRoadMatching(points) {
                 color = "#00a86b";
                 type = "green";
             }
-            const line = new google.maps.polyline({
+            const line = new google.maps.Polyline({
                 path: [p1, p2],
                 map: appState.map,
                 strokeColor: color,
@@ -792,7 +792,7 @@ async function testColorRoadMatching(points) {
         }
 
         //以前の紫色のテスト戦を非表示
-        if (appState.testRoadMatching) {
+        if (appState.testRoadPolyline) {
             appState.testRoadPolyline.setMap(null);
             appState.testRoadPolyline = null;
         }
