@@ -688,7 +688,7 @@ async function testColorRoadMatching(points) {
 
     const segments = getEffectiveFamiliarSegments();
 
-    if (segment.length === 0) {
+    if (segments.length === 0) {
         console.error("習熟線分がありません");
         return;
     }
